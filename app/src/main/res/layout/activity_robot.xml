@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="10dp"
+    android:id="@+id/main_relative"
+    tools:context=".activity.RobotDetailActivity">
+
+    <ImageView
+        android:id="@+id/robot_map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="120dp" />
+    <ScrollView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/robot_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="当前工作模式：手动、自动"/>
+            <TextView
+                android:id="@+id/robot_power"
+                android:layout_below="@id/robot_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="电池容量："/>
+            <TextView
+                android:id="@+id/robot_low_power"
+                android:layout_below="@+id/robot_power"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="低电量回冲设置"/>
+
+            <TextView
+                android:id="@+id/robot_video"
+                android:layout_below="@+id/robot_low_power"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="当前语言"/>
+            <TextView
+                android:id="@+id/robot_auto_task"
+                android:layout_below="@+id/robot_video"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="自动模式任务描述"/>
+
+            <TextView
+                android:id="@+id/robot_disinfection_num"
+                android:layout_below="@+id/robot_auto_task"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="总共消毒点数："/>
+            <TextView
+                android:id="@+id/robot_disinfection_time"
+                android:layout_below="@id/robot_disinfection_num"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="预计总共耗时："/>
+
+            <TextView
+                android:id="@+id/robot_task_title"
+                android:layout_below="@id/robot_disinfection_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="任务列表："/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/robot_task_list"
+                android:layout_below="@id/robot_task_title"
+                android:layout_width="wrap_content"
+                android:layout_height="60dp"
+                android:text="任务清单："/>
+
+            <Button
+                android:layout_below="@id/robot_task_list"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="转圈初始化"
+                android:id="@+id/start_initialize"/>
+            <Button
+                android:layout_below="@id/start_initialize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="停止初始化"
+                android:id="@+id/stop_initialize"/>
+
+            <Spinner
+                android:id="@+id/uvc_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_below="@id/stop_initialize"
+                android:entries="@array/spinner_time" />
+
+            <TextView
+                android:id="@+id/residual_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/uvc_time"
+                android:layout_marginTop="10dp"
+                android:text="开始消毒" />
+
+            <Switch
+                android:id="@+id/controller_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/residual_time"
+                android:layout_marginTop="10dp"
+                android:text="uvc灯控" />
+            <Button
+                android:layout_below="@id/controller_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="开始导航至充电点"
+                android:id="@+id/start_navigate"/>
+            <Button
+                android:layout_below="@id/start_navigate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="暂停导航"
+                android:id="@+id/pause_navigate"/>
+            <Button
+                android:layout_below="@id/pause_navigate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="停止导航"
+                android:id="@+id/stop_navigate"/>
+
+            <Button
+                android:layout_below="@id/stop_navigate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="存储任务队列"
+                android:id="@+id/save_task_queue"/>
+            <Button
+                android:layout_below="@id/save_task_queue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除任务队列"
+                android:id="@+id/stop_task_queue"/>
+            <Button
+                android:layout_below="@id/stop_task_queue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="获取任务队列"
+                android:id="@+id/get_task_queue"/>
+            <Button
+                android:layout_below="@id/get_task_queue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="记录点"
+                android:id="@+id/add_position"/>
+            <Button
+                android:layout_below="@id/add_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="删除点"
+                android:id="@+id/delete_position"/>
+            <Button
+                android:layout_below="@id/delete_position"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="地图点数据"
+                android:id="@+id/get_position"/>
+        </RelativeLayout>
+    </ScrollView>
+    <RelativeLayout
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="20dp">
+
+        <ImageView
+            android:id="@+id/forward_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/darker_gray"
+            android:src="@drawable/ic_forward" />
+
+        <ImageView
+            android:id="@+id/to_left_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/forward_img"
+            android:background="@android:color/darker_gray"
+            android:src="@drawable/ic_to_left" />
+
+        <ImageView
+            android:id="@+id/to_right_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/forward_img"
+            android:layout_alignParentRight="true"
+            android:background="@android:color/darker_gray"
+            android:src="@drawable/ic_to_right" />
+
+        <ImageView
+            android:id="@+id/fallback_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/to_left_img"
+            android:layout_centerHorizontal="true"
+            android:background="@android:color/darker_gray"
+            android:src="@drawable/ic_fallback" />
+    </RelativeLayout>
+
+</RelativeLayout>
