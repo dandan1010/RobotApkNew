@@ -217,7 +217,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     tvText = calculateDays(System.currentTimeMillis());
                     residualTime.setText(tvText);
                     gsonUtils.setTvTime(tvText);
-                    server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                    if (server != null) {
+                        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                    }
                 }
 
                 myHandler.sendEmptyMessageDelayed(1, 0);
@@ -424,11 +426,16 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                         tvText = calculateDays(workTime);
                         residualTime.setText(tvText);
                         gsonUtils.setTvTime(tvText);
-                        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                        if (server != null) {
+                            server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                        }
+
                     } else {
                         residualTime.setText("消毒完成");
                         gsonUtils.setTvTime("消毒完成");
-                        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                        if (server != null) {
+                            server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                        }
                         toLightControlBtn.setChecked(false);
                         checkLztekLamp.stopUvc1Lamp();
                         checkLztekLamp.stopUvc2Lamp();
@@ -447,7 +454,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     Log.d(TAG, "case 4  " + workTime);
                     residualTime.setText("电量回充,消毒未完成");
                     gsonUtils.setTvTime("电量回充,消毒未完成");
-                    server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                    if (server != null) {
+                        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                    }
                     checkLztekLamp.stopUvc1Lamp();
                     checkLztekLamp.stopUvc2Lamp();
                     checkLztekLamp.stopUvc3Lamp();
@@ -474,7 +483,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         tvText = (10 - ledtime) + "秒";
         residualTime.setText(tvText);
         gsonUtils.setTvTime(tvText);
-        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+        if (server != null) {
+            server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+        }
         ledtime++;
         if (!toLightControlBtn.isChecked()) {
             ledtime = 0;
