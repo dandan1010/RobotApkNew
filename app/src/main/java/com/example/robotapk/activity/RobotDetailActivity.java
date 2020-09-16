@@ -268,7 +268,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 TaskManager.getInstances().save_taskQueue(list, "task1");
                 break;
             case R.id.stop_task_queue:
-                TaskManager.getInstances().deleteTaskQueue("task3");
+                TaskManager.getInstances().deleteTaskQueue("task1");
                 break;
             case R.id.get_task_queue:
                 TaskManager.getInstances().getTaskQueues();
@@ -656,11 +656,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             List<String> list = new ArrayList<>();
             Log.d("ZDZD:", "robotTaskQueueList size : " + robotTaskQueueList.getData().size());
             for (int i = 0; i < robotTaskQueueList.getData().size(); i++) {
+                list.add("任务："+robotTaskQueueList.getData().get(i).getName());
                 Log.d("ZDZD:", "" + robotTaskQueueList.getData().get(i).getTasks().size() + ",   size  : " + robotTaskQueueList.getData().get(i).getTasks().get(0).getStart_param().getPath_name());
-                for (int j = 0;j<robotTaskQueueList.getData().get(i).getTasks().size();j++) {
+                for (int j = 0; j < robotTaskQueueList.getData().get(i).getTasks().size(); j++) {
                     list.add(robotTaskQueueList.getData().get(i).getTasks().get(j).getStart_param().getPath_name());
                 }
-//                list.add(robotTaskQueueList.getData().get(i).getName());
             }
             taskAdapter.refeshList(list);
             taskAdapter.notifyDataSetChanged();
