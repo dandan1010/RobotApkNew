@@ -175,6 +175,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         handler2.removeCallbacks(runnable2);
         handler3.removeCallbacks(runnable3);
         handler4.removeCallbacks(runnable4);
+        myHandler.removeCallbacks(runnablePosition);
 
     }
 
@@ -251,7 +252,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 } else {
                     Toast.makeText(mContext, "底盘还没有链接成功，请稍后重试", Toast.LENGTH_SHORT).show();
                 }
-            case R.id.start_navigate:
+            case R.id.start_navigate://获取充电点,导航到导航点
                 TaskManager.getInstances().charge_Position();
                 break;
             case R.id.pause_navigate:
@@ -630,7 +631,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         if (messageEvent.getState() == 1002) {
             bytes = (byte[]) messageEvent.getT();
             Glide.with(mContext).load(bytes).into(robotMap);
-            myHandler.removeCallbacks(runnablePosition);
             myHandler.postDelayed(runnablePosition, 1000);
             if (server != null) {
                 server.broadcast(bytes);

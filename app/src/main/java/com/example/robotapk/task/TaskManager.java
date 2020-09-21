@@ -174,33 +174,7 @@ public class TaskManager {
             @Override
             public void success(String s) {
                 Log.d(TAG, "地图charge_Position : " + mapName + ",   " + s);
-                /**
-                 * 导航到点
-                 * */
-                RobotManagerController.getInstance().getRobotController().navigate_Position(mapName, s, new RobotStatus<Status>() {
-
-                    @Override
-                    public void success(Status status) {
-                        if (status == null) {
-                            Log.d(TAG, "地图" + mapName + "充电status空" + s);
-                            return;
-                        }
-                        if (status.isSuccessed()) {
-                            Log.d(TAG, "地图" + mapName + "充电命令成功");
-                        } else {
-                            Log.d(TAG, "地图" + mapName + "充电命令失败" + status.toString());
-                        }
-                    }
-
-                    @Override
-                    public void error(Throwable error) {
-                        if (error == null) {
-                            Log.d(TAG, "地图" + mapName + "充电命令异常 error = null");
-                            return;
-                        }
-                        Log.d(TAG, "地图" + mapName + "充电命令异常" + error.getMessage());
-                    }
-                });
+                navigate_Position(s);
             }
 
             @Override
@@ -211,6 +185,24 @@ public class TaskManager {
                     return;
                 }
                 Log.d(TAG, "地图" + mapName + "充电异常" + error.getMessage());
+            }
+        });
+    }
+
+    /**
+     * 移动到导航点
+     * */
+    public void navigate_Position(String positionName){
+        RobotManagerController.getInstance().getRobotController().navigate_Position(mapName, positionName, new RobotStatus<Status>() {
+
+            @Override
+            public void success(Status status) {
+                    Log.d(TAG, "地图" + mapName + "移动到导航点 : " + positionName);
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "地图" + mapName + "移动到导航点fail : " + error.getMessage());
             }
         });
 
@@ -496,7 +488,7 @@ public class TaskManager {
     }
 
     /**
-     * 地图点数据
+     * 地图点数据，导航点列表
      * */
     public void getPosition() {
         GsController.INSTANCE.getPosition(TaskManager.getInstances().mapName, 2, new RobotStatus<RobotPositions>() {
