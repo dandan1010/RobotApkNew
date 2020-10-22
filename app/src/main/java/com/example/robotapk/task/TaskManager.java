@@ -34,7 +34,7 @@ import io.reactivex.schedulers.Schedulers;
 public class TaskManager {
     private static final String TAG = "TaskManager";
     public String mapName = "";
-    private static TaskManager taskQueueManager;
+    private static TaskManager mTaskManager;
     private MyThread myThread;
     private boolean scanningFlag = false;
 
@@ -43,14 +43,14 @@ public class TaskManager {
     }
 
     public static TaskManager getInstances() {
-        if (taskQueueManager == null) {
+        if (mTaskManager == null) {
             synchronized (TaskManager.class) {
-                if (taskQueueManager == null)
-                    taskQueueManager = new TaskManager();
+                if (mTaskManager == null)
+                    mTaskManager = new TaskManager();
             }
         }
 
-        return taskQueueManager;
+        return mTaskManager;
     }
 
     /**
