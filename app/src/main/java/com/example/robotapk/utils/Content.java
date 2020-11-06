@@ -5,8 +5,8 @@ public final class Content {
     /**
      * robotState：
      * 0:关机
-     * 1:开机连接下位机成功
-     * 2:静止
+     * 1:静止
+     * 2:
      * 3:移动
      * 4:充电
      * 5:uvc警告
@@ -43,6 +43,13 @@ public final class Content {
     public static final String DELETETASKQUEUE = "deleteTaskQueue";//删除任务队列
     public static final String GETTASKQUEUE = "getTaskQueue";//获取任务列表
 
+    //task key
+    public static final String DATA_TASK = "dataTask";//任务队列的列表array的key
+    public static final String TASK_NAME = "name";//任务名字
+    public static final String TASK_X = "x";
+    public static final String TASK_Y = "y";
+    public static final String TASK_DISINFECT_TIME = "disinfect_Time";
+    public static final String TASK_ANGLE = "angle";
 
 
 }

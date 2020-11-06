@@ -9,13 +9,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.example.robotapk.R;
+import com.example.robotapk.bean.TaskBean;
 
 import java.util.List;
 
 public class TaskAdapter extends RecyclerView.Adapter<RecycleHolder> {
 
     private Context mContext;
-    private List<String> mDatas;
+    private List<TaskBean> mDatas;
     private int mLayoutId;
     private LayoutInflater mInflater;
 
@@ -27,7 +28,7 @@ public class TaskAdapter extends RecyclerView.Adapter<RecycleHolder> {
         mInflater = LayoutInflater.from(mContext);
     }
 
-    public void refeshList(List<String> mDatas) {
+    public void refeshList(List<TaskBean> mDatas) {
         this.mDatas = mDatas;
     }
 
@@ -38,7 +39,7 @@ public class TaskAdapter extends RecyclerView.Adapter<RecycleHolder> {
 
     @Override
     public void onBindViewHolder(final RecycleHolder holder, int position) {
-        convert(holder, mDatas.get(position), position);
+        convert(holder, mDatas.get(position).getName(), position);
         if (onItemClickListener != null) {
             //设置背景
             //holder.itemView.setBackgroundResource(R.drawable.recycler_bg);
