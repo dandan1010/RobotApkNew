@@ -54,16 +54,18 @@ public class CheckLztekLamp {
 
     public boolean getGpioSensorState() {
 
-        boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
-        boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
-        boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
-        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
+//        boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
+//        boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
+//        boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
+//        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
+//
+//        if (k1 && k2 && k3 && k4) {
+//            return true;
+//        } else {
+//            return false;
+//        }
 
-        if (k1 && k2 && k3 && k4) {
-            return true;
-        } else {
-            return false;
-        }
+        return false;
     }
 
     public void startCheckSensorAtTime() {

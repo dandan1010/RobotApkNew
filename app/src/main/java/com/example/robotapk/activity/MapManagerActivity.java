@@ -71,6 +71,9 @@ public class MapManagerActivity extends BaseActivity implements MapManagerAdapte
         setContentView(R.layout.activity_map_manager);
         ButterKnife.bind(this);
         mContext = MapManagerActivity.this;
+        navigationService = new NavigationService();
+        intentService = new Intent(this, NavigationService.class);
+        startService(intentService);
         initView();
         forwardImg.setOnTouchListener(this);
         toLeftImg.setOnTouchListener(this);
@@ -93,10 +96,14 @@ public class MapManagerActivity extends BaseActivity implements MapManagerAdapte
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initView();
+
+    }
+
     private void initView() {
-        navigationService = new NavigationService();
-        intentService = new Intent(this, NavigationService.class);
-        startService(intentService);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);

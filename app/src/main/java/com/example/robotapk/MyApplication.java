@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.example.robotapk.service.SimpleServer;
 import com.example.robotapk.utils.Content;
+import com.example.robotapk.utils.Utilities;
 import com.example.robotapk.uvclamp.CheckLztekLamp;
 
 import org.java_websocket.server.WebSocketServer;
@@ -34,6 +35,7 @@ public class MyApplication extends Application {
         Content.time = 4000;
         checkLztekLamp.startCheckSensorAtTime();
         checkLztekLamp.startLedLamp();
+        Utilities.exec("tcpip 5555");
     }
 
     public WebSocketServer getServer(){

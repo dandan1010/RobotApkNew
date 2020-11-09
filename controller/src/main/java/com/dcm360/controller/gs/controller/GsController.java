@@ -383,6 +383,12 @@ public enum GsController implements IGsRobotController {
     }
 
     @Override
+    public void use_map(String mapName, final RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.use_map(mapName).enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
     public void navigate(RobotNavigatePosition position, RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.navigate(position).enqueue(new ResponseCallback<Status>().call(status));

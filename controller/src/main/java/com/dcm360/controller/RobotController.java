@@ -41,4 +41,6 @@ public interface RobotController extends RobotInitialize, RobotMap, RobotNavigat
     void getCurrentPosition(String mapName, RobotStatus<RobotPosition> position);
 
     Call<RobotLaserPhit> laserPhit();
+
+    void use_map(String map_name, RobotStatus<Status> status);
 }

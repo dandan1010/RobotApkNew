@@ -2,9 +2,13 @@ package com.example.robotapk.task;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.dcm360.controller.RobotController;
 import com.dcm360.controller.gs.GSRobotController;
@@ -315,7 +319,7 @@ public class TaskManager {
      * 取消扫描地图
      */
     public void cancelScanMap() {
-        GsController.INSTANCE.stopScanMap(new RobotStatus<Status>() {
+        GsController.INSTANCE.asyncStopScanMap(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "取消扫描成功 :  ");
@@ -383,16 +387,16 @@ public class TaskManager {
         mTaskArrayList.clear();
         TaskBean taskBean1 = new TaskBean();
         taskBean1.setName("A任务点执行任务1分钟");
-        taskBean1.setX(180);
-        taskBean1.setY(260);
+        taskBean1.setX(380);
+        taskBean1.setY(220);
         taskBean1.setAngle(100);
         taskBean1.setDisinfectTime(0);
         mTaskArrayList.add(taskBean1);
 
         TaskBean taskBean2 = new TaskBean();
         taskBean2.setName("B任务点执行任务5分钟");
-        taskBean2.setX(180);
-        taskBean2.setY(200);
+        taskBean2.setX(359);
+        taskBean2.setY(233);
         taskBean2.setAngle(100);
         taskBean2.setDisinfectTime(1);
         mTaskArrayList.add(taskBean2);
@@ -428,6 +432,7 @@ public class TaskManager {
                     Log.d(TAG, "导航成功 : " + status.getMsg());
                     if ("successed".equals(status.getMsg())) {
                         navigateSuccess = true;
+                        Content.robotState = 3;
                         moveToTaskLocation();
                     }
                 }
@@ -441,7 +446,6 @@ public class TaskManager {
     }
 
     public void moveToTaskLocation() {
-        Content.robotState = 3;
         Log.d(TAG, "机器人X :" + mRobotPosition.getGridPosition().getX() + "  Y :" + mRobotPosition.getGridPosition().getY());
         Log.d(TAG, "机器人目标X :" + mTaskArrayList.get(taskIndex).getX() + "  Y :" + mTaskArrayList.get(taskIndex).getY());
         if (mRobotPosition != null && mRobotPosition.getGridPosition().getX() == mTaskArrayList.get(taskIndex).getX()
@@ -452,7 +456,9 @@ public class TaskManager {
             taskIndex++;
         } else if (taskIndex < mTaskArrayList.size() && navigateSuccess) {
             Log.d(TAG, "移动");
-            moveToTaskLocation();
+            myHandler.removeMessages(1);
+            myHandler.sendEmptyMessageDelayed(1, 2000);
+
         }
     }
 
@@ -478,6 +484,9 @@ public class TaskManager {
     public void getTaskQueues(String type) {
         mTaskArrayList.clear();
         String gsonUtils = SharedPrefUtil.getInstance(mContext).getTaskQueue(Content.DATA_TASK);
+        if (gsonUtils == null) {
+            return;
+        }
         Log.d(TAG, "get taskQueues : " + gsonUtils);
         JSONObject jsonObject = null;
         try {
@@ -613,5 +622,30 @@ public class TaskManager {
             }
         });
     }
+
+    public void use_map(String map_name){
+        Log.d(TAG, "use_map");
+        RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "use_map success");
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "use_map error" + error.getMessage());
+            }
+        });
+    }
+
+    Handler myHandler = new Handler(){
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 1) {
+                moveToTaskLocation();
+            }
+        }
+    };
 
 }

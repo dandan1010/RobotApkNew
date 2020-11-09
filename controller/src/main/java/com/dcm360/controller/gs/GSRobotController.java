@@ -230,6 +230,11 @@ public class GSRobotController implements RobotController {
     }
 
     @Override
+    public void use_map(String map_name, RobotStatus<Status> status) {
+        GsController.INSTANCE.use_map(map_name, status);
+    }
+
+    @Override
     public void navigatePosition(RobotNavigatePosition position, RobotStatus<Status> status) {
         GsController.INSTANCE.navigate(position, status);
     }

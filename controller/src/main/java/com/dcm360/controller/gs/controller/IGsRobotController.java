@@ -185,4 +185,6 @@ public interface IGsRobotController {
 
     void reportChargeStatus(String state, RobotStatus<ChargeStatus> status);//传感器板会返回充电口状态
 
+    void use_map(String mapName, RobotStatus<Status> status);
+
 }

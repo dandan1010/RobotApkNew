@@ -141,6 +141,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         //选取地图之后，展示地图数据
         mapName = getIntent().getStringExtra("mapName");
         TaskManager.getInstances(mContext).getMapPic(mapName);
+        TaskManager.getInstances(mContext).use_map(mapName);
         //获取设备的信息
 //        TaskQueueManager.getInstances().deviceStatus();
         initView();
@@ -273,6 +274,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             case R.id.stop_navigate:
                 isTaskFlag = false;
                 toLightControlBtn.setEnabled(true);
+                toLightControlBtn.setChecked(false);
                 TaskManager.getInstances(mContext).stopTaskQueue();
                 TaskManager.getInstances(mContext).cancel_navigate();
                 break;
@@ -282,6 +284,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             case R.id.stop_task_queue:
                 isTaskFlag = false;
                 toLightControlBtn.setEnabled(true);
+                toLightControlBtn.setChecked(false);
                 TaskManager.getInstances(mContext).stopTaskQueue();
                 TaskManager.getInstances(mContext).cancel_navigate();
                 break;
