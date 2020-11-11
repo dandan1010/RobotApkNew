@@ -95,7 +95,7 @@ public class RobotTaskQueue {
              */
 
             private String map_name;
-            private String path_name;
+            private String position_name;
 
             public String getMap_name() {
                 return map_name;
@@ -105,12 +105,12 @@ public class RobotTaskQueue {
                 this.map_name = map_name;
             }
 
-            public String getPath_name() {
-                return path_name;
+            public String getPosition_name() {
+                return position_name;
             }
 
-            public void setPath_name(String path_name) {
-                this.path_name = path_name;
+            public void setPosition_name(String position_name) {
+                this.position_name = position_name;
             }
         }
     }

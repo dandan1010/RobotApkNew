@@ -1,6 +1,7 @@
 package com.dcm360.controller.gs.controller;
 
 
+import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
@@ -13,13 +14,11 @@ import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserRaw;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotEditMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotInitCustom;
-import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationPath;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
-import com.dcm360.controller.gs.controller.bean.paths_bean.RobotSaveTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
@@ -186,5 +185,7 @@ public interface IGsRobotController {
     void reportChargeStatus(String state, RobotStatus<ChargeStatus> status);//传感器板会返回充电口状态
 
     void use_map(String mapName, RobotStatus<Status> status);
+
+    void add_Position(PositionListBean positionListBean, RobotStatus<Status> status);
 
 }

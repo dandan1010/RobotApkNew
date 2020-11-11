@@ -1,8 +1,8 @@
 package com.dcm360.controller.gs.controller;
 
 import android.annotation.SuppressLint;
-import android.util.Log;
 
+import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
@@ -15,13 +15,11 @@ import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserRaw;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotEditMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotInitCustom;
-import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationPath;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
-import com.dcm360.controller.gs.controller.bean.paths_bean.RobotSaveTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
@@ -43,7 +41,6 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.Observable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
@@ -193,6 +190,12 @@ public enum GsController implements IGsRobotController {
     public void addPosition(String positionName, int type, final RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.addPosition(positionName, type).enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
+    public void add_Position(PositionListBean positionListBean, final RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.add_Position(positionListBean).enqueue(new ResponseCallback<Status>().call(status));
     }
 
     @Override

@@ -125,15 +125,9 @@
                 android:layout_height="wrap_content"
                 android:text="开始导航至充电点"
                 android:id="@+id/start_navigate"/>
+
             <Button
                 android:layout_below="@id/start_navigate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="暂停导航"
-                android:enabled="false"
-                android:id="@+id/pause_navigate"/>
-            <Button
-                android:layout_below="@id/pause_navigate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="取消导航"
@@ -141,6 +135,19 @@
 
             <Button
                 android:layout_below="@id/stop_navigate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="暂停任务"
+                android:id="@+id/pause_task_queue"/>
+            <Button
+                android:layout_below="@id/pause_task_queue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="恢复任务"
+                android:id="@+id/resume_task_queue"/>
+
+            <Button
+                android:layout_below="@id/resume_task_queue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="存储任务队列"

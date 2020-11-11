@@ -1,5 +1,6 @@
 package com.dcm360.controller.gs.controller.service;
 
+import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
@@ -20,7 +21,6 @@ import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToP
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotAddPathAction;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPathData;
-import com.dcm360.controller.gs.controller.bean.paths_bean.RobotSaveTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
@@ -32,16 +32,13 @@ import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.robot_interface.bean.Status;
 
 import io.reactivex.Observable;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
-import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 /**
@@ -161,6 +158,12 @@ public interface GsControllerService {
      */
     @GET("/gs-robot/cmd/add_position")
     Call<Status> addPosition(@Query("position_name") String position_name, @Query("type") int type);
+
+    /**
+     * 添加点
+     */
+    @POST("/gs-robot/cmd/position/add_position")
+    Call<Status> add_Position(@Body PositionListBean paramPositionListBean);
 
     /**
      * 删除点
@@ -593,7 +596,7 @@ public interface GsControllerService {
      * @param queue the robot start task queue
      * @return the call
      */
-    @GET("/gs-robot/cmd/start_task_queue")
+    @POST("/gs-robot/cmd/start_task_queue")
     Call<Status> startTaskQueue(@Body RobotTaskQueue queue);
 
     /**
