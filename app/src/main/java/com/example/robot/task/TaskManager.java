@@ -747,6 +747,8 @@ public class TaskManager {
                 Log.d(TAG, "is_task_queue_finished success" + status.getData());
                 if ("true".equals(status.getData())) {
                     Content.taskState = 0;
+                    Content.robotState = 1;
+                    Content.time = 4000;
                     Toast.makeText(mContext, "任务完成", Toast.LENGTH_SHORT).show();
                     myHandler.removeCallbacks(runnable);
                     myHandler.removeCallbacks(runnable_is_finfish);

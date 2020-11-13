@@ -257,7 +257,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             case R.id.start_initialize:
                 if (NavigationService.isStartNavigationService) {
                     Log.d(TAG, "初始化转圈");
-                    NavigationService.initialize();
+                    NavigationService.initialize(mapName);
                 } else {
                     Toast.makeText(mContext, "底盘还没有链接成功，请稍后重试", Toast.LENGTH_SHORT).show();
                 }
@@ -277,7 +277,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
             case R.id.pause_task_queue:
                 isTaskFlag = true;
-                TaskManager.getInstances(mContext).pauseTaskQueue();
+                if (Content.taskState != 2) {
+                    TaskManager.getInstances(mContext).pauseTaskQueue();
+                }
                 break;
             case R.id.resume_task_queue:
                 isTaskFlag = false;
@@ -289,12 +291,12 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
                 List<SaveTaskBean> list = new ArrayList<>();
                 SaveTaskBean saveTaskBean = new SaveTaskBean();
-                saveTaskBean.setPositionName("bbb");
+                saveTaskBean.setPositionName("aaa");
                 saveTaskBean.setTime(0);
                 list.add(saveTaskBean);
 
                 SaveTaskBean saveTaskBean1 = new SaveTaskBean();
-                saveTaskBean1.setPositionName("B 1分钟");
+                saveTaskBean1.setPositionName("ggg");
                 saveTaskBean1.setTime(0);
                 list.add(saveTaskBean1);
 
@@ -314,9 +316,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
             case R.id.add_position:
                 PositionListBean positionListBean = new PositionListBean();
-                positionListBean.setName("bbb");
-                positionListBean.setGridX(150);
-                positionListBean.setGridY(280);
+                positionListBean.setName("ddd");
+                positionListBean.setGridX(105);
+                positionListBean.setGridY(180);
                 positionListBean.setAngle(0);
                 positionListBean.setType(2);
                 positionListBean.setMapName(mapName);

@@ -53,8 +53,8 @@ public class NavigationService extends Service {
             disposables.dispose();
     }
 
-    public static void initialize() {//转圈初始化
-        GsController.INSTANCE.getPosition(TaskManager.getInstances(mContext).mapName, 0, new RobotStatus<RobotPositions>() {
+    public static void initialize(String mapName) {//转圈初始化
+        GsController.INSTANCE.getPosition(mapName, 0, new RobotStatus<RobotPositions>() {
             @RequiresApi(api = Build.VERSION_CODES.N)
             @Override
             public void success(RobotPositions robotPositions) {
@@ -63,7 +63,7 @@ public class NavigationService extends Service {
                     Log.d(TAG, "转圈地图名称222： " + robotPositions.getData().get(i).getName() + ",   mapname:" +robotPositions.getData().get(i).getMapName());
                 }
 
-                RobotManagerController.getInstance().getRobotController().initialize(TaskManager.getInstances(mContext).mapName, robotPositions.getData().get(0).getName() + "", new RobotStatus<Status>() {
+                RobotManagerController.getInstance().getRobotController().initialize(mapName, robotPositions.getData().get(0).getName() + "", new RobotStatus<Status>() {
                     @Override
                     public void success(Status status) {
                         Log.d(TAG, "转圈地初始化成功");
