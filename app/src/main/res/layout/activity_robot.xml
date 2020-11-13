@@ -125,9 +125,14 @@
                 android:layout_height="wrap_content"
                 android:text="开始导航至充电点"
                 android:id="@+id/start_navigate"/>
-
             <Button
                 android:layout_below="@id/start_navigate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="添加点"
+                android:id="@+id/add_position"/>
+            <Button
+                android:layout_below="@id/add_position"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="取消导航"

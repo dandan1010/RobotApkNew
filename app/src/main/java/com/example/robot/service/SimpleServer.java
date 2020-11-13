@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 
 public class SimpleServer extends WebSocketServer {
     private GsonUtils gsonUtils;
+    private JSONObject jsonObject;
 
     public SimpleServer(InetSocketAddress address) {
         super(address);
@@ -27,7 +28,7 @@ public class SimpleServer extends WebSocketServer {
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
         conn.send("Welcome to the server!"); //This method sends a message to the new client
-        broadcast( "new connection: " + handshake.getResourceDescriptor() ); //This method sends a message to all clients connected
+        broadcast("new connection: " + handshake.getResourceDescriptor()); //This method sends a message to all clients connected
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
     }
 
@@ -38,7 +39,7 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from "	+ conn.getRemoteSocketAddress() + ": " + message);
+        System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
         //EventBus.getDefault().post(new EventBusMessage(10001, message));
         try {
             differentiateType(message);
@@ -48,16 +49,16 @@ public class SimpleServer extends WebSocketServer {
     }
 
     @Override
-    public void onMessage( WebSocket conn, ByteBuffer message ) {
-        System.out.println("received ByteBuffer from "	+ conn.getRemoteSocketAddress());
+    public void onMessage(WebSocket conn, ByteBuffer message) {
+        System.out.println("received ByteBuffer from " + conn.getRemoteSocketAddress());
     }
 
     @Override
     public void onError(WebSocket conn, Exception ex) {
         if (conn != null) {
-            System.err.println("an error occured on connection " + conn.getRemoteSocketAddress()  + ":" + ex);
+            System.err.println("an error occured on connection " + conn.getRemoteSocketAddress() + ":" + ex);
         } else {
-            System.err.println("an error occured on connection " +ex.getMessage());
+            System.err.println("an error occured on connection " + ex.getMessage());
             ex.printStackTrace();
 
         }
@@ -82,9 +83,9 @@ public class SimpleServer extends WebSocketServer {
     }
 
     private void differentiateType(String message) throws JSONException {
-        Log.d("zdzd ", "getType :  " +gsonUtils.getType(message));
-        switch (gsonUtils.getType(message)){
-            case Content.STARTDOWN :
+        Log.d("zdzd ", "getType :  " + gsonUtils.getType(message));
+        switch (gsonUtils.getType(message)) {
+            case Content.STARTDOWN:
                 EventBus.getDefault().post(new EventBusMessage(10001, message));
                 break;
             case Content.STARTUP:
@@ -97,7 +98,7 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10004, message));
                 break;
             case Content.STARTLIGHT:
-                JSONObject jsonObject = new JSONObject(message);
+                jsonObject = new JSONObject(message);
                 int string = jsonObject.getInt(Content.SPINNERTIME);
                 EventBus.getDefault().post(new EventBusMessage(10005, string));
                 break;
@@ -119,14 +120,16 @@ public class SimpleServer extends WebSocketServer {
             case Content.GETMAPLIST:
                 EventBus.getDefault().post(new EventBusMessage(10011, message));
                 break;
-            case Content.SaveTASKQUEUE:
+            case Content.SAVETASKQUEUE:
                 EventBus.getDefault().post(new EventBusMessage(10013, message));
                 break;
             case Content.DELETETASKQUEUE:
                 EventBus.getDefault().post(new EventBusMessage(10014, message));
                 break;
             case Content.GETTASKQUEUE:
-                EventBus.getDefault().post(new EventBusMessage(10015, message));
+                jsonObject = new JSONObject(message);
+                String mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10015, mapName));
                 break;
 
             default:

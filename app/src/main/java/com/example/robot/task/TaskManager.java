@@ -21,6 +21,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
+import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.bean.TaskBean;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
@@ -43,17 +44,17 @@ import io.reactivex.schedulers.Schedulers;
 
 public class TaskManager {
     private static final String TAG = "TaskManager";
-    public String mapName = "";
     private static TaskManager mTaskManager;
     private MyThread myThread;
     private boolean scanningFlag = false;
     private ArrayList<TaskBean> mTaskArrayList = new ArrayList<>();
-    private int taskIndex = 0;
     private boolean navigateSuccess = false;
     private RobotPosition mRobotPosition = null;
     private Context mContext;
     private RobotTaskQueue robotTaskQueue;
     private List<String> pois;
+    private RobotTaskQueueList mRobotTaskQueueList = null;
+    private RobotPositions mRobotPositions = null;
 
 
     private TaskManager(Context mContext) {
@@ -75,7 +76,6 @@ public class TaskManager {
      * 通过地图名字获取地图图片
      */
     public void getMapPic(String mapMame) {
-        this.mapName = mapMame;
         Log.d(TAG, "获取地图" + mapMame);
         if (TextUtils.isEmpty(mapMame)) {
             Log.d(TAG, "地图名字不能为空");
@@ -111,7 +111,7 @@ public class TaskManager {
     /**
      * 获取机器人的位置
      */
-    public void getPositions() {
+    public void getPositions(String mapName) {
         Log.d(TAG, "getPositions" + mapName);
         GsController.INSTANCE.getPositions(mapName, new RobotStatus<RobotPosition>() {
             @Override
@@ -188,12 +188,12 @@ public class TaskManager {
     /**
      * 获取充电点
      */
-    public void charge_Position() {
+    public void charge_Position(String mapName) {
         RobotManagerController.getInstance().getRobotController().charge_Position(mapName, new RobotStatus<String>() {
             @Override
             public void success(String s) {
                 Log.d(TAG, "地图charge_Position : " + mapName + ",   " + s);
-                navigate_Position(s);
+                navigate_Position(mapName, s);
             }
 
             @Override
@@ -211,7 +211,7 @@ public class TaskManager {
     /**
      * 移动到导航点
      */
-    public void navigate_Position(String positionName) {
+    public void navigate_Position(String mapName, String positionName) {
         RobotManagerController.getInstance().getRobotController().navigate_Position(mapName, positionName, new RobotStatus<Status>() {
 
             @Override
@@ -378,35 +378,16 @@ public class TaskManager {
     /**
      * 保存任务队列
      */
-    public void save_taskQueue(String taskName) {
-        Log.d(TAG, "保存任务队列");
-        mTaskArrayList.clear();
-//        TaskBean taskBean1 = new TaskBean();
-//        taskBean1.setName("A 1分钟");
-//        taskBean1.setX(150);
-//        taskBean1.setY(280);
-//        taskBean1.setAngle(0);
-//        taskBean1.setDisinfectTime(0);
-//        mTaskArrayList.add(taskBean1);
+    public void save_taskQueue(String mapName, String taskName, List<SaveTaskBean> list) {
+        ArrayList<TaskBean> taskPositionMsg = getTaskPositionMsg(mapName, taskName, list);
 
-        TaskBean taskBean2 = new TaskBean();
-        taskBean2.setName("B 1分钟");
-        taskBean2.setX(130);
-        taskBean2.setY(250);
-        taskBean2.setAngle(0);
-        taskBean2.setDisinfectTime(0);
-        mTaskArrayList.add(taskBean2);
-
-        robotTaskQueue = exeTaskPoi(taskName, mTaskArrayList);
+        robotTaskQueue = exeTaskPoi(mapName, taskName, taskPositionMsg);
 
         GsController.INSTANCE.saveTaskQueue(robotTaskQueue, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "存储任务成功");
                 Toast.makeText(mContext, "存储任务成功" + status.getMsg(), Toast.LENGTH_SHORT).show();
-                GsonUtils gsonUtils = new GsonUtils();
-                gsonUtils.setmTaskList(mTaskArrayList);
-                SharedPrefUtil.getInstance(mContext, mapName).setTaskQueue(gsonUtils.putJsonTaskMessage(taskName));
                 getTaskQueues(mapName);
             }
 
@@ -418,21 +399,36 @@ public class TaskManager {
 
     }
 
-    public RobotTaskQueue exeTaskPoi(String taskName, ArrayList<TaskBean> mTaskArrayList) {
+    private ArrayList<TaskBean> getTaskPositionMsg(String mapName, String taskName, List<SaveTaskBean> list) {
+        Log.d(TAG, "ZDZD :mRobotPositions  ===" + list.size());
+        Log.d(TAG, "ZDZD :mRobotPositions  ===" + (mRobotPositions != null));
+        ArrayList<TaskBean> arrayList = new ArrayList<>();
+        if (mRobotPositions != null) {
+            for (int j = 0; j < list.size(); j++) {
+                Log.d(TAG, "ZDZD :mRobotPositions  ===" + mRobotPositions.getData().size());
+                for (int i = 0; i < mRobotPositions.getData().size(); i++) {
+                    Log.d(TAG, "ZDZD : " + mRobotPositions.getData().get(i).getName() + "LISTnAME :" +list.get(j).getPositionName());
+                    if (list.get(j).getPositionName().equals(mRobotPositions.getData().get(i).getName())) {
+                        TaskBean taskBean = new TaskBean(mRobotPositions.getData().get(i).getName(),
+                                mRobotPositions.getData().get(i).getGridX(),
+                                mRobotPositions.getData().get(i).getGridY(),
+                                list.get(j).getTime(),
+                                mRobotPositions.getData().get(i).getAngle());
+                        arrayList.add(taskBean);
+                    }
+                }
+            }
+            SharedPrefUtil.getInstance(mContext, mapName).setPositionMsg(taskName, arrayList);
+        }
+        return arrayList;
+    }
+
+    public RobotTaskQueue exeTaskPoi(String mapName, String taskName, ArrayList<TaskBean> mTaskArrayList) {
         pois = new ArrayList<>();
         for (int i = 0; i < mTaskArrayList.size(); i++) {
-            PositionListBean localPositionListBean = new PositionListBean();
-            localPositionListBean.setAngle(mTaskArrayList.get(i).getAngle());
-            localPositionListBean.setGridX(mTaskArrayList.get(i).getX());
-            localPositionListBean.setGridY(mTaskArrayList.get(i).getY());
-            localPositionListBean.setMapName(mapName);
-            localPositionListBean.setName(mTaskArrayList.get(i).getName());
-            localPositionListBean.setTime(mTaskArrayList.get(i).getDisinfectTime());
-            localPositionListBean.setType(2);
-            add_Position(localPositionListBean);
             pois.add(mTaskArrayList.get(i).getName());
         }
-        pois.add("Current");
+        pois.add("Origin");
 
         RobotTaskQueue taskQueue = new RobotTaskQueue();
         taskQueue.setName(taskName);
@@ -459,29 +455,10 @@ public class TaskManager {
     /**
      * 开始执行任务队列
      */
-    public void startTaskQueue(String taskName) {
+    public void startTaskQueue(String mapName, String taskName) {
         Log.d(TAG, "startTaskQueue 开始执行任务" + taskName);
-        mTaskArrayList.clear();
-        String gsonUtils = SharedPrefUtil.getInstance(mContext, mapName).getTaskQueue(taskName);
-        if (gsonUtils == null) {
-            return;
-        }
-        Log.d(TAG, "get taskQueues : " + gsonUtils);
-        JSONObject jsonObject = null;
-        try {
-            jsonObject = new JSONObject(gsonUtils);
-            JSONArray jsonArray = jsonObject.getJSONArray(taskName);
-            for (int i = 0; i < jsonArray.length(); i++) {
-                JSONObject object = (JSONObject) jsonArray.get(i);
-                TaskBean taskBean = new TaskBean(object.getString(Content.TASK_NAME), object.getInt(Content.TASK_X),
-                        object.getInt(Content.TASK_Y), object.getInt(Content.TASK_DISINFECT_TIME), object.getInt(Content.TASK_ANGLE));
-                mTaskArrayList.add(taskBean);
-            }
-
-        } catch (JSONException e) {
-            Log.d(TAG, "ERROR任务列表object : " + e.getMessage());
-        }
-        robotTaskQueue = exeTaskPoi(taskName, mTaskArrayList);
+        getTaskPositionMsg(mapName, taskName);
+        robotTaskQueue = exeTaskPoi(mapName, taskName, mTaskArrayList);
 
         if (mTaskArrayList.size() == 0) {
             Log.d(TAG, "暂时没有任务队列");
@@ -499,7 +476,7 @@ public class TaskManager {
                     Content.robotState = 3;
                     Content.time = 300;
                     Content.taskState = 1;
-                    taskIndex = 0;
+                    Content.taskIndex = 0;
                     myHandler.removeCallbacks(runnable);
                     myHandler.postDelayed(runnable, 1000);
                     is_task_queue_finished();
@@ -507,8 +484,6 @@ public class TaskManager {
                     Toast.makeText(mContext, "11111" + status.getMsg(), Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "11111任务：" + status.getMsg());
                 }
-//                myHandler.removeCallbacks(runnable_robot_state);
-//                myHandler.postDelayed(runnable_robot_state, 1000);
             }
 
             @Override
@@ -516,6 +491,30 @@ public class TaskManager {
 
             }
         });
+    }
+
+    private ArrayList<TaskBean> getTaskPositionMsg(String mapName, String taskName) {
+        mTaskArrayList.clear();
+        String taskMsg = SharedPrefUtil.getInstance(mContext, mapName).getPositionMsg(taskName);
+        Log.d(TAG, "获取地图数据startTaskQueue ：" + taskMsg);
+        if (taskMsg != null) {
+            try {
+                JSONObject jsonObject = new JSONObject(taskMsg);
+                JSONArray jsonArray = jsonObject.getJSONArray(taskName);
+                for (int i =0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject1= (JSONObject) jsonArray.get(i);
+                    TaskBean taskBean = new TaskBean(jsonObject1.getString(Content.TASK_NAME),
+                            jsonObject1.getInt(Content.TASK_X),
+                            jsonObject1.getInt(Content.TASK_Y),
+                            jsonObject1.getInt(Content.TASK_DISINFECT_TIME),
+                            jsonObject1.getDouble(Content.TASK_ANGLE));
+                    mTaskArrayList.add(taskBean);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+        return mTaskArrayList;
     }
 
     /**
@@ -548,10 +547,9 @@ public class TaskManager {
                 Content.taskState = 1;
                 Content.robotState = 3;
                 Content.time = 300;
-                taskIndex ++ ;
                 myHandler.removeCallbacks(runnable);
-                Log.d(TAG, "恢复任务index : " + taskIndex + ",  pois : " + pois.size());
-                if (taskIndex < pois.size() - 1) {
+                Log.d(TAG, "恢复任务index : " + Content.taskIndex + ",  pois : " + pois.size());
+                if (Content.taskIndex < pois.size() - 1) {
                     myHandler.postDelayed(runnable, 1000);
                 }
             }
@@ -572,7 +570,7 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "停止任务队列成功");
                 Content.taskState = 0;
-                taskIndex = 0;
+                Content.taskIndex = 0;
                 myHandler.removeCallbacks(runnable);
                 myHandler.removeCallbacks(runnable_is_finfish);
             }
@@ -610,7 +608,9 @@ public class TaskManager {
             @Override
             public void success(RobotTaskQueueList robotTaskQueueList) {
                 Log.d(TAG, "获取任务队列 success" + robotTaskQueueList.getData().size());
+                mRobotTaskQueueList = robotTaskQueueList;
                 EventBus.getDefault().post(new EventBusMessage(1006, robotTaskQueueList));
+                EventBus.getDefault().post(new EventBusMessage(10016, robotTaskQueueList));
             }
 
             @Override
@@ -629,6 +629,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "addPosition success");
+                //SharedPrefUtil.getInstance(mContext, mapName).setPositionMsg(positionListBean);
             }
 
             @Override
@@ -642,7 +643,7 @@ public class TaskManager {
     /**
      * 删除点
      */
-    public void deletePosition(String positionName) {
+    public void deletePosition(String mapName, String positionName) {
         GsController.INSTANCE.deletePosition(mapName, positionName, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
@@ -660,7 +661,7 @@ public class TaskManager {
     /**
      * 重命名点
      */
-    public void renamePosition(String originName, String newName) {
+    public void renamePosition(String mapName, String originName, String newName) {
         GsController.INSTANCE.renamePosition(mapName, originName, newName, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
@@ -678,17 +679,17 @@ public class TaskManager {
     /**
      * 地图点数据，导航点列表
      */
-    public void getPosition() {
-        GsController.INSTANCE.getPosition(TaskManager.getInstances(mContext).mapName, 2, new RobotStatus<RobotPositions>() {
+    public void getPosition(String mapName) {
+        GsController.INSTANCE.getPosition(mapName, 2, new RobotStatus<RobotPositions>() {
             @Override
             public void success(RobotPositions robotPositions) {
                 Log.d(TAG, "getPosition success : " + robotPositions.getData().size());
-//                List<String> list = new ArrayList<>();
-//                for (int i = 0 ;i<robotPositions.getData().size();i++){
-//                    list.add(robotPositions.getData().get(i).getName());
-//                }
-//                TaskManager.getInstances().save_taskQueue(list,"task1");
-
+                List<String> list = new ArrayList<>();
+                for (int i = 0; i < robotPositions.getData().size(); i++) {
+                    list.add(robotPositions.getData().get(i).getName());
+                }
+                mRobotPositions = robotPositions;
+                EventBus.getDefault().post(new EventBusMessage(10017, list));
             }
 
             @Override
@@ -698,23 +699,6 @@ public class TaskManager {
         });
 
 
-    }
-
-    /**
-     * 获取路径
-     */
-    public void getPath() {
-        GsController.INSTANCE.getPath(mapName, new RobotStatus<RobotPath>() {
-            @Override
-            public void success(RobotPath robotPath) {
-                Log.d(TAG, "GET path success " + robotPath.getData().size());
-            }
-
-            @Override
-            public void error(Throwable error) {
-                Log.d(TAG, "GET path fail " + error.getMessage());
-            }
-        });
     }
 
     /**
@@ -784,11 +768,12 @@ public class TaskManager {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == 1) {
-                EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(taskIndex).getDisinfectTime()));
+                EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
                 Log.d(TAG, "暂停任务");
                 Content.robotState = 5;
                 Content.time = 1000;
                 pauseTaskQueue();
+                Content.taskIndex ++;
 
             }
         }
@@ -798,12 +783,11 @@ public class TaskManager {
         @Override
         public void run() {
             Log.d(TAG, "机器人X ：" + mRobotPosition.getGridPosition().getX() + ",  Y : " + mRobotPosition.getGridPosition().getY());
-            Log.d(TAG, "机器人目标X ：" + mTaskArrayList.get(taskIndex).getX() + ",  Y : " + mTaskArrayList.get(taskIndex).getY());
+            Log.d(TAG, "机器人目标X ：" + mTaskArrayList.get(Content.taskIndex).getX() + ",  Y : " + mTaskArrayList.get(Content.taskIndex).getY());
 
-            if (mRobotPosition != null && mRobotPosition.getGridPosition().getX() == mTaskArrayList.get(taskIndex).getX()
-                    && mRobotPosition.getGridPosition().getY() == mTaskArrayList.get(taskIndex).getY()) {
+            if (mRobotPosition != null && mRobotPosition.getGridPosition().getX() == mTaskArrayList.get(Content.taskIndex).getX()
+                    && mRobotPosition.getGridPosition().getY() == mTaskArrayList.get(Content.taskIndex).getY()) {
                 Log.d(TAG, "到达知道哪个位置，开始消毒");
-                //is_task_queue_finished();
                 myHandler.removeMessages(1);
                 myHandler.sendEmptyMessage(1);
             } else {

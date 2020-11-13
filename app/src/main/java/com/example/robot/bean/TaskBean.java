@@ -5,9 +5,10 @@ public class TaskBean extends Object{
     private int x;
     private int y;
     private int disinfectTime;
-    private int angle;
+    private double angle;
 
-    public TaskBean(String name, int x, int y, int disinfectTime, int angle) {
+
+    public TaskBean(String name, int x, int y, int disinfectTime, double angle) {
         this.name = name;
         this.x = x;
         this.y = y;
@@ -51,11 +52,11 @@ public class TaskBean extends Object{
         this.disinfectTime = disinfectTime;
     }
 
-    public int getAngle() {
+    public double getAngle() {
         return angle;
     }
 
-    public void setAngle(int angle) {
+    public void setAngle(double angle) {
         this.angle = angle;
     }
 }

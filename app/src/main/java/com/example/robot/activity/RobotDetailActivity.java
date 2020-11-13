@@ -23,12 +23,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.example.robot.MyApplication;
 import com.example.robot.R;
 import com.example.robot.adapter.TaskAdapter;
+import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.service.NavigationService;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
@@ -38,6 +40,8 @@ import com.example.robot.uvclamp.CheckLztekLamp;
 import com.example.robot.uvclamp.UvcWarning;
 
 import org.java_websocket.server.WebSocketServer;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -129,6 +133,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private ImageView robot_Position;
     private int i = 0;
     private String taskName = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -142,6 +147,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         TaskManager.getInstances(mContext).getMapPic(mapName);
         TaskManager.getInstances(mContext).use_map(mapName);
         TaskManager.getInstances(mContext).getTaskQueues(mapName);
+        TaskManager.getInstances(mContext).getPosition(mapName);
         //获取设备的信息
 //        TaskQueueManager.getInstances().deviceStatus();
         initView();
@@ -245,7 +251,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     @OnClick({R.id.start_initialize, R.id.stop_initialize,
             R.id.start_navigate, R.id.pause_task_queue, R.id.stop_navigate,
             R.id.save_task_queue, R.id.stop_task_queue, R.id.start_task_queue,
-            R.id.delete_task_queue, R.id.resume_task_queue})
+            R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.start_initialize:
@@ -264,7 +270,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     Toast.makeText(mContext, "底盘还没有链接成功，请稍后重试", Toast.LENGTH_SHORT).show();
                 }
             case R.id.start_navigate://获取充电点,导航到导航点
-                TaskManager.getInstances(mContext).charge_Position();
+                TaskManager.getInstances(mContext).charge_Position(mapName);
                 break;
             case R.id.stop_navigate:
                 TaskManager.getInstances(mContext).cancel_navigate();
@@ -275,20 +281,46 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
             case R.id.resume_task_queue:
                 isTaskFlag = false;
-                TaskManager.getInstances(mContext).resumeTaskQueue();
+                if (!toLightControlBtn.isChecked()) {
+                    TaskManager.getInstances(mContext).resumeTaskQueue();
+                }
                 break;
             case R.id.save_task_queue:
-                TaskManager.getInstances(mContext).save_taskQueue("task" + i);
+
+                List<SaveTaskBean> list = new ArrayList<>();
+                SaveTaskBean saveTaskBean = new SaveTaskBean();
+                saveTaskBean.setPositionName("bbb");
+                saveTaskBean.setTime(0);
+                list.add(saveTaskBean);
+
+                SaveTaskBean saveTaskBean1 = new SaveTaskBean();
+                saveTaskBean1.setPositionName("B 1分钟");
+                saveTaskBean1.setTime(0);
+                list.add(saveTaskBean1);
+
+                TaskManager.getInstances(mContext).save_taskQueue(mapName, "task" + i, list);
                 i++;
                 break;
             case R.id.stop_task_queue:
                 TaskManager.getInstances(mContext).stopTaskQueue();
                 break;
             case R.id.start_task_queue:
-                TaskManager.getInstances(mContext).startTaskQueue(taskName);
+                if (taskName != null) {
+                    TaskManager.getInstances(mContext).startTaskQueue(mapName, taskName);
+                }
                 break;
             case R.id.delete_task_queue:
                 TaskManager.getInstances(mContext).deleteTaskQueue(mapName, taskName);
+                break;
+            case R.id.add_position:
+                PositionListBean positionListBean = new PositionListBean();
+                positionListBean.setName("bbb");
+                positionListBean.setGridX(150);
+                positionListBean.setGridY(280);
+                positionListBean.setAngle(0);
+                positionListBean.setType(2);
+                positionListBean.setMapName(mapName);
+                TaskManager.getInstances(mContext).add_Position(positionListBean);
                 break;
             default:
                 break;
@@ -473,6 +505,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     Content.time = 4000;
                     uvcWarning.startCompletePrompt();
                     if (Content.taskState == 1) {
+                        Content.taskState = 3;
                         TaskManager.getInstances(mContext).pauseTaskQueue();
                     }
                     break;
@@ -529,7 +562,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         if (!toLightControlBtn.isChecked()) {
             return;
         }
-        if (battery < 30) {//是否到达回冲电量
+        if (battery > 80 && Content.taskState == 3) {
+            if (completeFlag) {
+                TaskManager.getInstances(mContext).resumeTaskQueue();
+            }
+        } else if (battery < 30) {//是否到达回冲电量
             myHandler.sendEmptyMessageDelayed(4, 1000);
         } else if (!checkLztekLamp.getGpioSensorState() && !isTaskFlag) {
             Log.d(TAG, "startUvcDetection" + "关led灯,开uvc灯");
@@ -591,7 +628,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private Runnable runnablePosition = new Runnable() {
         @Override
         public void run() {
-            TaskManager.getInstances(mContext).getPositions();
+            TaskManager.getInstances(mContext).getPositions(mapName);
             myHandler.postDelayed(this, 1000);
         }
     };
@@ -640,7 +677,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         } else if (messageEvent.getState() == 1006) {
             RobotTaskQueueList robotTaskQueueList = (RobotTaskQueueList) messageEvent.getT();
             List<String> list = new ArrayList<>();
-            for (int i = 0; i < robotTaskQueueList.getData().size(); i++){
+            for (int i = 0; i < robotTaskQueueList.getData().size(); i++) {
                 list.add(robotTaskQueueList.getData().get(i).getName());
             }
             taskAdapter.refeshList(list);
@@ -688,13 +725,48 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 server.broadcast(gsonUtils.putJsonMessage(Content.GETMAPNAME));
             }
         } else if (messageEvent.getState() == 10013) {//存储和执行任务队列
-//            List<String> list = (List<String>) messageEvent.getT();
-//            TaskManager.getInstances(mContext).save_taskQueue(list, list.get(0));
+            String messageEventT = (String) messageEvent.getT();
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(messageEventT);
+                String mapName = jsonObject.getString(Content.MAP_NAME);
+                String taskName = jsonObject.getString(Content.TASK_NAME);
+                List<SaveTaskBean> points = (List<SaveTaskBean>) jsonObject.getJSONArray(Content.DATATIME);
+                TaskManager.getInstances(mContext).save_taskQueue(mapName, taskName, points);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
         } else if (messageEvent.getState() == 10014) {//删除任务队列
-//            String taskName = (String) messageEvent.getT();
-//            TaskManager.getInstances(mContext).deleteTaskQueue(taskName);
+            String messageEventT = (String) messageEvent.getT();
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject(messageEventT);
+                String mapName = jsonObject.getString(Content.MAP_NAME);
+                String taskName = jsonObject.getString(Content.TASK_NAME);
+                TaskManager.getInstances(mContext).deleteTaskQueue(mapName, taskName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (messageEvent.getState() == 10015) {//获取任务列表
-//            TaskManager.getInstances(mContext).getTaskQueues();
+            String mapName = (String) messageEvent.getT();
+            TaskManager.getInstances(mContext).getTaskQueues(mapName);
+        } else if (messageEvent.getState() == 10016) {//返回任务列表
+            RobotTaskQueueList robotTaskQueueList = (RobotTaskQueueList) messageEvent.getT();
+            List<String> list = new ArrayList<>();
+            for (int i = 0; i < robotTaskQueueList.getData().size(); i++) {
+                list.add(robotTaskQueueList.getData().get(i).getName());
+            }
+            gsonUtils.setData(list);
+            if (server != null) {
+                server.broadcast(gsonUtils.putJsonMessage(Content.SENDTASKQUEUE));
+            }
+        } else if (messageEvent.getState() == 10017) {//地图点数据
+            List<String> list = (List<String>) messageEvent.getT();
+            gsonUtils.setData(list);
+            if (server != null) {
+                server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOSITION));
+            }
         }
     }
 

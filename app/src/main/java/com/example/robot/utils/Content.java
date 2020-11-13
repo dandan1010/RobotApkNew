@@ -18,9 +18,13 @@ public final class Content {
      * 0：任务结束
      * 1：执行任务，恢复任务
      * 2: 暂停任务
+     * 3:没电暂停
     */
     public static int taskState = 0;//机器人执行任务的状态
+    public static int taskIndex = 0;
 
+    public static final String MAP_NAME = "map_Name";//地图名字
+    public static final String TASK_NAME = "task_Name";//任务名字
     //type id
     public static final String STARTUP = "startUp";//前进
     public static final String STOPUP = "stopUp";//停止后退
@@ -39,18 +43,19 @@ public final class Content {
     public static final String GETMAPPIC = "getMapPic";//请求地图图片
     public static final String GETMAPICON = "getMapIcon";//返回地图图片
     public static final String GETPOSITION = "getPosition";//请求机器人位置
-    public static final String SENDPOSITION = "sendPosition";//返回机器人位置
-    public static final String SENDINITIALIZE = "sendPosition";//返回机器人转圈初始化
+    public static final String SENDGPSPOSITION = "sendGpsPosition";//返回机器人位置
+    public static final String SENDINITIALIZE = "sendInitialize";//返回机器人转圈初始化
+    public static final String SENDTASKQUEUE = "sendTaskQueue";//返回机任务列表
+    public static final String SENDPOSITION = "sendPosition";//返回点数据
 
     //json key
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
     public static final String SPINNERTIME = "spinnerTime";//text显示的倒计时
-    public static final String SaveTASKQUEUE = "saveTaskQueue";//存储，开始任务队列
+    public static final String SAVETASKQUEUE = "saveTaskQueue";//存储，开始任务队列
     public static final String DELETETASKQUEUE = "deleteTaskQueue";//删除任务队列
     public static final String GETTASKQUEUE = "getTaskQueue";//获取任务列表
 
     //task key
-    public static final String TASK_NAME = "name";//任务名字
     public static final String TASK_X = "x";
     public static final String TASK_Y = "y";
     public static final String TASK_DISINFECT_TIME = "disinfect_Time";

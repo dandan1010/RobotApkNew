@@ -8,6 +8,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GsonUtils {
@@ -18,7 +19,35 @@ public class GsonUtils {
 
     private String spinnerTime = null;
     private String tvTime = null;
+    private String mapName = null;
+    private String taskName = null;
     private List<String> data;
+    private List<TaskBean> mTaskList;
+    private int time;
+
+    public int getTime() {
+        return time;
+    }
+
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public String getTaskName() {
+        return taskName;
+    }
+
+    public void setTaskName(String taskName) {
+        this.taskName = taskName;
+    }
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
 
     public void setData(List<String> data) {
         this.data = data;
@@ -37,6 +66,7 @@ public class GsonUtils {
         try {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.SPINNERTIME, spinnerTime);
+            jsonObject.put(Content.MAP_NAME, mapName);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
         } catch (JSONException e) {
@@ -61,7 +91,6 @@ public class GsonUtils {
         return type;
     }
 
-    private List<TaskBean> mTaskList;
 
     public List<TaskBean> getmTaskList() {
         return mTaskList;
@@ -92,4 +121,29 @@ public class GsonUtils {
         Log.d(TAG, "存sp的任务 ： " + jsonObject.toString());
         return jsonObject.toString();
     }
+
+    public String putJsonPositionMessage(String taskName, ArrayList<TaskBean> arrayList) {
+        jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        try {
+            Log.d(TAG, "存sp的任务 ： " + arrayList.size());
+            for (int i = 0; i < arrayList.size(); i++) {
+                TaskBean taskBean = arrayList.get(i);
+                JSONObject object = new JSONObject();
+                object.put(Content.TASK_NAME, taskBean.getName());
+                object.put(Content.TASK_X, taskBean.getX());
+                object.put(Content.TASK_Y, taskBean.getY());
+                object.put(Content.TASK_ANGLE, taskBean.getAngle());
+                object.put(Content.TASK_DISINFECT_TIME, taskBean.getDisinfectTime());
+                jsonArray.put(i, object);
+            }
+            jsonObject.put(taskName, jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "存sp的任务 ： " + jsonObject.toString());
+        return jsonObject.toString();
+    }
+
+
 }

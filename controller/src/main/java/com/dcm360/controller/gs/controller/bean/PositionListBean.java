@@ -15,17 +15,8 @@ public class PositionListBean
   private String mapName;
   private String name;
   private boolean selected;
-  private int time;
   private int type;
   private WorldPoseBean worldPose;
-
-  public int getTime() {
-    return time;
-  }
-
-  public void setTime(int time) {
-    this.time = time;
-  }
 
   public PositionListBean clone()
   {

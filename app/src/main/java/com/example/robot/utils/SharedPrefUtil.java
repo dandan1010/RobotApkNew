@@ -3,6 +3,12 @@ package com.example.robot.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.WorldPoseBean;
+import com.example.robot.bean.TaskBean;
+
+import java.util.ArrayList;
+
 public class SharedPrefUtil {
 
     private static SharedPrefUtil sharedPrefUtil;
@@ -42,6 +48,15 @@ public class SharedPrefUtil {
     public void deleteTaskQueue(String type) {
         editor.remove(type);
         editor.commit();
+    }
+
+    public void setPositionMsg(String taskName, ArrayList<TaskBean> arrayList) {
+        GsonUtils gsonUtils = new GsonUtils();
+        editor.putString(taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
+        editor.commit();
+    }
+    public String getPositionMsg(String taskName) {
+        return sharedPreferences.getString(taskName, null);
     }
 
 }
