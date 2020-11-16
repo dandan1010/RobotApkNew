@@ -216,7 +216,7 @@ public class TaskManager {
 
             @Override
             public void success(Status status) {
-                Log.d(TAG, "地图" + mapName + "移动到导航点 : " + positionName);
+                Log.d(TAG, "地图" + mapName + "移动到导航点 : " + positionName + ",     " + status.getMsg());
             }
 
             @Override
@@ -564,7 +564,7 @@ public class TaskManager {
     /**
      * 结束任务
      */
-    public void stopTaskQueue() {
+    public void stopTaskQueue(String mapName) {
         GsController.INSTANCE.stopTaskQueue(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
@@ -573,6 +573,7 @@ public class TaskManager {
                 Content.taskIndex = 0;
                 myHandler.removeCallbacks(runnable);
                 myHandler.removeCallbacks(runnable_is_finfish);
+                navigate_Position(mapName, "Origin");
             }
 
             @Override

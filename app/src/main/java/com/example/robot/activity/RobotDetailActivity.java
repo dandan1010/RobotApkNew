@@ -304,7 +304,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 i++;
                 break;
             case R.id.stop_task_queue:
-                TaskManager.getInstances(mContext).stopTaskQueue();
+                TaskManager.getInstances(mContext).stopTaskQueue(mapName);
+                toLightControlBtn.setChecked(false);
                 break;
             case R.id.start_task_queue:
                 if (taskName != null) {
