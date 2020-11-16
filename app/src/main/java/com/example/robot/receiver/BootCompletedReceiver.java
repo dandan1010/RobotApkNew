@@ -1,4 +1,4 @@
-package com.example.robot.service;
+package com.example.robot.receiver;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

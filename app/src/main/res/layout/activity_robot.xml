@@ -175,6 +175,13 @@
                 android:layout_height="wrap_content"
                 android:text="删除任务队列"
                 android:id="@+id/delete_task_queue"/>
+
+            <Button
+                android:layout_below="@id/delete_task_queue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="定时开始任务"
+                android:id="@+id/alarm_btn"/>
         </RelativeLayout>
     </ScrollView>
     <RelativeLayout

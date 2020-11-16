@@ -56,9 +56,14 @@
         <activity android:name=".activity.RobotDetailActivity"></activity>
 
         <service android:name=".service.NavigationService" />
-        <receiver android:name=".service.BootCompletedReceiver">
+        <receiver android:name=".receiver.BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receiver.AlarmReceiver">
+            <intent-filter>
+                <action android:name="android.alarm.task.action" />
             </intent-filter>
         </receiver>
     </application>

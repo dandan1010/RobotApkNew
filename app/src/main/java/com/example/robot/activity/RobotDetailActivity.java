@@ -1,6 +1,9 @@
 package com.example.robot.activity;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +34,7 @@ import com.example.robot.MyApplication;
 import com.example.robot.R;
 import com.example.robot.adapter.TaskAdapter;
 import com.example.robot.bean.SaveTaskBean;
+import com.example.robot.receiver.AlarmReceiver;
 import com.example.robot.service.NavigationService;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
@@ -133,6 +137,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private ImageView robot_Position;
     private int i = 0;
     private String taskName = "";
+    private PendingIntent mPendingIntent;
+    private AlarmManager mAlarmManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,7 +257,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     @OnClick({R.id.start_initialize, R.id.stop_initialize,
             R.id.start_navigate, R.id.pause_task_queue, R.id.stop_navigate,
             R.id.save_task_queue, R.id.stop_task_queue, R.id.start_task_queue,
-            R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position})
+            R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position,
+            R.id.alarm_btn})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.start_initialize:
@@ -324,6 +331,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 positionListBean.setType(2);
                 positionListBean.setMapName(mapName);
                 TaskManager.getInstances(mContext).add_Position(positionListBean);
+                break;
+            case R.id.alarm_btn:
+                setAlarmTime(mapName, "task0", System.currentTimeMillis() + 2 * 60 * 1000);
                 break;
             default:
                 break;
@@ -635,6 +645,21 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             myHandler.postDelayed(this, 1000);
         }
     };
+
+    private void setAlarmTime(String mapName, String taskName, long triggerAtMillis) {
+        Log.d("AlarmReceiver", "开启定时任务 ：" + triggerAtMillis);
+        mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent("android.alarm.task.action");
+        intent.putExtra("mapName", mapName);
+        intent.putExtra("taskName", taskName);
+        intent.setClass(this, AlarmReceiver.class);
+        mPendingIntent = PendingIntent.getBroadcast(
+                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        //闹铃间隔， 这里设为1分钟闹一次，在第2步我们将每隔1分钟收到一次广播
+        int interval = 24 * 60 * 60 * 1000;
+        mAlarmManager.setRepeating(AlarmManager.RTC, triggerAtMillis, interval, mPendingIntent);
+//        am.set(AlarmManager.RTC, triggerAtMillis, sender);
+    }
 
     @Override
     protected void onBaseEventMessage(EventBusMessage messageEvent) {
