@@ -53,6 +53,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EventListener;
 import java.util.List;
 
 import butterknife.BindView;
@@ -648,7 +649,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
     private void setAlarmTime(String mapName, String taskName, long triggerAtMillis) {
         Log.d("AlarmReceiver", "开启定时任务 ：" + triggerAtMillis);
-        mAlarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent("android.alarm.task.action");
         intent.putExtra("mapName", mapName);
         intent.putExtra("taskName", taskName);
@@ -750,7 +751,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             }
             gsonUtils.setData(stringList);
             if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.GETMAPNAME));
+                server.broadcast(gsonUtils.putJsonMessage(Content.SENDMAPNAME));
             }
         } else if (messageEvent.getState() == 10013) {//存储和执行任务队列
             String messageEventT = (String) messageEvent.getT();
@@ -789,12 +790,49 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             if (server != null) {
                 server.broadcast(gsonUtils.putJsonMessage(Content.SENDTASKQUEUE));
             }
-        } else if (messageEvent.getState() == 10017) {//地图点数据
+        } else if (messageEvent.getState() == 10017) {//返回地图点数据
             List<String> list = (List<String>) messageEvent.getT();
             gsonUtils.setData(list);
             if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOSITION));
+                server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
             }
+        } else if (messageEvent.getState() == 10019) {//请求地图图片
+            TaskManager.getInstances(mContext).getMapPic((String) messageEvent.getT());
+        } else if (messageEvent.getState() == 10020) {//返回地图图片
+            byte[] bytes = (byte[]) messageEvent.getT();
+            gsonUtils.setBytes(bytes);
+            if (server != null) {
+                server.broadcast(gsonUtils.putJsonMessage(Content.SENDMAPICON));
+            }
+        } else if (messageEvent.getState() == 10021) {//添加点
+            String s = (String) messageEvent.getT();
+            try {
+                JSONObject jsonObject = new JSONObject(s);
+                PositionListBean positionListBean = new PositionListBean();
+                positionListBean.setName(jsonObject.getString(Content.POINT_NAME));
+                positionListBean.setGridX(jsonObject.getInt(Content.TASK_X));
+                positionListBean.setGridY(jsonObject.getInt(Content.TASK_Y));
+                positionListBean.setAngle(jsonObject.getInt(Content.TASK_ANGLE));
+                positionListBean.setType(2);
+                positionListBean.setMapName(jsonObject.getString(Content.MAP_NAME));
+                TaskManager.getInstances(mContext).add_Position(positionListBean);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+
+        } else if (messageEvent.getState() == 10022) {//开始任务
+            JSONObject jsonObject = (JSONObject) messageEvent.getT();
+            try {
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                taskName = jsonObject.getString(Content.TASK_NAME);
+                TaskManager.getInstances(mContext).startTaskQueue(mapName, taskName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        } else if (messageEvent.getState() == 10023) {//停止任务
+            TaskManager.getInstances(mContext).stopTaskQueue(mapName);
+            toLightControlBtn.setChecked(false);
         }
     }
 

@@ -36,29 +36,35 @@ public final class Content {
     public static final String STOPRIGHT = "stopRight";//停止右转
     public static final String STARTLIGHT = "startLight";//开灯
     public static final String STOPLIGHT = "stopLight";//关灯
-    public static final String TV_TIME = "tv_time";//时间
 
     public static final String GETMAPLIST = "getMapList";//请求地图列表
-    public static final String GETMAPNAME = "getMapName";//返回地图列表名称
+    public static final String SENDMAPNAME = "sendMapName";//返回地图列表名称
     public static final String GETMAPPIC = "getMapPic";//请求地图图片
-    public static final String GETMAPICON = "getMapIcon";//返回地图图片
+    public static final String SENDMAPICON = "sendMapIcon";//返回地图图片
     public static final String GETPOSITION = "getPosition";//请求机器人位置
     public static final String SENDGPSPOSITION = "sendGpsPosition";//返回机器人位置
+    public static final String GETINITIALIZE = "getInitialize";//请求机器人转圈初始化
     public static final String SENDINITIALIZE = "sendInitialize";//返回机器人转圈初始化
-    public static final String SENDTASKQUEUE = "sendTaskQueue";//返回机任务列表
-    public static final String SENDPOSITION = "sendPosition";//返回点数据
-
-    //json key
-    public static final String DATATIME = "dataTime";//地图名称的列表array的key
-    public static final String SPINNERTIME = "spinnerTime";//text显示的倒计时
-    public static final String SAVETASKQUEUE = "saveTaskQueue";//存储，开始任务队列
+    public static final String GETTASKQUEUE = "getTaskQueue";//请求机器人任务列表
+    public static final String SENDTASKQUEUE = "sendTaskQueue";//返回任务列表
+    public static final String GETPOINTPOSITION = "getPointPosition";//返回点数据
+    public static final String SENDPOINTPOSITION = "sendPointPosition";//返回点数据
+    public static final String ADD_POSITION = "add_position";//添加点
+    public static final String SPINNERTIME = "spinnerTime";//请求的时间
+    public static final String TV_TIME = "tv_time";//返回时间
+    public static final String SAVETASKQUEUE = "saveTaskQueue";//存储任务
     public static final String DELETETASKQUEUE = "deleteTaskQueue";//删除任务队列
-    public static final String GETTASKQUEUE = "getTaskQueue";//获取任务列表
+    public static final String STARTTASKQUEUE = "startTaskQueue";//开始任务队列
+    public static final String STOPTASKQUEUE = "stopTaskQueue";//停止任务队列
+
+    public static final String DATATIME = "dataTime";//地图名称的列表array的key
+
 
     //task key
-    public static final String TASK_X = "x";
-    public static final String TASK_Y = "y";
-    public static final String TASK_DISINFECT_TIME = "disinfect_Time";
-    public static final String TASK_ANGLE = "angle";
+    public static final String TASK_X = "x";//x坐标
+    public static final String TASK_Y = "y";//y坐标
+    public static final String TASK_DISINFECT_TIME = "disinfect_Time";//执行任务的点的时间
+    public static final String TASK_ANGLE = "angle";//机器人角度
+    public static final String POINT_NAME = "point_Name";//点的名字
 
 }

@@ -22,8 +22,17 @@ public class GsonUtils {
     private String mapName = null;
     private String taskName = null;
     private List<String> data;
+    private byte[] bytes;
     private List<TaskBean> mTaskList;
     private int time;
+
+    public byte[] getBytes() {
+        return bytes;
+    }
+
+    public void setBytes(byte[] bytes) {
+        this.bytes = bytes;
+    }
 
     public int getTime() {
         return time;
@@ -69,6 +78,7 @@ public class GsonUtils {
             jsonObject.put(Content.MAP_NAME, mapName);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
+            jsonObject.put(Content.SENDMAPICON, new String(bytes));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -91,35 +101,12 @@ public class GsonUtils {
         return type;
     }
 
-
     public List<TaskBean> getmTaskList() {
         return mTaskList;
     }
 
     public void setmTaskList(List<TaskBean> mTaskList) {
         this.mTaskList = mTaskList;
-    }
-
-    public String putJsonTaskMessage(String taskName) {
-        jsonObject = new JSONObject();
-        JSONArray jsonArray = new JSONArray();
-        try {
-            for (int i = 0; i < mTaskList.size(); i++) {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put(Content.TASK_NAME, mTaskList.get(i).getName());
-                jsonObject.put(Content.TASK_X, mTaskList.get(i).getX());
-                jsonObject.put(Content.TASK_Y, mTaskList.get(i).getY());
-                jsonObject.put(Content.TASK_ANGLE, mTaskList.get(i).getAngle());
-                jsonObject.put(Content.TASK_DISINFECT_TIME, mTaskList.get(i).getDisinfectTime());
-                jsonArray.put(i, jsonObject);
-            }
-            jsonObject.put(TYPE, taskName);
-            jsonObject.put(taskName, jsonArray);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        Log.d(TAG, "存sp的任务 ： " + jsonObject.toString());
-        return jsonObject.toString();
     }
 
     public String putJsonPositionMessage(String taskName, ArrayList<TaskBean> arrayList) {

@@ -2,6 +2,7 @@ package com.example.robot.service;
 
 import android.util.Log;
 
+import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
@@ -20,6 +21,8 @@ import java.nio.ByteBuffer;
 public class SimpleServer extends WebSocketServer {
     private GsonUtils gsonUtils;
     private JSONObject jsonObject;
+    private String mapName = "";
+    private String taskName = "";
 
     public SimpleServer(InetSocketAddress address) {
         super(address);
@@ -27,8 +30,7 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        conn.send("Welcome to the server!"); //This method sends a message to the new client
-        broadcast("new connection: " + handshake.getResourceDescriptor()); //This method sends a message to all clients connected
+        broadcast("OK"); //This method sends a message to all clients connected
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
     }
 
@@ -117,21 +119,37 @@ public class SimpleServer extends WebSocketServer {
             case Content.STOPRIGHT:
                 EventBus.getDefault().post(new EventBusMessage(10010, message));
                 break;
-            case Content.GETMAPLIST:
+            case Content.GETMAPLIST://地图列表
                 EventBus.getDefault().post(new EventBusMessage(10011, message));
                 break;
-            case Content.SAVETASKQUEUE:
+            case Content.SAVETASKQUEUE://存储任务
                 EventBus.getDefault().post(new EventBusMessage(10013, message));
                 break;
-            case Content.DELETETASKQUEUE:
+            case Content.DELETETASKQUEUE://删除任务
                 EventBus.getDefault().post(new EventBusMessage(10014, message));
                 break;
-            case Content.GETTASKQUEUE:
+            case Content.GETTASKQUEUE://任务列表
                 jsonObject = new JSONObject(message);
-                String mapName = jsonObject.getString(Content.MAP_NAME);
+                mapName = jsonObject.getString(Content.MAP_NAME);
                 EventBus.getDefault().post(new EventBusMessage(10015, mapName));
                 break;
-
+            case Content.GETMAPPIC://地图图片
+                jsonObject = new JSONObject(message);
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10019, mapName));
+                break;
+            case Content.ADD_POSITION:
+                EventBus.getDefault().post(new EventBusMessage(10021, message));
+                break;
+            case Content.STARTTASKQUEUE:
+                jsonObject = new JSONObject(message);
+                EventBus.getDefault().post(new EventBusMessage(10022, jsonObject));
+                break;
+            case Content.STOPTASKQUEUE:
+                jsonObject = new JSONObject(message);
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10023, jsonObject));
+                break;
             default:
                 break;
         }

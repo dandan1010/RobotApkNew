@@ -35,16 +35,6 @@ public class SharedPrefUtil {
         return sharedPrefUtil;
     }
 
-    public void setTaskQueue(String taskJson) {
-        GsonUtils gsonUtils = new GsonUtils();
-        editor.putString(gsonUtils.getType(taskJson), taskJson);
-        editor.commit();
-    }
-
-    public String getTaskQueue(String taskName) {
-        return sharedPreferences.getString(taskName, null);
-    }
-
     public void deleteTaskQueue(String type) {
         editor.remove(type);
         editor.commit();

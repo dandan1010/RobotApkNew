@@ -95,6 +95,7 @@ public class TaskManager {
             public void success(byte[] bytes) {
                 Log.d(TAG, "获取地图图片成功" + bytes.length);
                 EventBus.getDefault().post(new EventBusMessage(1002, bytes));
+                EventBus.getDefault().post(new EventBusMessage(10020, bytes));
             }
 
             @Override
