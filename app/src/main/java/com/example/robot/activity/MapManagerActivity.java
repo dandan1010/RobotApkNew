@@ -59,7 +59,6 @@ public class MapManagerActivity extends BaseActivity implements MapManagerAdapte
     private MapManagerAdapter mapManagerAdapter;
     private Context mContext;
     private List<RobotMap.DataBean> data;
-    private String mapName;
     private NavigationService navigationService;
     private Intent intentService;
     private CheckLztekLamp checkLztekLamp;
@@ -121,20 +120,20 @@ public class MapManagerActivity extends BaseActivity implements MapManagerAdapte
      */
     @Override
     public void OnItemClickListener(View view, int position) {
-        mapName = data.get(position).getName();
-        TaskManager.getInstances(mContext).getMapPic(mapName);
+        Content.mapName = data.get(position).getName();
+        TaskManager.getInstances(mContext).getMapPic(Content.mapName);
     }
 
     @Override
     public void OnItemLongClickListener(View view, int position) {
-        mapName = data.get(position).getName();
+        String mapName = data.get(position).getName();
         data.remove(position);
         mapManagerAdapter.refeshList(data);
         mapManagerAdapter.notifyDataSetChanged();
         TaskManager.getInstances(mContext).deleteMap(mapName);
     }
 
-    @OnClick({R.id.scanning_map, R.id.map_icon, R.id.cancel_scanning_map, R.id.press_ok, R.id.develop_map})
+    @OnClick({R.id.scanning_map, R.id.cancel_scanning_map, R.id.develop_map})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.scanning_map:
@@ -159,13 +158,8 @@ public class MapManagerActivity extends BaseActivity implements MapManagerAdapte
             case R.id.cancel_scanning_map:
                 TaskManager.getInstances(mContext).cancelScanMap();
                 break;
-            case R.id.press_ok:
-                Intent intent = new Intent(this, RobotDetailActivity.class);
-                intent.putExtra("mapName", mapName);
-                startActivity(intent);
-                break;
             case R.id.develop_map:
-                TaskManager.getInstances(mContext).start_develop_map(mapName);
+                TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
                 break;
             default:
                 break;
@@ -292,8 +286,8 @@ public class MapManagerActivity extends BaseActivity implements MapManagerAdapte
             data = robotMap.getData();
             mapManagerAdapter.refeshList(data);
             mapRecycler.setAdapter(mapManagerAdapter);
-            mapName = data.get(0).getName();
-            TaskManager.getInstances(mContext).getMapPic(mapName);
+            Content.mapName = data.get(0).getName();
+            TaskManager.getInstances(mContext).getMapPic(Content.mapName);
             mapManagerAdapter.notifyDataSetChanged();
         } else if (messageEvent.getState() == 1002) {
             byte[] bytes = (byte[]) messageEvent.getT();

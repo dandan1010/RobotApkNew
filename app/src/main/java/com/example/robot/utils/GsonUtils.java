@@ -25,6 +25,69 @@ public class GsonUtils {
     private byte[] bytes;
     private List<TaskBean> mTaskList;
     private int time;
+    private float x;
+    private float y;
+    private float gridHeight;
+    private float gridWidth;
+    private float originX;
+    private float originY;
+    private float resolution;
+
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
+    }
+
+    public float getGridHeight() {
+        return gridHeight;
+    }
+
+    public void setGridHeight(float gridHeight) {
+        this.gridHeight = gridHeight;
+    }
+
+    public float getGridWidth() {
+        return gridWidth;
+    }
+
+    public void setGridWidth(float gridWidth) {
+        this.gridWidth = gridWidth;
+    }
+
+    public float getOriginX() {
+        return originX;
+    }
+
+    public void setOriginX(float originX) {
+        this.originX = originX;
+    }
+
+    public float getOriginY() {
+        return originY;
+    }
+
+    public void setOriginY(float originY) {
+        this.originY = originY;
+    }
+
+    public float getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(float resolution) {
+        this.resolution = resolution;
+    }
 
     public byte[] getBytes() {
         return bytes;

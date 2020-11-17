@@ -1,8 +1,10 @@
 package com.example.robot.activity;
 
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -21,6 +24,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.solver.ArrayLinkedVariables;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -32,6 +36,7 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.example.robot.MyApplication;
 import com.example.robot.R;
+import com.example.robot.adapter.MapManagerAdapter;
 import com.example.robot.adapter.TaskAdapter;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.receiver.AlarmReceiver;
@@ -60,11 +65,15 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class RobotDetailActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener, View.OnTouchListener {
+public class RobotDetailActivity extends BaseActivity implements CompoundButton.OnCheckedChangeListener, View.OnTouchListener, MapManagerAdapter.OnItemClickListener {
 
     private static final String TAG = "MainActivity";
     @BindView(R.id.uvc_time)
     Spinner spinner;
+    @BindView(R.id.scanning_map_icon)
+    ImageView scanningMapIcon;
+    @BindView(R.id.map_recycler)
+    RecyclerView mapRecycler;
     @BindView(R.id.residual_time)
     TextView residualTime;
     @BindView(R.id.controller_btn)
@@ -101,8 +110,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     TextView robotDisinfectionTime;
     @BindView(R.id.robot_task_title)
     TextView robotTaskTitle;
-    @BindView(R.id.start_navigate)
-    Button startNavigate;
     @BindView(R.id.stop_navigate)
     Button stopNavigate;
     //    @BindView(R.id.robot_position)
@@ -132,14 +139,15 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private String tvText;
     private TaskAdapter taskAdapter;
     private List<String> taskList = new ArrayList<>();
-    private String mapName;
     private byte battery = 0;
     private int deletePosition = -1;
     private ImageView robot_Position;
     private int i = 0;
-    private String taskName = "";
     private PendingIntent mPendingIntent;
     private AlarmManager mAlarmManager;
+    private MapManagerAdapter mapManagerAdapter;
+    private List<RobotMap.DataBean> data;
+    private boolean isDevelop = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,19 +158,20 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         robot_Position = new ImageView(mContext);
         server = new MyApplication().getServer();
         //选取地图之后，展示地图数据
-        mapName = getIntent().getStringExtra("mapName");
-        TaskManager.getInstances(mContext).getMapPic(mapName);
-        TaskManager.getInstances(mContext).use_map(mapName);
-        TaskManager.getInstances(mContext).getTaskQueues(mapName);
-        TaskManager.getInstances(mContext).getPosition(mapName);
-        //获取设备的信息
-//        TaskQueueManager.getInstances().deviceStatus();
         initView();
         initListener();
 
     }
 
     private void initView() {
+        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(mContext);
+        linearLayoutManager1.setOrientation(LinearLayoutManager.VERTICAL);
+        mapRecycler.setLayoutManager(linearLayoutManager1);
+        mapRecycler.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+        mapManagerAdapter = new MapManagerAdapter(this, R.layout.item_recycler);
+        mapManagerAdapter.setOnItemClickListener(this);
+
+
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
 
@@ -180,10 +189,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             @Override
             public void OnItemClickListener(View view, int position, String itemString) {
                 deletePosition = position;
-                taskName = itemString;
+                Content.taskName = itemString;
             }
         });
-        TaskManager.getInstances(mContext).getTaskQueues(mapName);
+        TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
 
         checkLztekLamp.openBatteryPort();
     }
@@ -256,16 +265,16 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
      * 初始化转圈圈点击事件
      */
     @OnClick({R.id.start_initialize, R.id.stop_initialize,
-            R.id.start_navigate, R.id.pause_task_queue, R.id.stop_navigate,
+            R.id.pause_task_queue, R.id.stop_navigate,
             R.id.save_task_queue, R.id.stop_task_queue, R.id.start_task_queue,
             R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position,
-            R.id.alarm_btn})
+            R.id.alarm_btn, R.id.scanning_map, R.id.cancel_scanning_map, R.id.develop_map})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.start_initialize:
                 if (NavigationService.isStartNavigationService) {
                     Log.d(TAG, "初始化转圈");
-                    NavigationService.initialize(mapName);
+                    NavigationService.initialize(Content.mapName);
                 } else {
                     Toast.makeText(mContext, "底盘还没有链接成功，请稍后重试", Toast.LENGTH_SHORT).show();
                 }
@@ -277,11 +286,36 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 } else {
                     Toast.makeText(mContext, "底盘还没有链接成功，请稍后重试", Toast.LENGTH_SHORT).show();
                 }
-            case R.id.start_navigate://获取充电点,导航到导航点
-                TaskManager.getInstances(mContext).charge_Position(mapName);
                 break;
             case R.id.stop_navigate:
                 TaskManager.getInstances(mContext).cancel_navigate();
+                break;
+            case R.id.scanning_map:
+                EditText editText = new EditText(this);
+                AlertDialog alertDialog = new AlertDialog.Builder(mContext)
+                        .setTitle("输入地图的名字：")
+                        .setView(editText)
+                        .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                TaskManager.getInstances(mContext).start_scan_map(editText.getText().toString());
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        })
+                        .show();
+                break;
+            case R.id.cancel_scanning_map:
+                isDevelop = false;
+                TaskManager.getInstances(mContext).cancelScanMap();
+                break;
+            case R.id.develop_map:
+                isDevelop = true;
+                NavigationService.initialize(Content.mapName);
                 break;
             case R.id.pause_task_queue:
                 isTaskFlag = true;
@@ -308,20 +342,20 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 saveTaskBean1.setTime(0);
                 list.add(saveTaskBean1);
 
-                TaskManager.getInstances(mContext).save_taskQueue(mapName, "task" + i, list);
+                TaskManager.getInstances(mContext).save_taskQueue(Content.mapName, "task" + i, list);
                 i++;
                 break;
             case R.id.stop_task_queue:
-                TaskManager.getInstances(mContext).stopTaskQueue(mapName);
+                TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
                 toLightControlBtn.setChecked(false);
                 break;
             case R.id.start_task_queue:
-                if (taskName != null) {
-                    TaskManager.getInstances(mContext).startTaskQueue(mapName, taskName);
+                if (Content.taskName != null) {
+                    TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
                 }
                 break;
             case R.id.delete_task_queue:
-                TaskManager.getInstances(mContext).deleteTaskQueue(mapName, taskName);
+                TaskManager.getInstances(mContext).deleteTaskQueue(Content.mapName, Content.taskName);
                 break;
             case R.id.add_position:
                 PositionListBean positionListBean = new PositionListBean();
@@ -330,11 +364,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 positionListBean.setGridY(180);
                 positionListBean.setAngle(0);
                 positionListBean.setType(2);
-                positionListBean.setMapName(mapName);
+                positionListBean.setMapName(Content.mapName);
                 TaskManager.getInstances(mContext).add_Position(positionListBean);
                 break;
             case R.id.alarm_btn:
-                setAlarmTime(mapName, "task0", System.currentTimeMillis() + 2 * 60 * 1000);
+                setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000);
                 break;
             default:
                 break;
@@ -450,6 +484,24 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         }
 
         return true;
+    }
+
+    @Override
+    public void OnItemClickListener(View view, int position) {
+        Content.mapName = data.get(position).getName();
+        TaskManager.getInstances(mContext).getMapPic(Content.mapName);
+        TaskManager.getInstances(mContext).use_map(Content.mapName);
+        TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
+        TaskManager.getInstances(mContext).getPosition(Content.mapName);
+    }
+
+    @Override
+    public void OnItemLongClickListener(View view, int position) {
+        String mapName = data.get(position).getName();
+        data.remove(position);
+        mapManagerAdapter.refeshList(data);
+        mapManagerAdapter.notifyDataSetChanged();
+        TaskManager.getInstances(mContext).deleteMap(mapName);
     }
 
     public class MyHandler extends Handler {//防止内存泄漏
@@ -642,16 +694,16 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private Runnable runnablePosition = new Runnable() {
         @Override
         public void run() {
-            TaskManager.getInstances(mContext).getPositions(mapName);
+            TaskManager.getInstances(mContext).getPositions(Content.mapName);
             myHandler.postDelayed(this, 1000);
         }
     };
 
-    private void setAlarmTime(String mapName, String taskName, long triggerAtMillis) {
+    private void setAlarmTime(String taskName, long triggerAtMillis) {
         Log.d("AlarmReceiver", "开启定时任务 ：" + triggerAtMillis);
         mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent("android.alarm.task.action");
-        intent.putExtra("mapName", mapName);
+        intent.putExtra("mapName", Content.mapName);
         intent.putExtra("taskName", taskName);
         intent.setClass(this, AlarmReceiver.class);
         mPendingIntent = PendingIntent.getBroadcast(
@@ -667,7 +719,13 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         super.onBaseEventMessage(messageEvent);
         Log.d(TAG, "messageEvent.getState() :  " + messageEvent.getState());
 //上位机本身发送的消息
-        if (messageEvent.getState() == 1002) {
+        if (messageEvent.getState() == 1001) {
+            RobotMap robotMap = (RobotMap) messageEvent.getT();
+            data = robotMap.getData();
+            mapManagerAdapter.refeshList(data);
+            mapRecycler.setAdapter(mapManagerAdapter);
+            mapManagerAdapter.notifyDataSetChanged();
+        } else if (messageEvent.getState() == 1002) {
             bytes = (byte[]) messageEvent.getT();
             Glide.with(mContext).load(bytes).into(robotMap);
 
@@ -703,6 +761,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             byte[] bytes = (byte[]) messageEvent.getT();
             battery = bytes[23];
             robotPower.setText("电池容量：" + battery + "%");
+        } else if (messageEvent.getState() == 1005) {
+            byte[] bytes = (byte[]) messageEvent.getT();
+            Glide.with(mContext).load(bytes).into(scanningMapIcon);
         } else if (messageEvent.getState() == 1006) {
             RobotTaskQueueList robotTaskQueueList = (RobotTaskQueueList) messageEvent.getT();
             List<String> list = new ArrayList<>();
@@ -753,15 +814,21 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             if (server != null) {
                 server.broadcast(gsonUtils.putJsonMessage(Content.SENDMAPNAME));
             }
-        } else if (messageEvent.getState() == 10013) {//存储和执行任务队列
+        } else if (messageEvent.getState() == 10013) {//存储任务队列
             String messageEventT = (String) messageEvent.getT();
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(messageEventT);
-                String mapName = jsonObject.getString(Content.MAP_NAME);
                 String taskName = jsonObject.getString(Content.TASK_NAME);
-                List<SaveTaskBean> points = (List<SaveTaskBean>) jsonObject.getJSONArray(Content.DATATIME);
-                TaskManager.getInstances(mContext).save_taskQueue(mapName, taskName, points);
+                List<SaveTaskBean> points = new ArrayList<>();
+                for (int i = 0; i < jsonObject.getJSONArray(Content.DATATIME).length(); i++) {
+                    SaveTaskBean saveTaskBean = new SaveTaskBean();
+                    JSONObject jsonObject1 = (JSONObject) jsonObject.getJSONArray(Content.DATATIME).get(i);
+                    saveTaskBean.setPositionName(jsonObject1.getString(Content.POINT_NAME));
+                    saveTaskBean.setPositionName(jsonObject1.getString(Content.SPINNERTIME));
+                    points.add(saveTaskBean);
+                }
+                TaskManager.getInstances(mContext).save_taskQueue(Content.mapName, taskName, points);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -771,15 +838,13 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             JSONObject jsonObject = null;
             try {
                 jsonObject = new JSONObject(messageEventT);
-                String mapName = jsonObject.getString(Content.MAP_NAME);
                 String taskName = jsonObject.getString(Content.TASK_NAME);
-                TaskManager.getInstances(mContext).deleteTaskQueue(mapName, taskName);
+                TaskManager.getInstances(mContext).deleteTaskQueue(Content.mapName, taskName);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         } else if (messageEvent.getState() == 10015) {//获取任务列表
-            String mapName = (String) messageEvent.getT();
-            TaskManager.getInstances(mContext).getTaskQueues(mapName);
+            TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
         } else if (messageEvent.getState() == 10016) {//返回任务列表
             RobotTaskQueueList robotTaskQueueList = (RobotTaskQueueList) messageEvent.getT();
             List<String> list = new ArrayList<>();
@@ -814,7 +879,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 positionListBean.setGridY(jsonObject.getInt(Content.TASK_Y));
                 positionListBean.setAngle(jsonObject.getInt(Content.TASK_ANGLE));
                 positionListBean.setType(2);
-                positionListBean.setMapName(jsonObject.getString(Content.MAP_NAME));
+                positionListBean.setMapName(Content.mapName);
                 TaskManager.getInstances(mContext).add_Position(positionListBean);
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -822,18 +887,38 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
 
         } else if (messageEvent.getState() == 10022) {//开始任务
-            JSONObject jsonObject = (JSONObject) messageEvent.getT();
-            try {
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                taskName = jsonObject.getString(Content.TASK_NAME);
-                TaskManager.getInstances(mContext).startTaskQueue(mapName, taskName);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
         } else if (messageEvent.getState() == 10023) {//停止任务
-            TaskManager.getInstances(mContext).stopTaskQueue(mapName);
+            TaskManager.getInstances(mContext).stopTaskQueue((String) messageEvent.getT());
             toLightControlBtn.setChecked(false);
+        } else if (messageEvent.getState() == 10024) {//返回机器人位置
+            RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
+            gsonUtils.setX(robotPosition.getGridPosition().getX());
+            gsonUtils.setY(robotPosition.getGridPosition().getY());
+            gsonUtils.setGridHeight(robotPosition.getMapInfo().getGridHeight());
+            gsonUtils.setGridWidth(robotPosition.getMapInfo().getGridWidth());
+            gsonUtils.setOriginX(robotPosition.getMapInfo().getOriginX());
+            gsonUtils.setOriginY(robotPosition.getMapInfo().getOriginY());
+            gsonUtils.setResolution(robotPosition.getMapInfo().getResolution());
+            if (server != null) {
+                server.broadcast(gsonUtils.putJsonMessage(Content.SENDGPSPOSITION));
+            }
+        } else if (messageEvent.getState() == 10024) {//请求地图点列表
+            TaskManager.getInstances(mContext).getPosition((String) messageEvent.getT());
+        } else if (messageEvent.getState() == 10025) {//开始扫描地图
+            TaskManager.getInstances(mContext).start_scan_map((String) messageEvent.getT());
+        } else if (messageEvent.getState() == 10026) {//选定地图
+            TaskManager.getInstances(mContext).use_map(Content.mapName);
+        } else if (messageEvent.getState() == 10027) {//转圈初始化结果
+            if (isDevelop) {
+                Log.d(TAG, "初始化" + (String) messageEvent.getT());
+                TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
+            }
+            if (server != null) {
+                server.broadcast((String) messageEvent.getT());
+            }
         }
     }
+
 
 }

@@ -15,6 +15,9 @@ import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.task.TaskManager;
+import com.example.robot.utils.EventBusMessage;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.concurrent.TimeUnit;
 
@@ -66,12 +69,14 @@ public class NavigationService extends Service {
                 RobotManagerController.getInstance().getRobotController().initialize(mapName, robotPositions.getData().get(0).getName() + "", new RobotStatus<Status>() {
                     @Override
                     public void success(Status status) {
-                        Log.d(TAG, "转圈地初始化成功");
+                        EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
+                        Log.d(TAG, "转圈地初始化成功" + status.getMsg());
                     }
 
                     @Override
                     public void error(Throwable error) {
                         Log.d(TAG, "转圈地初始化失败：" + error.getMessage());
+                        EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
                     }
                 });
 

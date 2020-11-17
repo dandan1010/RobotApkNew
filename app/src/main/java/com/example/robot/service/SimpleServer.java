@@ -21,8 +21,6 @@ import java.nio.ByteBuffer;
 public class SimpleServer extends WebSocketServer {
     private GsonUtils gsonUtils;
     private JSONObject jsonObject;
-    private String mapName = "";
-    private String taskName = "";
 
     public SimpleServer(InetSocketAddress address) {
         super(address);
@@ -30,7 +28,8 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        broadcast("OK"); //This method sends a message to all clients connected
+        conn.send("OK conn");
+        broadcast("OK," + Content.mapName + "," + Content.taskName); //This method sends a message to all clients connected
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
     }
 
@@ -129,26 +128,32 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10014, message));
                 break;
             case Content.GETTASKQUEUE://任务列表
-                jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(10015, mapName));
+                EventBus.getDefault().post(new EventBusMessage(10015, message));
                 break;
             case Content.GETMAPPIC://地图图片
-                jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(10019, mapName));
+                EventBus.getDefault().post(new EventBusMessage(10019, message));
                 break;
-            case Content.ADD_POSITION:
+            case Content.ADD_POSITION://添加点
                 EventBus.getDefault().post(new EventBusMessage(10021, message));
                 break;
-            case Content.STARTTASKQUEUE:
+            case Content.STARTTASKQUEUE://开始任务
                 jsonObject = new JSONObject(message);
-                EventBus.getDefault().post(new EventBusMessage(10022, jsonObject));
+                Content.taskName = jsonObject.getString(Content.TASK_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10022, message));
                 break;
-            case Content.STOPTASKQUEUE:
+            case Content.STOPTASKQUEUE://停止任务
+                EventBus.getDefault().post(new EventBusMessage(10023, message));
+                break;
+            case Content.GETPOINTPOSITION://地图点数据
+                EventBus.getDefault().post(new EventBusMessage(10024, message));
+                break;
+            case Content.START_SCAN_MAP://开始扫描地图
+                EventBus.getDefault().post(new EventBusMessage(10025, message));
+                break;
+            case Content.MAP_NAME://选定地图
                 jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(10023, jsonObject));
+                Content.mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10026, message));
                 break;
             default:
                 break;

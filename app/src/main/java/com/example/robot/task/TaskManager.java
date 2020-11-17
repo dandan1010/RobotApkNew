@@ -23,6 +23,7 @@ import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.bean.TaskBean;
+import com.example.robot.service.NavigationService;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.controller.RobotManagerController;
@@ -121,6 +122,7 @@ public class TaskManager {
                     mRobotPosition = robotPosition;
                     Log.d(TAG, "机器人位置 :  " + robotPosition.getGridPosition().getX() + ",  " + robotPosition.getGridPosition().getY());
                     EventBus.getDefault().post(new EventBusMessage(1003, robotPosition));
+                    EventBus.getDefault().post(new EventBusMessage(10024, robotPosition));
                 } else {
                     Log.d(TAG, "robotPosition == NULL");
                 }
@@ -168,48 +170,6 @@ public class TaskManager {
     }
 
     /**
-     * 获取设备信息
-     */
-    public void deviceStatus() {
-        Log.d(TAG, "设备信息： ：deviceStatus ");
-        GsController.INSTANCE.deviceStatus(new RobotStatus<RobotDeviceStatus>() {
-            @Override
-            public void success(RobotDeviceStatus robotDeviceStatus) {
-                Log.d(TAG, "设备信息： ： " + robotDeviceStatus.getData().toString());
-                //EventBus.getDefault().post(new EventBusMessage(1004, robotDeviceStatus));
-            }
-
-            @Override
-            public void error(Throwable error) {
-                Log.d(TAG, "设备信息获取失败 " + error.getMessage());
-            }
-        });
-    }
-
-    /**
-     * 获取充电点
-     */
-    public void charge_Position(String mapName) {
-        RobotManagerController.getInstance().getRobotController().charge_Position(mapName, new RobotStatus<String>() {
-            @Override
-            public void success(String s) {
-                Log.d(TAG, "地图charge_Position : " + mapName + ",   " + s);
-                navigate_Position(mapName, s);
-            }
-
-            @Override
-            public void error(Throwable error) {
-
-                if (error == null) {
-                    Log.d(TAG, "地图" + mapName + "充电异常 error = null");
-                    return;
-                }
-                Log.d(TAG, "地图" + mapName + "充电异常" + error.getMessage());
-            }
-        });
-    }
-
-    /**
      * 移动到导航点
      */
     public void navigate_Position(String mapName, String positionName) {
@@ -226,27 +186,6 @@ public class TaskManager {
             }
         });
 
-    }
-
-    public void scanMapThread(String newMapName) {
-        GsController.INSTANCE.startScanMap(newMapName, 0, new RobotStatus<Status>() {
-            @Override
-            public void success(Status status) {
-                Log.d(TAG, "开始扫描成功 :  " + status.getData());
-                scanMapPng();
-                scanningFlag = true;
-                if (myThread == null) {
-                    Log.d(TAG, "启动thread ");
-                    myThread = new MyThread(newMapName);
-                    myThread.start();
-                }
-            }
-
-            @Override
-            public void error(Throwable error) {
-                Log.d(TAG, "开始扫描成功失败 :  " + error.getMessage());
-            }
-        });
     }
 
     /**
@@ -272,7 +211,9 @@ public class TaskManager {
         });
 
     }
-
+    /**
+     * 扩展扫描地图
+     */
     public void start_develop_map(String map_name) {
         GsController.INSTANCE.startScanMap(map_name, 1, new RobotStatus<Status>() {
             @Override
@@ -316,7 +257,7 @@ public class TaskManager {
      * 取消扫描地图
      */
     public void cancelScanMap() {
-        GsController.INSTANCE.asyncStopScanMap(new RobotStatus<Status>() {
+        GsController.INSTANCE.stopScanMap(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "取消扫描成功 :  ");
@@ -572,6 +513,7 @@ public class TaskManager {
                 Log.d(TAG, "停止任务队列成功");
                 Content.taskState = 0;
                 Content.taskIndex = 0;
+                Content.taskName = null;
                 myHandler.removeCallbacks(runnable);
                 myHandler.removeCallbacks(runnable_is_finfish);
                 navigate_Position(mapName, "Origin");
@@ -752,6 +694,7 @@ public class TaskManager {
                     Content.robotState = 1;
                     Content.time = 4000;
                     Toast.makeText(mContext, "任务完成", Toast.LENGTH_SHORT).show();
+                    Content.taskName = null;
                     myHandler.removeCallbacks(runnable);
                     myHandler.removeCallbacks(runnable_is_finfish);
                 } else {

@@ -8,12 +8,34 @@
     android:id="@+id/main_relative"
     tools:context=".activity.RobotDetailActivity">
 
-    <ImageView
-        android:id="@+id/robot_map"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_launcher_background"
+            android:id="@+id/robot_map"
+            />
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:id="@+id/scanning_map_icon"
+            android:src="@drawable/ic_launcher_background"
+            />
+    </LinearLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerInParent="true" />
+        android:id="@+id/map_recycler"
+        android:layout_alignParentRight="true"/>
+
 <!--    <ImageView-->
 <!--        android:id="@+id/robot_position"-->
 <!--        android:layout_width="5dp"-->
@@ -119,14 +141,27 @@
                 android:layout_below="@id/residual_time"
                 android:layout_marginTop="10dp"
                 android:text="uvc灯控" />
+
             <Button
                 android:layout_below="@id/controller_btn"
+                android:id="@+id/scanning_map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="开始导航至充电点"
-                android:id="@+id/start_navigate"/>
+                android:text="扫描地图"/>
             <Button
-                android:layout_below="@id/start_navigate"
+                android:id="@+id/develop_map"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/scanning_map"
+                android:text="地图拓展"/>
+            <Button
+                android:id="@+id/cancel_scanning_map"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/develop_map"
+                android:text="保存地图"/>
+            <Button
+                android:layout_below="@id/cancel_scanning_map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="添加点"
