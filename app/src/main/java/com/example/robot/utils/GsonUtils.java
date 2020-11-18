@@ -143,11 +143,22 @@ public class GsonUtils {
         this.tvTime = tvTime;
     }
 
+    public String putTVTime(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.TV_TIME, tvTime);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
     public String putJsonMessage(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.SPINNERTIME, spinnerTime);
+            jsonObject.put(Content.TV_TIME, tvTime);
             jsonObject.put(Content.MAP_NAME, mapName);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
@@ -163,7 +174,6 @@ public class GsonUtils {
                 }
             }
             jsonObject.put(Content.SENDPOINTPOSITION, mRobotPositionsArray);
-            jsonObject.put(Content.SENDMAPICON, new String(bytes));
         } catch (JSONException e) {
             e.printStackTrace();
         }

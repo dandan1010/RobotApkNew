@@ -165,7 +165,9 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10030, message));
                 break;
             case Content.DELETE_MAP://删除地图
-                EventBus.getDefault().post(new EventBusMessage(10031, message));
+                jsonObject = new JSONObject(message);
+                String deleteMapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10031, deleteMapName));
                 break;
             case Content.DELETE_POSITION://删除点
                 jsonObject = new JSONObject(message);

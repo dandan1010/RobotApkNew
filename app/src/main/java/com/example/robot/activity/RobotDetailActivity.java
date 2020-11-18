@@ -42,6 +42,7 @@ import com.example.robot.adapter.TaskAdapter;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.receiver.AlarmReceiver;
 import com.example.robot.service.NavigationService;
+import com.example.robot.service.SimpleServer;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
@@ -53,7 +54,10 @@ import org.java_websocket.server.WebSocketServer;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -125,7 +129,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private boolean isTaskFlag = false;
     private long pauseTime = 0;
     private static byte[] bytes;
-    private WebSocketServer server;
     private GsonUtils gsonUtils;
     private String tvText;
     private TaskAdapter taskAdapter;
@@ -143,11 +146,22 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                String host = "10.7.5.166";
+                int port = 8887;
+                Content.server = new SimpleServer(new InetSocketAddress(host, port));
+                Content.server.run();
+            }
+        }.start();
+
         setContentView(R.layout.activity_robot);
         ButterKnife.bind(this);
         mContext = RobotDetailActivity.this;
         robot_Position = new ImageView(mContext);
-        server = new MyApplication().getServer();
         //选取地图之后，展示地图数据
         initView();
         initListener();
@@ -161,7 +175,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         mapRecycler.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
         mapManagerAdapter = new MapManagerAdapter(this, R.layout.item_recycler);
         mapManagerAdapter.setOnItemClickListener(this);
-
 
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
@@ -202,7 +215,15 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         handler3.removeCallbacks(runnable3);
         handler4.removeCallbacks(runnable4);
         myHandler.removeCallbacks(runnablePosition);
-
+        try {
+            if (Content.server != null) {
+                Content.server.stop();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initListener() {
@@ -243,8 +264,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     tvText = calculateDays(System.currentTimeMillis());
                     residualTime.setText(tvText);
                     gsonUtils.setTvTime(tvText);
-                    if (server != null) {
-                        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                    if (Content.server != null) {
+                        Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                     }
                 }
                 myHandler.sendEmptyMessageDelayed(1, 0);
@@ -256,7 +277,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
      * 初始化转圈圈点击事件
      */
     @OnClick({R.id.start_initialize, R.id.stop_initialize,
-            R.id.pause_task_queue, R.id.stop_navigate,R.id.delete_position,
+            R.id.pause_task_queue, R.id.stop_navigate, R.id.delete_position,
             R.id.save_task_queue, R.id.stop_task_queue, R.id.start_task_queue,
             R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position,
             R.id.alarm_btn, R.id.scanning_map, R.id.cancel_scanning_map, R.id.develop_map})
@@ -522,15 +543,15 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                         tvText = calculateDays(workTime);
                         residualTime.setText(tvText);
                         gsonUtils.setTvTime(tvText);
-                        if (server != null) {
-                            server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                        if (Content.server != null) {
+                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
 
                     } else {
                         residualTime.setText("消毒完成");
                         gsonUtils.setTvTime("消毒完成");
-                        if (server != null) {
-                            server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                        if (Content.server != null) {
+                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
                         toLightControlBtn.setChecked(false);
                         checkLztekLamp.stopUvc1Lamp();
@@ -554,8 +575,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     Log.d(TAG, "case 4  " + workTime);
                     residualTime.setText("电量回充,消毒未完成");
                     gsonUtils.setTvTime("电量回充,消毒未完成");
-                    if (server != null) {
-                        server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+                    if (Content.server != null) {
+                        Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                     }
                     checkLztekLamp.stopUvc1Lamp();
                     checkLztekLamp.stopUvc2Lamp();
@@ -588,8 +609,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         tvText = (10 - ledtime) + "秒";
         residualTime.setText(tvText);
         gsonUtils.setTvTime(tvText);
-        if (server != null) {
-            server.broadcast(gsonUtils.putJsonMessage(Content.TV_TIME));
+        if (Content.server != null) {
+            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
         }
         ledtime++;
         if (!toLightControlBtn.isChecked()) {
@@ -725,8 +746,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             Glide.with(mContext).load(bytes).into(robotMap);
 
             myHandler.postDelayed(runnablePosition, 1000);
-            if (server != null) {
-                server.broadcast(bytes);
+            if (Content.server != null) {
+                Content.server.broadcast(bytes);
             }
         } else if (messageEvent.getState() == 1003) {
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
@@ -749,8 +770,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             List<String> list = new ArrayList<>();
             list.add(String.valueOf(x));
             list.add(String.valueOf(y));
-            if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.GETPOSITION));
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.GETPOSITION));
             }
         } else if (messageEvent.getState() == 1004) {
             byte[] bytes = (byte[]) messageEvent.getT();
@@ -806,8 +827,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 stringList.add(data.get(i).getName());
             }
             gsonUtils.setData(stringList);
-            if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.SENDMAPNAME));
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDMAPNAME));
             }
         } else if (messageEvent.getState() == 10013) {//存储任务队列
             String messageEventT = (String) messageEvent.getT();
@@ -827,12 +848,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
         } else if (messageEvent.getState() == 10014) {//删除任务队列
-            String messageEventT = (String) messageEvent.getT();
             JSONObject jsonObject = null;
             try {
-                jsonObject = new JSONObject(messageEventT);
+                jsonObject = new JSONObject((String) messageEvent.getT());
                 String taskName = jsonObject.getString(Content.TASK_NAME);
                 TaskManager.getInstances(mContext).deleteTaskQueue(Content.mapName, taskName);
             } catch (JSONException e) {
@@ -847,22 +866,28 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 list.add(robotTaskQueueList.getData().get(i).getName());
             }
             gsonUtils.setData(list);
-            if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.SENDTASKQUEUE));
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDTASKQUEUE));
             }
         } else if (messageEvent.getState() == 10017) {//返回地图点数据
             RobotPositions robotPositions = (RobotPositions) messageEvent.getT();
             gsonUtils.setmRobotPositions(robotPositions);
-            if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
             }
         } else if (messageEvent.getState() == 10019) {//请求地图图片
-            TaskManager.getInstances(mContext).getMapPic((String) messageEvent.getT());
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject((String) messageEvent.getT());
+                String mapName = jsonObject.getString(Content.MAP_NAME);
+                TaskManager.getInstances(mContext).getMapPic(mapName);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (messageEvent.getState() == 10020) {//返回地图图片
             byte[] bytes = (byte[]) messageEvent.getT();
-            gsonUtils.setBytes(bytes);
-            if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.SENDMAPICON));
+            if (Content.server != null) {
+                Content.server.broadcast(bytes);
             }
         } else if (messageEvent.getState() == 10021) {//添加点
             String s = (String) messageEvent.getT();
@@ -882,7 +907,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         } else if (messageEvent.getState() == 10022) {//开始任务
             TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
         } else if (messageEvent.getState() == 10023) {//停止任务
-            TaskManager.getInstances(mContext).stopTaskQueue((String) messageEvent.getT());
+            TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
             toLightControlBtn.setChecked(false);
         } else if (messageEvent.getState() == 10024) {//返回机器人位置
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
@@ -893,8 +918,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             gsonUtils.setOriginX(robotPosition.getMapInfo().getOriginX());
             gsonUtils.setOriginY(robotPosition.getMapInfo().getOriginY());
             gsonUtils.setResolution(robotPosition.getMapInfo().getResolution());
-            if (server != null) {
-                server.broadcast(gsonUtils.putJsonMessage(Content.SENDGPSPOSITION));
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDGPSPOSITION));
             }
         } else if (messageEvent.getState() == 10025) {//开始扫描地图
             TaskManager.getInstances(mContext).start_scan_map((String) messageEvent.getT());
@@ -905,11 +930,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 Log.d(TAG, "初始化" + (String) messageEvent.getT());
                 TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
             }
-            if (server != null) {
-                server.broadcast((String) messageEvent.getT());
+            if (Content.server != null) {
+                Content.server.broadcast((String) messageEvent.getT());
             }
         } else if (messageEvent.getState() == 10028) {//请求地图点列表
-            TaskManager.getInstances(mContext).getPosition((String) messageEvent.getT());
+            TaskManager.getInstances(mContext).getPosition(Content.mapName);
         } else if (messageEvent.getState() == 10029) {//取消扫描地图并保存
             isDevelop = false;
             TaskManager.getInstances(mContext).cancelScanMap();
@@ -917,7 +942,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             isDevelop = true;
             NavigationService.initialize(Content.mapName);
         } else if (messageEvent.getState() == 10031) {//删除地图
-            TaskManager.getInstances(mContext).deleteMap(Content.mapName);
+            TaskManager.getInstances(mContext).deleteMap((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10032) {//删除点
             TaskManager.getInstances(mContext).deletePosition(Content.mapName, (String) messageEvent.getT());
         }

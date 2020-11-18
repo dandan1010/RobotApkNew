@@ -76,9 +76,9 @@ public class TaskManager {
     /**
      * 通过地图名字获取地图图片
      */
-    public void getMapPic(String mapMame) {
-        Log.d(TAG, "获取地图" + mapMame);
-        if (TextUtils.isEmpty(mapMame)) {
+    public void getMapPic(String mapName) {
+        Log.d(TAG, "获取地图" + mapName);
+        if (TextUtils.isEmpty(mapName)) {
             Log.d(TAG, "地图名字不能为空");
             return;
         }
@@ -91,7 +91,7 @@ public class TaskManager {
             Log.d(TAG, "getRobotController() 不能为空");
             return;
         }
-        RobotManagerController.getInstance().getRobotController().getMapPicture(mapMame, new RobotStatus<byte[]>() {
+        RobotManagerController.getInstance().getRobotController().getMapPicture(mapName, new RobotStatus<byte[]>() {
             @Override
             public void success(byte[] bytes) {
                 Log.d(TAG, "获取地图图片成功" + bytes.length);
@@ -244,6 +244,7 @@ public class TaskManager {
             public void success(byte[] bytes) {
                 Log.d(TAG, "获取实时扫地图图片png :  " + bytes.length);
                 EventBus.getDefault().post(new EventBusMessage(1005, bytes));
+                EventBus.getDefault().post(new EventBusMessage(10020, bytes));
             }
 
             @Override

@@ -15,24 +15,12 @@ import java.net.InetSocketAddress;
 
 public class MyApplication extends Application {
 
-    private WebSocketServer server = null;
     private NavigationService navigationService;
     private Intent intentService;
 
     @Override
     public void onCreate() {
         super.onCreate();
-
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                String host = "10.7.5.166";
-                int port = 8887;
-                server = new SimpleServer(new InetSocketAddress(host, port));
-                server.run();
-            }
-        }.start();
 
         CheckLztekLamp checkLztekLamp = new CheckLztekLamp(this);
         Content.robotState = 1;
@@ -45,7 +33,4 @@ public class MyApplication extends Application {
         startService(intentService);
     }
 
-    public WebSocketServer getServer(){
-        return server;
-    }
 }

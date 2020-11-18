@@ -1,6 +1,10 @@
 package com.example.robot.utils;
 
+import org.java_websocket.server.WebSocketServer;
+
 public final class Content {
+
+    public static WebSocketServer server = null;
 
     /**
      * robotState：
