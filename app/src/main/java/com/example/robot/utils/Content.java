@@ -18,12 +18,12 @@ public final class Content {
      * 0：任务结束
      * 1：执行任务，恢复任务
      * 2: 暂停任务
-     * 3:没电暂停
+     * 3: 没电暂停
     */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = 0;
-    public static String mapName = null;
-    public static String taskName = null;
+    public static String mapName = "test1";
+    public static String taskName = "task0";
 
     public static final String MAP_NAME = "map_Name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字
@@ -72,5 +72,10 @@ public final class Content {
     public static final String TASK_DISINFECT_TIME = "disinfect_Time";//执行任务的点的时间
     public static final String TASK_ANGLE = "angle";//机器人角度
     public static final String POINT_NAME = "point_Name";//点的名字
+    public static final String POINT_X = "point_x";//点x坐标
+    public static final String POINT_Y = "point_y";//点y坐标
+    public static final String POINT_TYPE = "point_type";//点类型
+
+
 
 }

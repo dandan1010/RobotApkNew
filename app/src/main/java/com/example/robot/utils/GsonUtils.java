@@ -2,6 +2,7 @@ package com.example.robot.utils;
 
 import android.util.Log;
 
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.example.robot.bean.TaskBean;
 
 import org.json.JSONArray;
@@ -23,7 +24,6 @@ public class GsonUtils {
     private String taskName = null;
     private List<String> data;
     private byte[] bytes;
-    private List<TaskBean> mTaskList;
     private int time;
     private float x;
     private float y;
@@ -32,6 +32,16 @@ public class GsonUtils {
     private float originX;
     private float originY;
     private float resolution;
+    private RobotPositions mRobotPositions = null;
+
+
+    public RobotPositions getmRobotPositions() {
+        return mRobotPositions;
+    }
+
+    public void setmRobotPositions(RobotPositions mRobotPositions) {
+        this.mRobotPositions = mRobotPositions;
+    }
 
     public float getX() {
         return x;
@@ -141,6 +151,18 @@ public class GsonUtils {
             jsonObject.put(Content.MAP_NAME, mapName);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
+            JSONArray mRobotPositionsArray = new JSONArray();
+            if (mRobotPositions != null) {
+                for (int i = 0; i < mRobotPositions.getData().size(); i++) {
+                    JSONObject object = new JSONObject();
+                    object.put(Content.POINT_NAME, mRobotPositions.getData().get(i).getName());
+                    object.put(Content.POINT_X, mRobotPositions.getData().get(i).getGridX());
+                    object.put(Content.POINT_Y, mRobotPositions.getData().get(i).getGridY());
+                    object.put(Content.POINT_TYPE, mRobotPositions.getData().get(i).getType());
+                    mRobotPositionsArray.put(i, object);
+                }
+            }
+            jsonObject.put(Content.SENDPOINTPOSITION, mRobotPositionsArray);
             jsonObject.put(Content.SENDMAPICON, new String(bytes));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -162,14 +184,6 @@ public class GsonUtils {
             e.printStackTrace();
         }
         return type;
-    }
-
-    public List<TaskBean> getmTaskList() {
-        return mTaskList;
-    }
-
-    public void setmTaskList(List<TaskBean> mTaskList) {
-        this.mTaskList = mTaskList;
     }
 
     public String putJsonPositionMessage(String taskName, ArrayList<TaskBean> arrayList) {

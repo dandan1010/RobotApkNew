@@ -9,6 +9,7 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.dcm360.controller.gs.GSRobotController;
 import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.robot_interface.bean.Status;
@@ -54,6 +55,21 @@ public class NavigationService extends Service {
         super.onDestroy();
         if (disposables != null && !disposables.isDisposed())
             disposables.dispose();
+    }
+
+    public static void initialize_directly(String mapName) {//不转圈初始化
+        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, "Origin", new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "不转圈初始化成功" + status.getMsg());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "不转圈初始化成功" + error.getMessage());
+            }
+        });
+
     }
 
     public static void initialize(String mapName) {//转圈初始化

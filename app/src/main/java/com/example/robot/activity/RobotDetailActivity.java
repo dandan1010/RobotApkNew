@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
@@ -574,6 +575,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                         Content.taskState = 3;
                         TaskManager.getInstances(mContext).pauseTaskQueue();
                     }
+                    TaskManager.getInstances(mContext).navigate_Position(Content.mapName, "Origin");
                     break;
                 case 5:
                     break;
@@ -856,8 +858,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 server.broadcast(gsonUtils.putJsonMessage(Content.SENDTASKQUEUE));
             }
         } else if (messageEvent.getState() == 10017) {//返回地图点数据
-            List<String> list = (List<String>) messageEvent.getT();
-            gsonUtils.setData(list);
+            RobotPositions robotPositions = (RobotPositions) messageEvent.getT();
+            gsonUtils.setmRobotPositions(robotPositions);
             if (server != null) {
                 server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
             }
@@ -884,8 +886,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-
-
         } else if (messageEvent.getState() == 10022) {//开始任务
             TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
         } else if (messageEvent.getState() == 10023) {//停止任务
@@ -903,8 +903,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             if (server != null) {
                 server.broadcast(gsonUtils.putJsonMessage(Content.SENDGPSPOSITION));
             }
-        } else if (messageEvent.getState() == 10024) {//请求地图点列表
-            TaskManager.getInstances(mContext).getPosition((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10025) {//开始扫描地图
             TaskManager.getInstances(mContext).start_scan_map((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10026) {//选定地图
@@ -917,6 +915,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             if (server != null) {
                 server.broadcast((String) messageEvent.getT());
             }
+        } else if (messageEvent.getState() == 10028) {//请求地图点列表
+            TaskManager.getInstances(mContext).getPosition((String) messageEvent.getT());
         }
     }
 

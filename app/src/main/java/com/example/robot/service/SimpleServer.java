@@ -40,8 +40,9 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from " + conn.getRemoteSocketAddress() + ": " + message);
+        System.out.println("received message from " + conn.getRemoteSocketAddress() );
         //EventBus.getDefault().post(new EventBusMessage(10001, message));
+        Log.d("zdzd : " , "收到信息 ： " + message);
         try {
             differentiateType(message);
         } catch (JSONException e) {
@@ -144,9 +145,6 @@ public class SimpleServer extends WebSocketServer {
             case Content.STOPTASKQUEUE://停止任务
                 EventBus.getDefault().post(new EventBusMessage(10023, message));
                 break;
-            case Content.GETPOINTPOSITION://地图点数据
-                EventBus.getDefault().post(new EventBusMessage(10024, message));
-                break;
             case Content.START_SCAN_MAP://开始扫描地图
                 EventBus.getDefault().post(new EventBusMessage(10025, message));
                 break;
@@ -155,6 +153,10 @@ public class SimpleServer extends WebSocketServer {
                 Content.mapName = jsonObject.getString(Content.MAP_NAME);
                 EventBus.getDefault().post(new EventBusMessage(10026, message));
                 break;
+            case Content.GETPOINTPOSITION://地图点数据
+                EventBus.getDefault().post(new EventBusMessage(10028, message));
+                break;
+
             default:
                 break;
         }

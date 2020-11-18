@@ -628,12 +628,8 @@ public class TaskManager {
             @Override
             public void success(RobotPositions robotPositions) {
                 Log.d(TAG, "getPosition success : " + robotPositions.getData().size());
-                List<String> list = new ArrayList<>();
-                for (int i = 0; i < robotPositions.getData().size(); i++) {
-                    list.add(robotPositions.getData().get(i).getName());
-                }
                 mRobotPositions = robotPositions;
-                EventBus.getDefault().post(new EventBusMessage(10017, list));
+                EventBus.getDefault().post(new EventBusMessage(10017, robotPositions));
             }
 
             @Override
