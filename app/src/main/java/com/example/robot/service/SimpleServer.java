@@ -146,7 +146,9 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10023, message));
                 break;
             case Content.START_SCAN_MAP://开始扫描地图
-                EventBus.getDefault().post(new EventBusMessage(10025, message));
+                jsonObject = new JSONObject(message);
+                String mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10025, mapName));
                 break;
             case Content.MAP_NAME://选定地图
                 jsonObject = new JSONObject(message);
@@ -156,7 +158,19 @@ public class SimpleServer extends WebSocketServer {
             case Content.GETPOINTPOSITION://地图点数据
                 EventBus.getDefault().post(new EventBusMessage(10028, message));
                 break;
-
+            case Content.CANCEL_SCAN_MAP://取消扫描并且保存地图
+                EventBus.getDefault().post(new EventBusMessage(10029, message));
+                break;
+            case Content.DEVELOP_MAP://拓展地图
+                EventBus.getDefault().post(new EventBusMessage(10030, message));
+                break;
+            case Content.DELETE_MAP://删除地图
+                EventBus.getDefault().post(new EventBusMessage(10031, message));
+                break;
+            case Content.DELETE_POSITION://删除点
+                jsonObject = new JSONObject(message);
+                EventBus.getDefault().post(new EventBusMessage(10032, jsonObject.getString(Content.POINT_NAME)));
+                break;
             default:
                 break;
         }

@@ -52,6 +52,7 @@ public final class Content {
     public static final String GETPOINTPOSITION = "getPointPosition";//请求点数据
     public static final String SENDPOINTPOSITION = "sendPointPosition";//返回点数据
     public static final String ADD_POSITION = "add_position";//添加点
+    public static final String DELETE_POSITION = "delete_position";//删除点
     public static final String SPINNERTIME = "spinnerTime";//请求的时间
     public static final String TV_TIME = "tv_time";//返回时间
     public static final String SAVETASKQUEUE = "saveTaskQueue";//存储任务
@@ -62,6 +63,7 @@ public final class Content {
     public static final String START_SCAN_MAP = "start_scan_map";//开始扫描地图
     public static final String CANCEL_SCAN_MAP = "cancel_scan_map";//取消扫描地图并且保存
     public static final String DEVELOP_MAP = "develop_map";//扩展扫描地图
+    public static final String DELETE_MAP = "delete_map";//删除地图
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 
@@ -75,7 +77,5 @@ public final class Content {
     public static final String POINT_X = "point_x";//点x坐标
     public static final String POINT_Y = "point_y";//点y坐标
     public static final String POINT_TYPE = "point_type";//点类型
-
-
 
 }

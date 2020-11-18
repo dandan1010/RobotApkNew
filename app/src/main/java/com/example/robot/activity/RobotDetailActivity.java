@@ -95,18 +95,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     RelativeLayout mainRelative;
     @BindView(R.id.robot_task_list)
     RecyclerView robotTaskList;
-    @BindView(R.id.robot_state)
-    TextView robotState;
     @BindView(R.id.robot_power)
     TextView robotPower;
-    @BindView(R.id.robot_low_power)
-    TextView robotLowPower;
-    @BindView(R.id.robot_video)
-    TextView robotVideo;
-    @BindView(R.id.robot_auto_task)
-    TextView robotAutoTask;
-    @BindView(R.id.robot_disinfection_num)
-    TextView robotDisinfectionNum;
     @BindView(R.id.robot_disinfection_time)
     TextView robotDisinfectionTime;
     @BindView(R.id.robot_task_title)
@@ -266,7 +256,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
      * 初始化转圈圈点击事件
      */
     @OnClick({R.id.start_initialize, R.id.stop_initialize,
-            R.id.pause_task_queue, R.id.stop_navigate,
+            R.id.pause_task_queue, R.id.stop_navigate,R.id.delete_position,
             R.id.save_task_queue, R.id.stop_task_queue, R.id.start_task_queue,
             R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position,
             R.id.alarm_btn, R.id.scanning_map, R.id.cancel_scanning_map, R.id.develop_map})
@@ -367,6 +357,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 positionListBean.setType(2);
                 positionListBean.setMapName(Content.mapName);
                 TaskManager.getInstances(mContext).add_Position(positionListBean);
+                break;
+            case R.id.delete_position:
+                TaskManager.getInstances(mContext).deletePosition(Content.mapName, "bbb");
                 break;
             case R.id.alarm_btn:
                 setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000);
@@ -917,6 +910,16 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             }
         } else if (messageEvent.getState() == 10028) {//请求地图点列表
             TaskManager.getInstances(mContext).getPosition((String) messageEvent.getT());
+        } else if (messageEvent.getState() == 10029) {//取消扫描地图并保存
+            isDevelop = false;
+            TaskManager.getInstances(mContext).cancelScanMap();
+        } else if (messageEvent.getState() == 10030) {//拓展地图
+            isDevelop = true;
+            NavigationService.initialize(Content.mapName);
+        } else if (messageEvent.getState() == 10031) {//删除地图
+            TaskManager.getInstances(mContext).deleteMap(Content.mapName);
+        } else if (messageEvent.getState() == 10032) {//删除点
+            TaskManager.getInstances(mContext).deletePosition(Content.mapName, (String) messageEvent.getT());
         }
     }
 
