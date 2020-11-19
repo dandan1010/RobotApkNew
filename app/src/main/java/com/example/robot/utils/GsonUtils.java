@@ -18,6 +18,7 @@ public class GsonUtils {
     private static final String TYPE = "type";
     private JSONObject jsonObject;
 
+    private String callback = null;
     private String spinnerTime = null;
     private String tvTime = null;
     private String mapName = null;
@@ -33,7 +34,23 @@ public class GsonUtils {
     private float originY;
     private float resolution;
     private RobotPositions mRobotPositions = null;
+    private String battery = null;
 
+    public String getCallback() {
+        return callback;
+    }
+
+    public void setCallback(String callback) {
+        this.callback = callback;
+    }
+
+    public String getBattery() {
+        return battery;
+    }
+
+    public void setBattery(String battery) {
+        this.battery = battery;
+    }
 
     public RobotPositions getmRobotPositions() {
         return mRobotPositions;
@@ -143,11 +160,51 @@ public class GsonUtils {
         this.tvTime = tvTime;
     }
 
+
+    public String putCallBackMsg(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.REQUEST_MSG, callback);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
+    public String putBattery(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.BATTERY_DATA, battery);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
     public String putTVTime(String type){
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.TV_TIME, tvTime);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
+    public String putRobotPosition(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.ROBOT_X, x);
+            jsonObject.put(Content.ROBOT_Y, y);
+            jsonObject.put(Content.GRID_HEIGHT, gridHeight);
+            jsonObject.put(Content.GRID_WIDTH, gridWidth);
+            jsonObject.put(Content.ORIGIN_X, originX);
+            jsonObject.put(Content.ORIGIN_Y, originY);
+            jsonObject.put(Content.RESOLUTION, resolution);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -195,7 +252,7 @@ public class GsonUtils {
         }
         return type;
     }
-
+//存储任务
     public String putJsonPositionMessage(String taskName, ArrayList<TaskBean> arrayList) {
         jsonObject = new JSONObject();
         JSONArray jsonArray = new JSONArray();

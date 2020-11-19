@@ -31,6 +31,8 @@ import com.dcm360.controller.gs.controller.bean.system_bean.RobotRotate;
 import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.robot_interface.bean.Status;
 
+import java.util.List;
+
 import io.reactivex.Observable;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
@@ -235,6 +237,13 @@ public interface GsControllerService {
      */
     @GET("/gs-robot/real_time_data/scan_map_png")
     Call<ResponseBody> scanMapPng();
+
+
+    @GET("/gs-robot/real_time_data/scan_candidate_init_data")
+    Observable<List<PositionListBean>> getInitPositions();
+
+    @GET("/gs-robot/real_time_data/scan_candidate_position_data")
+    Observable<List<PositionListBean>> getPositions();
 
     /**
      * 获取地图图片png

@@ -15,9 +15,6 @@ import java.net.InetSocketAddress;
 
 public class MyApplication extends Application {
 
-    private NavigationService navigationService;
-    private Intent intentService;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -28,9 +25,7 @@ public class MyApplication extends Application {
         checkLztekLamp.startCheckSensorAtTime();
         checkLztekLamp.startLedLamp();
         Utilities.exec("tcpip 5555");
-        navigationService = new NavigationService();
-        intentService = new Intent(this, NavigationService.class);
-        startService(intentService);
+
     }
 
 }

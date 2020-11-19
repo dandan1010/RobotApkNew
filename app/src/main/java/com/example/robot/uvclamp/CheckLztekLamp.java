@@ -293,7 +293,7 @@ public class CheckLztekLamp {
                         outputStream.write(battery);
                         index++;
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(5000);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
@@ -343,6 +343,7 @@ public class CheckLztekLamp {
                             }
                             Log.d(TAG, "读取数据 ： " + editText.getText().toString());
                             EventBus.getDefault().post(new EventBusMessage(1004, data));
+                            EventBus.getDefault().post(new EventBusMessage(10033, data));
                             batteryThread = false;
                             batteryPortThread = null;
                         }

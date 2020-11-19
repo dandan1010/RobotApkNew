@@ -16,6 +16,7 @@ import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.task.TaskManager;
+import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 
 import org.greenrobot.eventbus.EventBus;
@@ -73,34 +74,33 @@ public class NavigationService extends Service {
     }
 
     public static void initialize(String mapName) {//转圈初始化
-        GsController.INSTANCE.getPosition(mapName, 0, new RobotStatus<RobotPositions>() {
-            @RequiresApi(api = Build.VERSION_CODES.N)
+
+        RobotManagerController.getInstance().getRobotController().initialize(mapName, "Origin", new RobotStatus<Status>() {
             @Override
-            public void success(RobotPositions robotPositions) {
-                Log.d(TAG, "转圈地初始化222 == " + robotPositions.getData().size());
-                for (int i = 0; i < robotPositions.getData().size(); i++) {
-                    Log.d(TAG, "转圈地图名称222： " + robotPositions.getData().get(i).getName() + ",   mapname:" +robotPositions.getData().get(i).getMapName());
-                }
-
-                RobotManagerController.getInstance().getRobotController().initialize(mapName, robotPositions.getData().get(0).getName() + "", new RobotStatus<Status>() {
-                    @Override
-                    public void success(Status status) {
-                        EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
-                        Log.d(TAG, "转圈地初始化成功" + status.getMsg());
-                    }
-
-                    @Override
-                    public void error(Throwable error) {
-                        Log.d(TAG, "转圈地初始化失败：" + error.getMessage());
-                        EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
-                    }
-                });
-
+            public void success(Status status) {
+                EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
+                Log.d(TAG, "转圈地初始化成功" + status.getMsg());
             }
 
             @Override
             public void error(Throwable error) {
-                Log.d(TAG, "转圈地初始化失败222 == " + error.getMessage());
+                Log.d(TAG, "转圈地初始化失败：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
+            }
+        });
+    }
+
+    public static void is_initialize_finished() {
+        RobotManagerController.getInstance().getRobotController().is_initialize_finished(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d("zdzd :", "初始化：" + status.toString());
+                EventBus.getDefault().post(new EventBusMessage(10034, status.getData()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                EventBus.getDefault().post(new EventBusMessage(10035, error.getMessage()));
             }
         });
     }
@@ -110,11 +110,13 @@ public class NavigationService extends Service {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "停止初始化");
+                EventBus.getDefault().post(new EventBusMessage(10000, "停止初始化 :  " + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "停止初始化失败：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(10000, "停止初始化失败 :  " + error.getMessage()));
             }
         });
     }

@@ -66,8 +66,12 @@ public final class Content {
 
     public static final String START_SCAN_MAP = "start_scan_map";//开始扫描地图
     public static final String CANCEL_SCAN_MAP = "cancel_scan_map";//取消扫描地图并且保存
+    public static final String CANCEL_SCAN_MAP_NO = "cancel_scan_map_no";//取消扫描不保存
     public static final String DEVELOP_MAP = "develop_map";//扩展扫描地图
     public static final String DELETE_MAP = "delete_map";//删除地图
+    public static final String USE_MAP = "use_map";//选定地图
+
+    public static final String BATTERY_DATA = "battery_data";//电池电量
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 
@@ -81,5 +85,16 @@ public final class Content {
     public static final String POINT_X = "point_x";//点x坐标
     public static final String POINT_Y = "point_y";//点y坐标
     public static final String POINT_TYPE = "point_type";//点类型
+
+    public static final String REQUEST_MSG = "request_msg";//请求返回结果
+
+    public static final String ROBOT_X = "robot_x";//x坐标
+    public static final String ROBOT_Y = "robot_y";//y坐标
+    public static final String GRID_HEIGHT = "grid_height";//地图高
+    public static final String GRID_WIDTH = "grid_width";//地图宽
+    public static final String ORIGIN_X = "origin_x";//原点x
+    public static final String ORIGIN_Y = "origin_y";//原点Y
+    public static final String RESOLUTION = "resolution";
+
 
 }

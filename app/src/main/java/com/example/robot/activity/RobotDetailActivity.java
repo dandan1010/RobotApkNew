@@ -142,6 +142,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private MapManagerAdapter mapManagerAdapter;
     private List<RobotMap.DataBean> data;
     private boolean isDevelop = false;
+    private NavigationService navigationService;
+    private Intent intentService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,6 +159,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 Content.server.run();
             }
         }.start();
+
+        navigationService = new NavigationService();
+        intentService = new Intent(this, NavigationService.class);
+        startService(intentService);
 
         setContentView(R.layout.activity_robot);
         ButterKnife.bind(this);
@@ -224,6 +230,17 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        if (intentService != null) {
+            stopService(intentService);
+        }
+
+        checkLztekLamp.stopUvc1Lamp();
+        checkLztekLamp.stopUvc2Lamp();
+        checkLztekLamp.stopUvc3Lamp();
+        checkLztekLamp.stopLedLamp();
+
+
     }
 
     private void initListener() {
@@ -323,7 +340,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
             case R.id.cancel_scanning_map:
                 isDevelop = false;
-                TaskManager.getInstances(mContext).cancelScanMap();
+                TaskManager.getInstances(mContext).stopScanMap();
                 break;
             case R.id.develop_map:
                 isDevelop = true;
@@ -389,6 +406,15 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
         }
     }
+
+    //初始化结果
+    Handler handlerInitialize = new Handler();
+    Runnable runnableInitialize = new Runnable() {
+        @Override
+        public synchronized void run() {
+            NavigationService.is_initialize_finished();
+        }
+    };
 
     //持续移动 下
     Handler handler1 = new Handler();
@@ -796,6 +822,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
 
 //phone 发送的命令
+        } else if (messageEvent.getState() == 10000) {//callback信息的返回
+            if (Content.server != null) {
+                gsonUtils.setCallback((String) messageEvent.getT());
+                Content.server.broadcast(gsonUtils.putCallBackMsg(Content.REQUEST_MSG));
+            }
         } else if (messageEvent.getState() == 10001) {//后退
             handler1.postDelayed(runnable1, 10);
         } else if (messageEvent.getState() == 10002) {//前进
@@ -876,14 +907,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
             }
         } else if (messageEvent.getState() == 10019) {//请求地图图片
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = new JSONObject((String) messageEvent.getT());
-                String mapName = jsonObject.getString(Content.MAP_NAME);
-                TaskManager.getInstances(mContext).getMapPic(mapName);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            TaskManager.getInstances(mContext).getMapPic(Content.mapName);
         } else if (messageEvent.getState() == 10020) {//返回地图图片
             byte[] bytes = (byte[]) messageEvent.getT();
             if (Content.server != null) {
@@ -919,16 +943,16 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             gsonUtils.setOriginY(robotPosition.getMapInfo().getOriginY());
             gsonUtils.setResolution(robotPosition.getMapInfo().getResolution());
             if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDGPSPOSITION));
+                Content.server.broadcast(gsonUtils.putRobotPosition(Content.SENDGPSPOSITION));
             }
         } else if (messageEvent.getState() == 10025) {//开始扫描地图
             TaskManager.getInstances(mContext).start_scan_map((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10026) {//选定地图
             TaskManager.getInstances(mContext).use_map(Content.mapName);
         } else if (messageEvent.getState() == 10027) {//转圈初始化结果
-            if (isDevelop) {
-                Log.d(TAG, "初始化" + (String) messageEvent.getT());
-                TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
+            Log.d("zdzd ", "初始化结果： " + (String) messageEvent.getT() + ",     isDevelop :" + isDevelop);
+            if ("successed".equals((String) messageEvent.getT()) && isDevelop) {
+                handlerInitialize.postDelayed(runnableInitialize, 1000);
             }
             if (Content.server != null) {
                 Content.server.broadcast((String) messageEvent.getT());
@@ -936,8 +960,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         } else if (messageEvent.getState() == 10028) {//请求地图点列表
             TaskManager.getInstances(mContext).getPosition(Content.mapName);
         } else if (messageEvent.getState() == 10029) {//取消扫描地图并保存
+            TaskManager.getInstances(mContext).stopScanMap();
             isDevelop = false;
-            TaskManager.getInstances(mContext).cancelScanMap();
         } else if (messageEvent.getState() == 10030) {//拓展地图
             isDevelop = true;
             NavigationService.initialize(Content.mapName);
@@ -945,6 +969,27 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             TaskManager.getInstances(mContext).deleteMap((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10032) {//删除点
             TaskManager.getInstances(mContext).deletePosition(Content.mapName, (String) messageEvent.getT());
+        } else if (messageEvent.getState() == 10033) {//电池电量
+            byte[] bytes = (byte[]) messageEvent.getT();
+            battery = bytes[23];
+            robotPower.setText("电池容量：" + battery + "%");
+            if (Content.server != null) {
+                gsonUtils.setBattery(battery + "%");
+                Content.server.broadcast(gsonUtils.putBattery(Content.BATTERY_DATA));
+            }
+        } else if (messageEvent.getState() == 10034) {
+            Log.d("zdzd :", "是否完成初始化" + (String) messageEvent.getT());
+            if ("true".equals((String) messageEvent.getT())) {
+                handlerInitialize.removeCallbacks(runnableInitialize);
+                TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
+            } else {
+                handler1.postDelayed(runnableInitialize, 1000);
+            }
+        } else if (messageEvent.getState() == 10035) {
+            Log.d("zdzd :", "是否完成初始化error: " + (String) messageEvent.getT());
+            handlerInitialize.removeCallbacks(runnableInitialize);
+        } else if (messageEvent.getState() == 10036) {//取消扫描不保存地图
+            TaskManager.getInstances(mContext).cancleScanMap();
         }
     }
 
