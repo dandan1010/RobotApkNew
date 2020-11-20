@@ -1,8 +1,12 @@
 package com.example.robot.uvclamp;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.EditText;
+
+import androidx.annotation.NonNull;
 
 import com.example.robot.R;
 import com.example.robot.utils.EventBusMessage;
@@ -31,10 +35,9 @@ public class CheckLztekLamp {
      * 228:
      * 229:uvc灯
      * 230:led灯
-     * */
+     */
     private int[] port = new int[]{218, 248, 249, 250, 251, 228, 229, 230};
     private MoreSerialPortThread moreSerialPortThread;
-    private BatteryPortThread batteryPortThread;
     public boolean threadFlag = false;
     private boolean batteryThread = false;
 
@@ -50,7 +53,7 @@ public class CheckLztekLamp {
         }
     }
 
-    public void setUvcMode(){
+    public void setUvcMode() {
         for (int i = 4; i < 7; i++) {
             mLztek.setGpioOutputMode(port[i]);
         }
@@ -64,18 +67,40 @@ public class CheckLztekLamp {
 
     public boolean getGpioSensorState() {
 
-//        boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
-//        boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
-//        boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
-//        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
-//
-//        if (k1 && k2 && k3 && k4) {
-//            return true;
-//        } else {
-//            return false;
-//        }
+        boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
+        boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
+        boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
+        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
 
-        return false;
+        if (k1 && k2 && k3 && k4) {
+            return true;
+        } else {
+            return false;
+        }
+
+    }
+
+    public String testGpioSensorState() {
+
+        String sensorString = "没人靠近";
+        boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
+        boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
+        boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
+        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
+        if (k1) {
+            sensorString = "前边有人靠近";
+        }
+        if (k2) {
+            sensorString = "左边有人靠近";
+        }
+        if (k3) {
+            sensorString = "后边有人靠近";
+        }
+        if (k4) {
+            sensorString = "右边有人靠近";
+        }
+        return sensorString;
+
     }
 
     public void startCheckSensorAtTime() {
@@ -104,11 +129,6 @@ public class CheckLztekLamp {
         mLztek.setGpioValue(port[5], 1);
     }
 
-    public boolean getUvc1Lamp() {
-        int gpioValue = mLztek.getGpioValue(port[5]);
-        return gpioValue == 1 ? true : false;
-    }
-
     public void startUvc2Lamp() {
         mLztek.setGpioValue(port[6], 0);
     }
@@ -127,7 +147,7 @@ public class CheckLztekLamp {
 
     /**
      * 请求led灯光
-     * */
+     */
     private void openSerialPort() {//控制Led灯
         serialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
         if (serialPort == null) {
@@ -142,9 +162,10 @@ public class CheckLztekLamp {
         }
         moreSerialPortThread.start();
     }
+
     /**
      * led线程
-     * */
+     */
     class MoreSerialPortThread extends Thread {
         int index = 0;
         String[] lightArray;
@@ -153,7 +174,7 @@ public class CheckLztekLamp {
         @Override
         public void run() {
             super.run();
-            Log.d("zdzd : " , "thread = " + threadFlag);
+            Log.d("zdzd : ", "thread = " + threadFlag);
             while (threadFlag) {
                 outputStream = serialPort.getOutputStream();
                 try {
@@ -169,7 +190,8 @@ public class CheckLztekLamp {
                         case 3:
                             lightArray = mContext.getResources().getStringArray(R.array.move_light);
                             break;
-                        case 4:lightArray = mContext.getResources().getStringArray(R.array.charge_light);
+                        case 4:
+                            lightArray = mContext.getResources().getStringArray(R.array.charge_light);
                             break;
                         case 5:
                             lightArray = mContext.getResources().getStringArray(R.array.warning_light);
@@ -177,7 +199,8 @@ public class CheckLztekLamp {
                         case 6:
                             lightArray = mContext.getResources().getStringArray(R.array.low_power_light);
                             break;
-                        default:break;
+                        default:
+                            break;
                     }
                     if (index < lightArray.length - 1) {
 
@@ -187,7 +210,7 @@ public class CheckLztekLamp {
                     byte[] colorLight = hexBytes(lightArray[index]);
                     if (null != colorLight) {
                         outputStream.write(colorLight);
-                        Log.d(TAG, "serialPort write success index = " + index + "  , state = "+ Content.robotState);
+                        Log.d(TAG, "serialPort write success index = " + index + "  , state = " + Content.robotState);
                     }
                     if (index < lightArray.length - 1) {
                         index++;
@@ -195,7 +218,7 @@ public class CheckLztekLamp {
                         index = 0;
                     }
                     Thread.sleep(Content.time);
-                    if (Content.robotState == 1 || Content.robotState == 5 || Content.robotState == 6){
+                    if (Content.robotState == 1 || Content.robotState == 5 || Content.robotState == 6) {
                         outputStream.write(hexBytes(mContext.getResources().getString(R.string.no_color_light)));
                         Thread.sleep(1000);
                     }
@@ -216,7 +239,7 @@ public class CheckLztekLamp {
 
     /**
      * 转换16进制
-     * */
+     */
     private byte[] hexBytes(String hexString) {
         int length;
         byte h;
@@ -247,60 +270,33 @@ public class CheckLztekLamp {
 
     /**
      * 请求电池数据
-     * */
+     */
     public void openBatteryPort() {//获取电池
         batterySerialPort = mLztek.openSerialPort("/dev/ttyS0", 9600, 8, 0, 1, 0);
         if (batterySerialPort == null) {
             Log.d(TAG, "BatteryPort is null");
             return;
         }
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (true) {
-                    batteryThread = true;
-                    if (batteryPortThread == null) {
-                        batteryPortThread = new BatteryPortThread();
-                        batteryPortThread.start();
-                    }
-                    readBattery();
-                    try {
-                        Thread.sleep(60 * 1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
-
-
+        handler.postDelayed(runnable, 0);
     }
+
+    Handler handler = new Handler();
+
     /**
      * 间隔1分钟写入请求一次电池数据
-     * */
-    class BatteryPortThread extends Thread {
+     */
+    Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            super.run();
             OutputStream outputStream = null;
-            int index = 0;
             byte[] battery = hexBytes("DDA50300FFFD77");
             try {
-                while (index < 2) {
-                    if (null != battery) {
-                        outputStream = batterySerialPort.getOutputStream();
-                        outputStream.write(battery);
-                        index++;
-                        try {
-                            Thread.sleep(5000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        Log.d(TAG, "batteryPort write success");
-                    }
+                if (null != battery) {
+                    outputStream = batterySerialPort.getOutputStream();
+                    outputStream.write(battery);
+                    Log.d(TAG, "batteryPort write success");
                 }
-
+                handler.postDelayed(batteryRunnable, 0);
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
@@ -312,56 +308,48 @@ public class CheckLztekLamp {
                     }
                 }
             }
+            handler.postDelayed(this::run, 60 * 1000);
         }
-    }
+    };
 
     /**
      * 读取电池数据
-     * */
-    private void readBattery() {
-        if (null == batterySerialPort) {
-            return;
-        }
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                while (batteryThread) {
-                    java.io.InputStream input = batterySerialPort.getInputStream();
+     */
+    Runnable batteryRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (null == batterySerialPort) {
+                return;
+            }
+            java.io.InputStream input = batterySerialPort.getInputStream();
+            try {
+                byte[] buffer = new byte[1024];
+                int len = input.read(buffer);
+                Log.d(TAG, "读取数据len ： " + len);
+                if (len > 0) {
+                    byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
+                    EditText editText = new EditText(mContext);
+                    for (byte b : data) {
+                        byte h = (byte) (0x0F & (b >> 4));
+                        byte l = (byte) (0x0F & b);
+                        editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
+                        editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
+                    }
+                    Log.d(TAG, "读取数据 ： " + editText.getText().toString());
+                    EventBus.getDefault().post(new EventBusMessage(1004, data));
+                    EventBus.getDefault().post(new EventBusMessage(10033, data));
+                }
+            } catch (Exception e) {
+                android.util.Log.d(TAG, "[COM]Read Faild: " + e.getMessage(), e);
+            } finally {
+                if (null != input) {
                     try {
-                        byte[] buffer = new byte[1024];
-                        int len = input.read(buffer);
-                        Log.d(TAG, "读取数据len ： " + len);
-                        if (len > 0) {
-                            byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
-                            EditText editText = new EditText(mContext);
-                            for (byte b : data) {
-                                byte h = (byte) (0x0F & (b >> 4));
-                                byte l = (byte) (0x0F & b);
-                                editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
-                                editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
-                            }
-                            Log.d(TAG, "读取数据 ： " + editText.getText().toString());
-                            EventBus.getDefault().post(new EventBusMessage(1004, data));
-                            EventBus.getDefault().post(new EventBusMessage(10033, data));
-                            batteryThread = false;
-                            batteryPortThread = null;
-                        }
-                        Thread.sleep(2000);
-                    } catch (Exception e) {
-                        android.util.Log.d(TAG, "[COM]Read Faild: " + e.getMessage(), e);
-                    } finally {
-                        if (null != input) {
-                            try {
-                                input.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
+                        input.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
-        }.start();
-    }
-
+        }
+    };
 }

@@ -176,6 +176,30 @@ public class SimpleServer extends WebSocketServer {
             case Content.CANCEL_SCAN_MAP_NO://取消扫描不保存地图
                 EventBus.getDefault().post(new EventBusMessage(10036, message));
                 break;
+
+
+//test request:
+            case Content.TEST_UVCSTART:
+                EventBus.getDefault().post(new EventBusMessage(20001, message));
+                break;
+            case Content.TEST_UVCSTOP:
+                EventBus.getDefault().post(new EventBusMessage(20002, message));
+                break;
+            case Content.TEST_LIGHTSTART:
+                EventBus.getDefault().post(new EventBusMessage(20003, message));
+                break;
+            case Content.TEST_LIGHTSTOP:
+                EventBus.getDefault().post(new EventBusMessage(20004, message));
+                break;
+            case Content.TEST_SENSOR:
+                EventBus.getDefault().post(new EventBusMessage(20005, message));
+                break;
+            case Content.TEST_WARINGSTART:
+                EventBus.getDefault().post(new EventBusMessage(20006, message));
+                break;
+            case Content.TEST_WARINGSTOP:
+                EventBus.getDefault().post(new EventBusMessage(20007, message));
+                break;
             default:
                 break;
         }

@@ -35,6 +35,15 @@ public class GsonUtils {
     private float resolution;
     private RobotPositions mRobotPositions = null;
     private String battery = null;
+    private String testCallBack = null;
+
+    public String getTestCallBack() {
+        return testCallBack;
+    }
+
+    public void setTestCallBack(String testCallBack) {
+        this.testCallBack = testCallBack;
+    }
 
     public String getCallback() {
         return callback;
@@ -160,7 +169,16 @@ public class GsonUtils {
         this.tvTime = tvTime;
     }
 
-
+    public String putTestSensorCallBack(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.TEST_SENSOR_CALLBACK, testCallBack);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
     public String putCallBackMsg(String type){
         jsonObject = new JSONObject();
         try {

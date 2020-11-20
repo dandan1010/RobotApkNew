@@ -829,12 +829,20 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             }
         } else if (messageEvent.getState() == 10001) {//后退
             handler1.postDelayed(runnable1, 10);
+            Content.time = 300;
+            Content.robotState = 3;
         } else if (messageEvent.getState() == 10002) {//前进
             handler2.postDelayed(runnable2, 10);
+            Content.time = 300;
+            Content.robotState = 3;
         } else if (messageEvent.getState() == 10003) {//左转
             handler3.postDelayed(runnable3, 10);
+            Content.time = 300;
+            Content.robotState = 3;
         } else if (messageEvent.getState() == 10004) {//右转
             handler4.postDelayed(runnable4, 10);
+            Content.time = 300;
+            Content.robotState = 3;
         } else if (messageEvent.getState() == 10005) {//开始消毒检测
             spinner.setSelection((Integer) messageEvent.getT());
             toLightControlBtn.setChecked(true);
@@ -842,12 +850,20 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             toLightControlBtn.setChecked(false);
         } else if (messageEvent.getState() == 10007) {//停前
             handler2.removeCallbacks(runnable2);
+            Content.robotState = 1;
+            Content.time = 4000;
         } else if (messageEvent.getState() == 10008) {//停退
             handler1.removeCallbacks(runnable1);
+            Content.robotState = 1;
+            Content.time = 4000;
         } else if (messageEvent.getState() == 10009) {//停左
             handler3.removeCallbacks(runnable3);
+            Content.robotState = 1;
+            Content.time = 4000;
         } else if (messageEvent.getState() == 10010) {//停右
             handler4.removeCallbacks(runnable4);
+            Content.robotState = 1;
+            Content.time = 4000;
         } else if (messageEvent.getState() == 10011) {//地图列表
             TaskManager.getInstances(mContext).loadMapList();
         } else if (messageEvent.getState() == 10012) {//地图列表获取后发送
@@ -990,6 +1006,40 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             handlerInitialize.removeCallbacks(runnableInitialize);
         } else if (messageEvent.getState() == 10036) {//取消扫描不保存地图
             TaskManager.getInstances(mContext).cancleScanMap();
+        }
+
+
+
+
+
+
+
+
+//test request
+        else if (messageEvent.getState() == 20001) {
+            checkLztekLamp.setUvcMode();
+            checkLztekLamp.startUvc1Lamp();
+            checkLztekLamp.startUvc2Lamp();
+            checkLztekLamp.startUvc3Lamp();
+        } else if (messageEvent.getState() == 20002) {
+            checkLztekLamp.stopUvc1Lamp();
+            checkLztekLamp.stopUvc2Lamp();
+            checkLztekLamp.stopUvc3Lamp();
+        } else if (messageEvent.getState() == 20003) {
+            checkLztekLamp.startLedLamp();
+        } else if (messageEvent.getState() == 20004) {
+            checkLztekLamp.stopLedLamp();
+        } else if (messageEvent.getState() == 20005) {
+            String s = checkLztekLamp.testGpioSensorState();
+            Log.d("zdzd : " , "sensor返回值： " + s);
+            gsonUtils.setTestCallBack(s);
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putTestSensorCallBack(Content.TEST_SENSOR_CALLBACK));
+            }
+        } else if (messageEvent.getState() == 20006) {
+            uvcWarning.startWarning();
+        } else if (messageEvent.getState() == 20007) {
+            uvcWarning.stopWarning();
         }
     }
 

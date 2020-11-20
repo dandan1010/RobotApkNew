@@ -75,7 +75,6 @@ public final class Content {
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 
-
     //task key
     public static final String TASK_X = "x";//x坐标
     public static final String TASK_Y = "y";//y坐标
@@ -96,5 +95,17 @@ public final class Content {
     public static final String ORIGIN_Y = "origin_y";//原点Y
     public static final String RESOLUTION = "resolution";
 
+
+
+
+    //test
+    public static final String TEST_UVCSTART = "test_uvcstart";
+    public static final String TEST_UVCSTOP = "test_uvcstop";
+    public static final String TEST_SENSOR = "test_sensor";
+    public static final String TEST_SENSOR_CALLBACK = "test_sensor_callback";
+    public static final String TEST_WARINGSTART = "test_waringstart";
+    public static final String TEST_WARINGSTOP = "test_waringstop";
+    public static final String TEST_LIGHTSTART = "test_lightstart";
+    public static final String TEST_LIGHTSTOP = "test_lightstop";
 
 }
