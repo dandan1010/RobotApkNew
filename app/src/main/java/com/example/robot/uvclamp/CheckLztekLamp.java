@@ -27,19 +27,18 @@ public class CheckLztekLamp {
     private SerialPort serialPort;
     private SerialPort batterySerialPort;
     /**
-     * 218:
+     * 250:前边sensor
      * 248:左边sensor
-     * 249:
-     * 250:右边sensor
-     * 251:
-     * 228:
+     * 249:后边sensor
+     * 218:右边sensor
+     * 230:uvc灯
+     * 228:uvc灯
      * 229:uvc灯
-     * 230:led灯
+     * 251:led灯
      */
-    private int[] port = new int[]{218, 248, 249, 250, 251, 228, 229, 230};
+    private int[] port = new int[]{218, 248, 249, 250, 230, 228, 229, 251};
     private MoreSerialPortThread moreSerialPortThread;
     public boolean threadFlag = false;
-    private boolean batteryThread = false;
 
 
     public CheckLztekLamp(Context mContext) {
@@ -82,22 +81,25 @@ public class CheckLztekLamp {
 
     public String testGpioSensorState() {
 
-        String sensorString = "没人靠近";
+        String sensorString = "";
         boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
         boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
         boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
         if (k1) {
-            sensorString = "前边有人靠近";
+            sensorString = sensorString + "右边有人靠近";
         }
         if (k2) {
-            sensorString = "左边有人靠近";
+            sensorString = sensorString + "左边有人靠近";
         }
         if (k3) {
-            sensorString = "后边有人靠近";
+            sensorString = sensorString + "后边有人靠近";
         }
         if (k4) {
-            sensorString = "右边有人靠近";
+            sensorString = sensorString + "前边有人靠近";
+        }
+        if ("".equals(sensorString)) {
+            return "没有人靠近";
         }
         return sensorString;
 

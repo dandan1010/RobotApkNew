@@ -21,6 +21,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
+import com.example.robot.R;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.bean.TaskBean;
 import com.example.robot.service.NavigationService;
@@ -106,7 +107,7 @@ public class TaskManager {
                     msg = "获取地图图片失败" + error.getMessage();
                 }
                 Log.d(TAG, msg);
-                EventBus.getDefault().post(new EventBusMessage(10000, "获取地图图片失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.get_mapIcon + error.getMessage()));
             }
         });
     }
@@ -132,7 +133,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "gps error :" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "获取机器人位置失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.get_robotPosition + error.getMessage()));
             }
         });
     }
@@ -162,7 +163,7 @@ public class TaskManager {
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "get map list is error ： " + e.getMessage());
-                        EventBus.getDefault().post(new EventBusMessage(10000, "获取地图列表失败 :  " + e.getMessage()));
+                        EventBus.getDefault().post(new EventBusMessage(10000, R.string.get_mapList + e.getMessage()));
                     }
 
                     @Override
@@ -186,7 +187,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "地图" + mapName + "移动到导航点fail : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "导航到导航点失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.navigate_position + error.getMessage()));
             }
         });
 
@@ -211,7 +212,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "开始扫描成功失败 :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "开始扫描失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.start_scanMap + error.getMessage()));
             }
         });
 
@@ -225,7 +226,7 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "拓展扫描成功 :  " + status.toString() + "地图名字：" + map_name);
                 if ("START_SCAN_MAP_FAILED".equals(status.getErrorCode())) {
-                    EventBus.getDefault().post(new EventBusMessage(10000, status.getMsg()));
+                    EventBus.getDefault().post(new EventBusMessage(10000, R.string.develop_map + status.getMsg()));
                 } else {
                     scanningFlag = true;
                     if (myThread == null) {
@@ -240,7 +241,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "开始扫描成功失败 :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "扫描地图失败" + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.develop_map + error.getMessage()));
             }
         });
 
@@ -261,7 +262,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "获取实时扫地图图片png失败 :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "获取扫描地图失败：" + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.get_scanMap + error.getMessage()));
             }
         });
     }
@@ -274,7 +275,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "取消扫描成功 :  ");
-                EventBus.getDefault().post(new EventBusMessage(10000, "取消扫描成功 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_scanSaveMap + status.getMsg()));
                 scanningFlag = false;
                 if (myThread != null) {
                     myThread = null;
@@ -285,7 +286,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "取消扫描失败 :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "取消扫描 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_scanSaveMap + error.getMessage()));
             }
         });
     }
@@ -299,11 +300,14 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "取消不保存地图 ：" + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_scanMap + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "取消不保存地图失败 ：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_scanMap + error.getMessage()));
+
             }
         });
     }
@@ -316,13 +320,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "删除地图成功 :  ");
-                EventBus.getDefault().post(new EventBusMessage(10000, "删除地图 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.delete_map + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "删除地图失败 :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "删除地图失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.delete_map + error.getMessage()));
             }
         });
 
@@ -362,14 +366,14 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "存储任务成功");
-                EventBus.getDefault().post(new EventBusMessage(10000, "存储任务 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.save_task+ status.getMsg()));
                 getTaskQueues(mapName);
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "存储任务error : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "存储任务失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.save_task + error.getMessage()));
             }
         });
 
@@ -448,7 +452,7 @@ public class TaskManager {
         GsController.INSTANCE.startTaskQueue(robotTaskQueue, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
-                EventBus.getDefault().post(new EventBusMessage(10000, "开始执行任务 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.start_task + status.getMsg()));
                 if ("successed".equals(status.getMsg())) {
                     Content.robotState = 3;
                     Content.time = 300;
@@ -465,7 +469,7 @@ public class TaskManager {
 
             @Override
             public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(10000, "开始执行任务 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.start_task + error.getMessage()));
             }
         });
     }
@@ -552,13 +556,13 @@ public class TaskManager {
                 myHandler.removeCallbacks(runnable);
                 myHandler.removeCallbacks(runnable_is_finfish);
                 navigate_Position(mapName, "Origin");
-                EventBus.getDefault().post(new EventBusMessage(10000, "停止任务 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_task + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "ERROR 停止任务队列失败" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "停止任务失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_task + error.getMessage()));
             }
         });
     }
@@ -572,12 +576,12 @@ public class TaskManager {
             public void success(Status status) {
                 SharedPrefUtil.getInstance(mContext, mapName).deleteTaskQueue(task_name);
                 getTaskQueues(mapName);
-                EventBus.getDefault().post(new EventBusMessage(10000, "删除任务 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.delete_task + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(10000, "删除任务 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.delete_task + error.getMessage()));
             }
         });
     }
@@ -597,7 +601,7 @@ public class TaskManager {
 
             @Override
             public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(10000, "获取任务列表失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.get_taskList + error.getMessage()));
             }
         });
 
@@ -611,14 +615,14 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "addPosition success");
-                EventBus.getDefault().post(new EventBusMessage(10000, "添加点 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.add_position + status.getMsg()));
                 //SharedPrefUtil.getInstance(mContext, mapName).setPositionMsg(positionListBean);
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "addPosition fail : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "添加点失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.add_position + error.getMessage()));
 
             }
         });
@@ -632,13 +636,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "deletePosition success");
-                EventBus.getDefault().post(new EventBusMessage(10000, "删除点 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.delete_position + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "deletePosition fail : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "删除点失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.delete_position + error.getMessage()));
 
             }
         });
@@ -652,13 +656,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "renamePosition success");
-                EventBus.getDefault().post(new EventBusMessage(10000, "重命名点 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.rename_position + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "renamePosition fail : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "重命名点失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.rename_position + error.getMessage()));
 
             }
         });
@@ -679,7 +683,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "renamePosition fail : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "地图导航点获取失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.get_mapPositionList + error.getMessage()));
             }
         });
 
@@ -695,13 +699,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "取消导航成功");
-                EventBus.getDefault().post(new EventBusMessage(10000, "取消导航 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_navigate + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "ERROR取消导航失败:" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "取消导航失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_navigate + error.getMessage()));
             }
         });
     }
@@ -716,13 +720,13 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "use_map success");
                 NavigationService.initialize(map_name);
-                EventBus.getDefault().post(new EventBusMessage(10000, "选取地图 :  " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.use_map+ status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "use_map error" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, "选取地图失败 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.use_map + error.getMessage()));
             }
         });
     }
@@ -743,7 +747,7 @@ public class TaskManager {
                     Content.taskName = null;
                     myHandler.removeCallbacks(runnable);
                     myHandler.removeCallbacks(runnable_is_finfish);
-                    EventBus.getDefault().post(new EventBusMessage(10000, "任务完成"));
+                    EventBus.getDefault().post(new EventBusMessage(10000, R.string.task_finish));
                 } else {
                     myHandler.removeCallbacks(runnable_is_finfish);
                     myHandler.postDelayed(runnable_is_finfish, 1000);
@@ -752,7 +756,7 @@ public class TaskManager {
 
             @Override
             public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(10000, "不能获取任务是否完成 :  " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.task_finish + error.getMessage()));
             }
         });
     }
@@ -768,7 +772,7 @@ public class TaskManager {
                 Content.time = 1000;
                 pauseTaskQueue();
                 Content.taskIndex ++;
-                EventBus.getDefault().post(new EventBusMessage(10000, "到达位置开始消毒"));
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.arrive_location));
 
             }
         }

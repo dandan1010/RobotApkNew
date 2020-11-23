@@ -41,7 +41,6 @@ public class SimpleServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, String message) {
         System.out.println("received message from " + conn.getRemoteSocketAddress() );
-        //EventBus.getDefault().post(new EventBusMessage(10001, message));
         Log.d("zdzd : " , "收到信息 ： " + message);
         try {
             differentiateType(message);

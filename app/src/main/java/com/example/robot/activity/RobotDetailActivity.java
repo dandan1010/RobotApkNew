@@ -50,6 +50,7 @@ import com.example.robot.utils.GsonUtils;
 import com.example.robot.uvclamp.CheckLztekLamp;
 import com.example.robot.uvclamp.UvcWarning;
 
+import org.greenrobot.eventbus.EventBus;
 import org.java_websocket.server.WebSocketServer;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -142,27 +143,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private MapManagerAdapter mapManagerAdapter;
     private List<RobotMap.DataBean> data;
     private boolean isDevelop = false;
-    private NavigationService navigationService;
-    private Intent intentService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        new Thread() {
-            @Override
-            public void run() {
-                super.run();
-                String host = "10.7.5.166";
-                int port = 8887;
-                Content.server = new SimpleServer(new InetSocketAddress(host, port));
-                Content.server.run();
-            }
-        }.start();
-
-        navigationService = new NavigationService();
-        intentService = new Intent(this, NavigationService.class);
-        startService(intentService);
 
         setContentView(R.layout.activity_robot);
         ButterKnife.bind(this);
@@ -210,37 +194,13 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     @Override
     protected void onResume() {
         super.onResume();
+        Log.d("zdzd " , "onResume");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-
-        handler1.removeCallbacks(runnable1);
-        handler2.removeCallbacks(runnable2);
-        handler3.removeCallbacks(runnable3);
-        handler4.removeCallbacks(runnable4);
-        myHandler.removeCallbacks(runnablePosition);
-        try {
-            if (Content.server != null) {
-                Content.server.stop();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        if (intentService != null) {
-            stopService(intentService);
-        }
-
-        checkLztekLamp.stopUvc1Lamp();
-        checkLztekLamp.stopUvc2Lamp();
-        checkLztekLamp.stopUvc3Lamp();
-        checkLztekLamp.stopLedLamp();
-
-
+        Log.d("zdzd " , "onDestroy");
     }
 
     private void initListener() {
@@ -997,12 +957,15 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             Log.d("zdzd :", "是否完成初始化" + (String) messageEvent.getT());
             if ("true".equals((String) messageEvent.getT())) {
                 handlerInitialize.removeCallbacks(runnableInitialize);
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.finish_initialize));
                 TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
             } else {
                 handler1.postDelayed(runnableInitialize, 1000);
+                EventBus.getDefault().post(new EventBusMessage(10000, R.string.is_initialize));
             }
         } else if (messageEvent.getState() == 10035) {
             Log.d("zdzd :", "是否完成初始化error: " + (String) messageEvent.getT());
+            EventBus.getDefault().post(new EventBusMessage(10000, R.string.fail_initialize) + (String) messageEvent.getT());
             handlerInitialize.removeCallbacks(runnableInitialize);
         } else if (messageEvent.getState() == 10036) {//取消扫描不保存地图
             TaskManager.getInstances(mContext).cancleScanMap();
