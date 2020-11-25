@@ -1,5 +1,6 @@
 package com.example.robot.service;
 
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.robot.task.TaskManager;
@@ -28,20 +29,43 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        conn.send("OK conn");
-        broadcast("OK," + Content.mapName + "," + Content.taskName); //This method sends a message to all clients connected
-        System.out.println("new connection to " + conn.getRemoteSocketAddress());
+//        conn.send("OK conn");
+        InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
+//        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
+            gsonUtils.setMapName(Content.mapName);
+            gsonUtils.setTaskName(Content.taskName);
+            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE)); //This method sends a message to all clients connected
+            System.out.println("new connection to " + conn.getRemoteSocketAddress());
+            Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
+            Log.d("zdzd " , "连接的地址open：" + Content.CONNECT_ADDRESS);
+//        }
+        Log.d("zdzd ", remoteSocketAddress.getHostName());
+        Log.d("zdzd ", remoteSocketAddress.getHostString());
+        Log.d("zdzd ", String.valueOf(remoteSocketAddress.getAddress()));
+        Log.d("zdzd ", String.valueOf(remoteSocketAddress.getPort()));
+        Log.d("zdzd ", String.valueOf(remoteSocketAddress.isUnresolved()));
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
+        Log.d("zdzd ", "连接的地址close：" + Content.CONNECT_ADDRESS);
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from " + conn.getRemoteSocketAddress() );
-        Log.d("zdzd : " , "收到信息 ： " + message);
+        System.out.println("received message from " + conn.getRemoteSocketAddress());
+        Log.d("zdzd : ", "收到信息 ： " + message);
+//        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
+//            Content.CONNECT_ADDRESS = message;
+//            gsonUtils.setMapName(Content.mapName);
+//            gsonUtils.setTaskName(Content.taskName);
+//            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE));
+//        } else if (Content.CONNECT_ADDRESS.equals(message)) {
+//            gsonUtils.setMapName(Content.mapName);
+//            gsonUtils.setTaskName(Content.taskName);
+//            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE));
+//        }
         try {
             differentiateType(message);
         } catch (JSONException e) {

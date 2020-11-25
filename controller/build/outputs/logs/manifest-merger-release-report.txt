@@ -1,45 +1,45 @@
 -- Merging decision tree log ---
 manifest
-ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
+ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
 	package
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:3:5-36
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:3:5-57
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
 	android:versionName
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
 	android:versionCode
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:1-9:12
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:1-9:12
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
 	xmlns:android
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:2:11-69
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:2:11-69
 application
-ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:5:5-7:19
+ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:5:5-7:19
 	android:allowBackup
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:5:18-44
-activity#com.dcm360.controller.MainActivity
-ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:6:9-59
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:5:18-44
+activity#com.dcm360.com.example.robotapk.controller.MainActivity
+ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:6:9-59
 	android:name
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml:6:19-47
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml:6:19-47
 uses-sdk
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml reason: use-sdk injection requested
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
 	android:targetSdkVersion
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
 	android:minSdkVersion
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		ADDED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
-		INJECTED from D:\Project\ql845\ql845\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		ADDED from D:\RobotApk\controller\src\main\AndroidManifest.xml
+		INJECTED from D:\RobotApk\controller\src\main\AndroidManifest.xml

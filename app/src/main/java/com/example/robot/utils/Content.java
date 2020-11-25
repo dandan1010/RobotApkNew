@@ -5,7 +5,8 @@ import org.java_websocket.server.WebSocketServer;
 public final class Content {
 
     public static WebSocketServer server = null;
-
+    public static String CONNECT_ADDRESS = null;
+    public static String CONN_TYPE = "conn_type";
     /**
      * robotState：
      * 0:关机
@@ -26,7 +27,7 @@ public final class Content {
     */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = 0;
-    public static String mapName = "test1";
+    public static String mapName = "testapp";
     public static String taskName = "task0";
 
     public static final String MAP_NAME = "map_Name";//地图名字

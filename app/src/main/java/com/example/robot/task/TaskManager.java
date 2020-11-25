@@ -123,6 +123,8 @@ public class TaskManager {
                 if (robotPosition != null) {
                     mRobotPosition = robotPosition;
                     Log.d(TAG, "机器人位置 :  " + robotPosition.getGridPosition().getX() + ",  " + robotPosition.getGridPosition().getY());
+                    Log.d(TAG, "机器人位置 :  " + robotPosition.getMapInfo().getGridWidth() + ",  " + robotPosition.getMapInfo().getGridHeight());
+
                     EventBus.getDefault().post(new EventBusMessage(1003, robotPosition));
                     EventBus.getDefault().post(new EventBusMessage(10024, robotPosition));
                 } else {
@@ -714,12 +716,12 @@ public class TaskManager {
      * 使用地图
      */
     public void use_map(String map_name) {
-        Log.d(TAG, "use_map");
+        Log.d(TAG, "use_map： " + map_name);
         RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "use_map success");
-                NavigationService.initialize(map_name);
+                NavigationService.initialize(Content.mapName);
                 EventBus.getDefault().post(new EventBusMessage(10000, R.string.use_map+ status.getMsg()));
             }
 
@@ -786,6 +788,7 @@ public class TaskManager {
 
             if (mRobotPosition != null && mRobotPosition.getGridPosition().getX() == mTaskArrayList.get(Content.taskIndex).getX()
                     && mRobotPosition.getGridPosition().getY() == mTaskArrayList.get(Content.taskIndex).getY()) {
+                Log.d(TAG, "到达知道哪个位置，开始消毒");
                 Log.d(TAG, "到达知道哪个位置，开始消毒");
                 myHandler.removeMessages(1);
                 myHandler.sendEmptyMessage(1);

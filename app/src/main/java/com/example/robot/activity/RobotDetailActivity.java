@@ -739,17 +739,22 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
             float x = (float) robotPosition.getGridPosition().getX();
             float y = (float) robotPosition.getGridPosition().getY();
-            float rotate = (float) robotPosition.getAngle();
+            float angle = (float) robotPosition.getAngle();
 
-            Log.d(TAG, "地图：X" + robotPosition.getMapInfo().getGridWidth() + "Y :" + robotPosition.getMapInfo().getGridHeight());
-            Log.d(TAG, "地图rotate：X" + x + "Y :" + y);
-            Log.d(TAG, "地图originX：" + robotPosition.getMapInfo().getOriginX() + "originY :" + robotPosition.getMapInfo().getOriginY());
-            Log.d(TAG, "地图图片rotate：X" + robotMap.getWidth() + "  Y :" + robotMap.getHeight());
+            Log.d(TAG, "地图：X===" + robotPosition.getMapInfo().getGridWidth() + "Y :" + robotPosition.getMapInfo().getGridHeight());
+            Log.d(TAG, "地图rotate：X===" + x + "Y :" + y);
+            Log.d(TAG, "地图originX：===" + robotPosition.getMapInfo().getOriginX() + "originY :" + robotPosition.getMapInfo().getOriginY());
+            Log.d(TAG, "地图图片rotate：X===" + robotMap.getWidth() + "  Y :" + robotMap.getHeight());
+            Log.d(TAG, "地图angle：===" + angle + "cosy :" + Math.cos(angle) + "sinx :" + Math.sin(angle));
             mainRelative.removeView(robot_Position);
-            robot_Position.setImageResource(R.drawable.ic_robot_position);
+            robot_Position.setImageResource(R.drawable.ic_baseline_brightness_1_24);
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            layoutParams.setMargins((int) (robotMap.getWidth() / robotPosition.getMapInfo().getGridWidth() * x + robotMap.getLeft() + 11.2f),
-                    (int) (robotMap.getHeight() / robotPosition.getMapInfo().getGridHeight() * y + robotMap.getTop() + 11.2f), 0, 0);
+
+            layoutParams.setMargins((int) (robotMap.getWidth() / robotPosition.getMapInfo().getGridWidth() * x
+                    + robotPosition.getMapInfo().getOriginX() - ( Math.cos(angle))),
+                    (int) ((robotMap.getHeight()) - (robotMap.getHeight() / robotPosition.getMapInfo().getGridHeight() * y
+                    + robotPosition.getMapInfo().getOriginY()) - ( Math.sin(angle))),
+                    0, 0);
 
             robot_Position.setLayoutParams(layoutParams);
             mainRelative.addView(robot_Position);
@@ -924,6 +929,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         } else if (messageEvent.getState() == 10025) {//开始扫描地图
             TaskManager.getInstances(mContext).start_scan_map((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10026) {//选定地图
+            TaskManager.getInstances(mContext).getMapPic(Content.mapName);
             TaskManager.getInstances(mContext).use_map(Content.mapName);
         } else if (messageEvent.getState() == 10027) {//转圈初始化结果
             Log.d("zdzd ", "初始化结果： " + (String) messageEvent.getT() + ",     isDevelop :" + isDevelop);

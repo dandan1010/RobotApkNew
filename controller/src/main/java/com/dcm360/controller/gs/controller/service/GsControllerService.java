@@ -391,7 +391,7 @@ public interface GsControllerService {
      * @return the call
      */
     @GET("/gs-robot/cmd/use_map")
-    Call<RobotPosition> use_map(@Query("map_name") String mapName);
+    Call<Status> use_map(@Query("map_name") String mapName);
 
     /**
      * 获取初始化点列表

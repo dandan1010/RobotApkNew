@@ -1,1 +1,27 @@
-[{"outputType":{"type":"MERGED_MANIFESTS"},"apkData":{"type":"MAIN","splits":[],"versionCode":1,"versionName":"1.0","enabled":true,"outputFile":"controller-release.aar","fullName":"release","baseName":"release"},"path":"..\\..\\library_manifest\\release\\AndroidManifest.xml","properties":{"packageId":"com.dcm360.controller","split":""}}]
+{
+  "version": 1,
+  "applicationId": "com.dcm360.com.example.robotapk.controller",
+  "variantType": "LIBRARY",
+  "elements": [
+    {
+      "outputType": {
+        "type": "MERGED_MANIFESTS"
+      },
+      "apkData": {
+        "type": "MAIN",
+        "splits": [],
+        "versionCode": 1,
+        "versionName": "1.0",
+        "outputFile": "controller-release.aar",
+        "fullName": "release",
+        "baseName": "release",
+        "dirName": ""
+      },
+      "path": "../../library_manifest/release/AndroidManifest.xml",
+      "properties": {
+        "packageId": "com.dcm360.com.example.robotapk.controller",
+        "split": ""
+      }
+    }
+  ]
+}

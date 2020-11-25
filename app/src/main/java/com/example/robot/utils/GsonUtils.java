@@ -3,6 +3,7 @@ package com.example.robot.utils;
 import android.util.Log;
 
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.example.robot.MyApplication;
 import com.example.robot.bean.TaskBean;
 
 import org.json.JSONArray;
@@ -179,6 +180,19 @@ public class GsonUtils {
         }
         return jsonObject.toString();
     }
+
+    public String putConnMsg(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.TASK_NAME, taskName);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
     public String putCallBackMsg(String type){
         jsonObject = new JSONObject();
         try {

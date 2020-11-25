@@ -575,7 +575,7 @@ public enum GsController implements IGsRobotController {
     public void ping(RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.ping().enqueue(new ResponseCallback<Status>().call(status));
-    }
+}
 
 
     @Override
