@@ -28,4 +28,5 @@
     <string name="finish_initialize">初始化完成</string>
     <string name="fail_initialize">初始化失败</string>
     <string name="arrive_location">到达位置开始消毒</string>
+    <string name="position_fail">定位失败</string>
 </resources>

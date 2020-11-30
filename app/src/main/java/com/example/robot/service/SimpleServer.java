@@ -16,12 +16,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.PipedReader;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
 public class SimpleServer extends WebSocketServer {
     private GsonUtils gsonUtils;
     private JSONObject jsonObject;
+    private String address = "";
 
     public SimpleServer(InetSocketAddress address) {
         super(address);
@@ -31,14 +33,18 @@ public class SimpleServer extends WebSocketServer {
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
 //        conn.send("OK conn");
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
-//        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
+        address = remoteSocketAddress.getHostName();
+        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
             gsonUtils.setMapName(Content.mapName);
             gsonUtils.setTaskName(Content.taskName);
             broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE)); //This method sends a message to all clients connected
             System.out.println("new connection to " + conn.getRemoteSocketAddress());
             Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
             Log.d("zdzd " , "连接的地址open：" + Content.CONNECT_ADDRESS);
-//        }
+        } else {
+            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
+            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE));
+        }
         Log.d("zdzd ", remoteSocketAddress.getHostName());
         Log.d("zdzd ", remoteSocketAddress.getHostString());
         Log.d("zdzd ", String.valueOf(remoteSocketAddress.getAddress()));
@@ -49,7 +55,10 @@ public class SimpleServer extends WebSocketServer {
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
-        Log.d("zdzd ", "连接的地址close：" + Content.CONNECT_ADDRESS);
+        if (address.equals(Content.CONNECT_ADDRESS)) {
+            Content.CONNECT_ADDRESS = null;
+            Log.d("zdzd ", "连接的地址close：" + Content.CONNECT_ADDRESS);
+        }
     }
 
     @Override

@@ -151,6 +151,9 @@ public interface GsControllerService {
     @GET("/gs-robot/data/positions")
     Observable<RobotPositions> positions(@Query("map_name") String map_name, @Query("type") int type);
 
+    @GET("/gs-robot/data/positions")
+    Observable<RobotPositions> getMapPositions(@Query("map_name") String map_name);
+
     /**
      * 记录点
      *

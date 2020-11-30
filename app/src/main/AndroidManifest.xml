@@ -7,7 +7,8 @@
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
-
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
     <uses-permission
         android:name="android.permission.CHANGE_CONFIGURATION"
         tools:ignore="ProtectedPermissions" />
@@ -64,6 +65,7 @@
                 <action android:name="android.alarm.task.action" />
             </intent-filter>
         </receiver>
+        <service android:name=".service.SocketServices"/>
     </application>
 
 </manifest>

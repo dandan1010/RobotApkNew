@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import com.example.robot.R;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.Content;
+import com.lztek.toolkit.AddrInfo;
 import com.lztek.toolkit.Lztek;
 import com.lztek.toolkit.SerialPort;
 
@@ -39,7 +40,6 @@ public class CheckLztekLamp {
     private int[] port = new int[]{218, 248, 249, 250, 230, 228, 229, 251};
     private MoreSerialPortThread moreSerialPortThread;
     public boolean threadFlag = false;
-
 
     public CheckLztekLamp(Context mContext) {
         this.mContext = mContext;
@@ -145,6 +145,19 @@ public class CheckLztekLamp {
 
     public void stopUvc3Lamp() {
         mLztek.setGpioValue(port[4], 1);
+    }
+
+    public boolean getEthEnable() {
+        return mLztek.getEthEnable();
+    }
+    public void openEth(){
+        mLztek.setEthEnable(true);
+    }
+    public void setEthAddress(){
+        mLztek.setEthIpAddress(Content.ip, Content.mask, Content.gateway, Content.dns);
+    }
+    public AddrInfo getAddrInfo () {
+        return mLztek.getEthAddrInfo();
     }
 
     /**

@@ -3,6 +3,7 @@ package com.example.robot.utils;
 import android.util.Log;
 
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.example.robot.MyApplication;
 import com.example.robot.bean.TaskBean;
 
@@ -27,19 +28,28 @@ public class GsonUtils {
     private List<String> data;
     private byte[] bytes;
     private int time;
-    private float x;
-    private float y;
-    private float gridHeight;
-    private float gridWidth;
-    private float originX;
-    private float originY;
-    private float resolution;
+    private double x;
+    private double y;
+    private int gridHeight;
+    private int gridWidth;
+    private double originX;
+    private double originY;
+    private double resolution;
+    private double angle;
     private RobotPositions mRobotPositions = null;
     private String battery = null;
     private String testCallBack = null;
 
     public String getTestCallBack() {
         return testCallBack;
+    }
+
+    public double getAngle() {
+        return angle;
+    }
+
+    public void setAngle(double angle) {
+        this.angle = angle;
     }
 
     public void setTestCallBack(String testCallBack) {
@@ -70,59 +80,59 @@ public class GsonUtils {
         this.mRobotPositions = mRobotPositions;
     }
 
-    public float getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(float x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public float getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(float y) {
+    public void setY(double y) {
         this.y = y;
     }
 
-    public float getGridHeight() {
+    public int getGridHeight() {
         return gridHeight;
     }
 
-    public void setGridHeight(float gridHeight) {
+    public void setGridHeight(int gridHeight) {
         this.gridHeight = gridHeight;
     }
 
-    public float getGridWidth() {
+    public int getGridWidth() {
         return gridWidth;
     }
 
-    public void setGridWidth(float gridWidth) {
+    public void setGridWidth(int gridWidth) {
         this.gridWidth = gridWidth;
     }
 
-    public float getOriginX() {
+    public double getOriginX() {
         return originX;
     }
 
-    public void setOriginX(float originX) {
+    public void setOriginX(double originX) {
         this.originX = originX;
     }
 
-    public float getOriginY() {
+    public double getOriginY() {
         return originY;
     }
 
-    public void setOriginY(float originY) {
+    public void setOriginY(double originY) {
         this.originY = originY;
     }
 
-    public float getResolution() {
+    public double getResolution() {
         return resolution;
     }
 
-    public void setResolution(float resolution) {
+    public void setResolution(double resolution) {
         this.resolution = resolution;
     }
 
@@ -237,11 +247,37 @@ public class GsonUtils {
             jsonObject.put(Content.ORIGIN_X, originX);
             jsonObject.put(Content.ORIGIN_Y, originY);
             jsonObject.put(Content.RESOLUTION, resolution);
+            jsonObject.put(Content.ANGLE, angle);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return jsonObject.toString();
     }
+
+    public String putMapListMessage(String type, RobotMap robotMap) {
+        jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        try {
+            jsonObject.put(TYPE, type);
+            if (robotMap != null) {
+                for (int i = 0; i < robotMap.getData().size(); i++) {
+                    JSONObject object = new JSONObject();
+                    object.put(Content.MAP_NAME, robotMap.getData().get(i).getName());
+                    object.put(Content.GRID_HEIGHT, robotMap.getData().get(i).getMapInfo().getGridHeight());
+                    object.put(Content.GRID_WIDTH, robotMap.getData().get(i).getMapInfo().getGridWidth());
+                    object.put(Content.ORIGIN_X, robotMap.getData().get(i).getMapInfo().getOriginX());
+                    object.put(Content.ORIGIN_Y, robotMap.getData().get(i).getMapInfo().getOriginX());
+                    object.put(Content.RESOLUTION, robotMap.getData().get(i).getMapInfo().getResolution());
+                    jsonArray.put(i, object);
+                }
+            }
+            jsonObject.put(type, jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
 
     public String putJsonMessage(String type) {
         jsonObject = new JSONObject();
@@ -258,6 +294,7 @@ public class GsonUtils {
                     object.put(Content.POINT_NAME, mRobotPositions.getData().get(i).getName());
                     object.put(Content.POINT_X, mRobotPositions.getData().get(i).getGridX());
                     object.put(Content.POINT_Y, mRobotPositions.getData().get(i).getGridY());
+                    object.put(Content.ANGLE, mRobotPositions.getData().get(i).getAngle());
                     object.put(Content.POINT_TYPE, mRobotPositions.getData().get(i).getType());
                     mRobotPositionsArray.put(i, object);
                 }

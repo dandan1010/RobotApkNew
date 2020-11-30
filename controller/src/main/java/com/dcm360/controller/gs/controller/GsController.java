@@ -188,6 +188,25 @@ public enum GsController implements IGsRobotController {
     }
 
     @Override
+    public void getMapPositions(String mapName, final RobotStatus<RobotPositions> status) {
+        if (gsControllerService != null) {
+            gsControllerService.getMapPositions(mapName).subscribeOn(Schedulers.io()).subscribe(new Consumer<RobotPositions>() {
+                @Override
+                public void accept(RobotPositions robotPositions) throws Exception {
+                    if (status != null)
+                        status.success(robotPositions);
+                }
+            }, new Consumer<Throwable>() {
+                @Override
+                public void accept(Throwable throwable) throws Exception {
+                    if (status != null)
+                        status.error(throwable);
+                }
+            });
+        }
+    }
+
+    @Override
     public void addPosition(String positionName, int type, final RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.addPosition(positionName, type).enqueue(new ResponseCallback<Status>().call(status));

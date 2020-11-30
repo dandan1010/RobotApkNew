@@ -4,9 +4,15 @@ import org.java_websocket.server.WebSocketServer;
 
 public final class Content {
 
+    public static final String ip = "10.7.5.176";//以太网ip
+    public static final int port = 8887;//端口
+    public static final String mask = "255.255.255.0";//子网掩码
+    public static final String gateway = "10.7.5.1";//网关地址
+    public static final String dns = "0.0.0.0";//域名服务器
     public static WebSocketServer server = null;
     public static String CONNECT_ADDRESS = null;
     public static String CONN_TYPE = "conn_type";
+    public static final double ROBOT_SIZE = 0.215f; //机器人大小(中心点到雷达距离 M)
     /**
      * robotState：
      * 0:关机
@@ -94,7 +100,8 @@ public final class Content {
     public static final String GRID_WIDTH = "grid_width";//地图宽
     public static final String ORIGIN_X = "origin_x";//原点x
     public static final String ORIGIN_Y = "origin_y";//原点Y
-    public static final String RESOLUTION = "resolution";
+    public static final String RESOLUTION = "resolution";//比例
+    public static final String ANGLE = "angle";//角度
 
 
 

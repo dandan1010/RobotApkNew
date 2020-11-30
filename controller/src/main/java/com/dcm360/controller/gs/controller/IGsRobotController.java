@@ -188,4 +188,6 @@ public interface IGsRobotController {
 
     void add_Position(PositionListBean positionListBean, RobotStatus<Status> status);
 
+    void getMapPositions(String mapName, RobotStatus<RobotPositions> status);
+
 }

@@ -111,13 +111,13 @@ public class NavigationService extends Service {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "停止初始化");
-                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_initialize + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_initialize) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "停止初始化失败：" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, R.string.stop_initialize + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_initialize) + error.getMessage()));
             }
         });
     }
@@ -208,6 +208,7 @@ public class NavigationService extends Service {
     }
 
     private void connectStatus(boolean connect) {
+        Log.d(TAG, "底盘连接状态：" + connect);
         if (isStartNavigationService != connect) {
             Log.d(TAG, "底盘连接状态：" + connect);
 //            TaskQueueManager.getInstances().notifyMessage("底盘连接状态：" + connect, "01");
