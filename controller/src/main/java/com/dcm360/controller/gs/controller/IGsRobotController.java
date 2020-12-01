@@ -2,6 +2,7 @@ package com.dcm360.controller.gs.controller;
 
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
@@ -21,6 +22,7 @@ import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToP
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotOdomRaw;
@@ -188,6 +190,10 @@ public interface IGsRobotController {
 
     void add_Position(PositionListBean positionListBean, RobotStatus<Status> status);
 
-    void getMapPositions(String mapName, RobotStatus<RobotPositions> status);
+    void getMapPositions(String mapName, RobotStatus<RobotPositions> status);//地图所有的点
+
+    void getVirtualObstacleData(String mapName, RobotStatus<VirtualObstacleBean> status);//获取虚拟墙
+
+    void getRecordStatus(RobotStatus<RecordStatusBean> status);
 
 }

@@ -1,6 +1,7 @@
 package com.dcm360.controller.gs.controller.service;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
@@ -23,6 +24,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPathData;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotOdomRaw;
@@ -743,6 +745,20 @@ public interface GsControllerService {
     @GET("/gs-robot/cmd/report_charge_status")
     Call<ChargeStatus> reportChargeStatus(@Query("status") String status);
 
+    /**
+     * 添加虚拟墙
+     * */
+//    @GET("/gs-robot/data/virtual_obstacles")
+//    Call<VirtualObstacleBean> getVirtualObstacleData(@Query("map_name") String paramString);
 
+    /**
+     * 获取虚拟墙
+     * */
+
+    @GET("/gs-robot/data/virtual_obstacles")
+    Call<VirtualObstacleBean> getVirtualObstacleData(@Query("map_name") String paramString);
+
+    @GET("/gs-robot/real_time_data/node_status")
+    Call<RecordStatusBean> getRecordStatus();
 
 }

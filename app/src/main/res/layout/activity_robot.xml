@@ -107,9 +107,20 @@
                 android:layout_below="@id/residual_time"
                 android:layout_marginTop="10dp"
                 android:text="uvc灯控" />
-
             <Button
                 android:layout_below="@id/controller_btn"
+                android:id="@+id/getVirtualObstacleData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="获取虚拟墙"/>
+            <Button
+                android:layout_below="@id/getVirtualObstacleData"
+                android:id="@+id/updateVirtualObstacleData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="添加虚拟墙"/>
+            <Button
+                android:layout_below="@id/updateVirtualObstacleData"
                 android:id="@+id/scanning_map"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

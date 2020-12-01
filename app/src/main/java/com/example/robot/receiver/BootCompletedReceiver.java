@@ -14,7 +14,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         Log.d("BootCompletedReceiver", "开机启动");
         Intent intentServer = new Intent(context, SocketServices.class);
         context.startService(intentServer);
-        Intent intent1 = new Intent(context, RobotDetailActivity.class);
-        context.startActivity(intent1);
+//        Intent intent1 = new Intent(context, RobotDetailActivity.class);
+//        context.startActivity(intent1);
     }
 }

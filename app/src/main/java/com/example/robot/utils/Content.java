@@ -13,6 +13,8 @@ public final class Content {
     public static String CONNECT_ADDRESS = null;
     public static String CONN_TYPE = "conn_type";
     public static final double ROBOT_SIZE = 0.215f; //机器人大小(中心点到雷达距离 M)
+    public static final String ROBOROT_INF_TWO = "ws://10.7.6.88:8089";//机器人底盘 webdocket
+    public static final String ROBOROT_INF = "http://10.7.6.88:8080"; //机器人底盘
     /**
      * robotState：
      * 0:关机
@@ -91,6 +93,7 @@ public final class Content {
     public static final String POINT_X = "point_x";//点x坐标
     public static final String POINT_Y = "point_y";//点y坐标
     public static final String POINT_TYPE = "point_type";//点类型
+    public static final String POINT_STATE = "point_state";//点执行状态
 
     public static final String REQUEST_MSG = "request_msg";//请求返回结果
 
@@ -103,7 +106,12 @@ public final class Content {
     public static final String RESOLUTION = "resolution";//比例
     public static final String ANGLE = "angle";//角度
 
+    public static final String ROBOT_HEALTHY = "robot_healthy";//机器人健康
+    public static final String ROBOT_TASK_STATE = "robot_task_state";//机器人任务状态
 
+
+
+    public static boolean completeFlag = false;
 
 
     //test

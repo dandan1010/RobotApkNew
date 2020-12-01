@@ -22,7 +22,7 @@ public class UvcWarning {
     public void startWarning() {
         Log.v(TAG, "start warning");
         mediaPlayer.reset();
-        mediaPlayer = MediaPlayer.create(mContext, R.raw.aaa);
+        mediaPlayer = MediaPlayer.create(mContext, R.raw.uvcalarm);
         mediaPlayer.setLooping(true);
         mediaPlayer.start();
         isWarning = true;
@@ -37,13 +37,4 @@ public class UvcWarning {
             isWarning = false;
         }
     }
-    /**
-     * 消毒完成
-     * */
-    public void startCompletePrompt() {
-        mediaPlayer.reset();
-        mediaPlayer = MediaPlayer.create(mContext, R.raw.aaa);
-        mediaPlayer.start();
-    }
-
 }

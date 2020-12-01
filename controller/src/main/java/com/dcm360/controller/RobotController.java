@@ -1,11 +1,13 @@
 package com.dcm360.controller;
 
 
+import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.robot_interface.RobotControllerStatus;
 import com.dcm360.controller.robot_interface.RobotDevice;
 import com.dcm360.controller.robot_interface.RobotInitialize;
@@ -43,4 +45,8 @@ public interface RobotController extends RobotInitialize, RobotMap, RobotNavigat
     Call<RobotLaserPhit> laserPhit();
 
     void use_map(String map_name, RobotStatus<Status> status);
+
+    void getVirtualObstacleData(String mapName, RobotStatus<VirtualObstacleBean> status);//获取虚拟墙
+
+    void getRecordStatus(RobotStatus<RecordStatusBean> status);
 }

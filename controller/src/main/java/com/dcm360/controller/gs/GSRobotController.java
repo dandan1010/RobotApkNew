@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dcm360.controller.RobotController;
 import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.gs.controller.ResponseCallback;
+import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
@@ -20,6 +21,7 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotMove;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotRotate;
@@ -371,6 +373,15 @@ public class GSRobotController implements RobotController {
                 png.error(error);
             }
         });
+    }
+
+    @Override
+    public void getVirtualObstacleData(String mapName, RobotStatus<VirtualObstacleBean> status) {
+        GsController.INSTANCE.getVirtualObstacleData(mapName, status);
+    }
+    @Override
+    public void getRecordStatus(RobotStatus<RecordStatusBean> status) {
+        GsController.INSTANCE.getRecordStatus(status);
     }
 
 }

@@ -43,6 +43,7 @@ import com.example.robot.adapter.TaskAdapter;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.receiver.AlarmReceiver;
 import com.example.robot.service.NavigationService;
+import com.example.robot.service.SocketServices;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
@@ -173,10 +174,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         ButterKnife.bind(this);
         mContext = RobotDetailActivity.this;
         robot_Position = new ImageView(mContext);
-//        mapLin.removeView(robot_Position);
-//        robot_Position.setImageResource(R.drawable.ic_baseline_brightness_1_24);
-//        robot_Position.setPaddingRelative(50,50,0,0);
-//        mapLin.addView(robot_Position);
+
+        Intent intentServer = new Intent(this, SocketServices.class);
+        startService(intentServer);
+
         initView();
         initListener();
 
@@ -212,19 +213,12 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         });
         TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
 
-        checkLztekLamp.openBatteryPort();
+        //checkLztekLamp.openBatteryPort();
         if (!checkLztekLamp.getEthEnable()) {
             Log.d(TAG, "网络设置失败");
         } else {
             Log.d(TAG, "网络设置成功");
         }
-
-        AddrInfo addrInfo = checkLztekLamp.getAddrInfo();
-        Log.d("zdzd : ", "" + addrInfo.getIpAddress());
-        Log.d("zdzd : ", "" + addrInfo.getGateway());
-        Log.d("zdzd : ", "" + addrInfo.getNetmask());
-        Log.d("zdzd : ", "" + addrInfo.getIpMode());
-        Log.d("zdzd : ", "" + addrInfo.getDns());
     }
 
     @Override
@@ -293,7 +287,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             R.id.pause_task_queue, R.id.stop_navigate, R.id.delete_position,
             R.id.save_task_queue, R.id.stop_task_queue, R.id.start_task_queue,
             R.id.delete_task_queue, R.id.resume_task_queue, R.id.add_position,
-            R.id.alarm_btn, R.id.scanning_map, R.id.cancel_scanning_map, R.id.develop_map})
+            R.id.alarm_btn, R.id.scanning_map, R.id.cancel_scanning_map, R.id.develop_map,
+            R.id.getVirtualObstacleData, R.id.updateVirtualObstacleData})
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.start_initialize:
@@ -397,6 +392,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
             case R.id.alarm_btn:
                 setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000);
+                break;
+            case R.id.getVirtualObstacleData:
+                TaskManager.getInstances(mContext).getVirtual_obstacles(Content.mapName);
+                break;
+            case R.id.updateVirtualObstacleData:
                 break;
             default:
                 break;
@@ -581,7 +581,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                         checkLztekLamp.stopUvc3Lamp();
                         Content.robotState = 1;
                         Content.time = 4000;
-                        uvcWarning.startCompletePrompt();
                         completeFlag = false;
                         Log.d(TAG, "恢复任务" + Content.taskState);
                         if (Content.taskState == 2) {
@@ -606,7 +605,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
                     Content.robotState = 6;
                     Content.time = 4000;
-                    uvcWarning.startCompletePrompt();
                     if (Content.taskState == 1) {
                         Content.taskState = 3;
                         TaskManager.getInstances(mContext).pauseTaskQueue();
@@ -634,28 +632,32 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         if (Content.server != null) {
             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
         }
-        ledtime++;
-        if (!toLightControlBtn.isChecked()) {
-            ledtime = 0;
-            return;
-        }
-        if (ledtime <= 10) {
-            Log.d(TAG, "正在警告");
-            if (checkLztekLamp.getGpioSensorState()) {
-                //有人靠近
-                Log.v(TAG, "10秒重置");
-                ledtime = 0;
-            }
+        if (battery < 30) {//是否到达回冲电量
+            myHandler.sendEmptyMessageDelayed(4, 1000);
         } else {
-            Log.d(TAG, "警告结束，关闭警告和led，开启uvc灯");
-            ledtime = 0;
-            uvcWarning.stopWarning();
-            Content.robotState = 5;
-            Content.time = 1000;
-            startUvcDetection();
-            return;
+            ledtime++;
+            if (!toLightControlBtn.isChecked()) {
+                ledtime = 0;
+                return;
+            }
+            if (ledtime <= 10) {
+                Log.d(TAG, "正在警告");
+                if (checkLztekLamp.getGpioSensorState()) {
+                    //有人靠近
+                    Log.v(TAG, "10秒重置");
+                    ledtime = 0;
+                }
+            } else {
+                Log.d(TAG, "警告结束，关闭警告和led，开启uvc灯");
+                ledtime = 0;
+                uvcWarning.stopWarning();
+                Content.robotState = 5;
+                Content.time = 1000;
+                startUvcDetection();
+                return;
+            }
+            myHandler.sendEmptyMessageDelayed(1, 1000);
         }
-        myHandler.sendEmptyMessageDelayed(1, 1000);
     }
 
     /**
@@ -779,16 +781,16 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             Log.d(TAG, "地图图片rotate：X===" + robotMap.getWidth() + "  Y :" + robotMap.getHeight());
             Log.d(TAG, "地图angle：===" + angle + "cosy :" + Math.cos(angle) + "sinx :" + Math.sin(angle));
             Log.d(TAG, "ZDZD === " + (int) (robotMap.getWidth() / robotPosition.getMapInfo().getGridWidth() * x
-                            + robotPosition.getMapInfo().getOriginX() - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.cos(angle))));
-            Log.d(TAG, "ZDZD ==="+ (int) ((robotMap.getHeight()) - ((robotMap.getHeight() / robotPosition.getMapInfo().getGridHeight() * y
-                            + robotPosition.getMapInfo().getOriginY()) - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.sin(angle)))));
+                    + robotPosition.getMapInfo().getOriginX() - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.cos(angle))));
+            Log.d(TAG, "ZDZD ===" + (int) ((robotMap.getHeight()) - ((robotMap.getHeight() / robotPosition.getMapInfo().getGridHeight() * y
+                    + robotPosition.getMapInfo().getOriginY()) - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.sin(angle)))));
             mapLin.removeView(robot_Position);
             robot_Position.setImageResource(R.drawable.ic_baseline_brightness_1_24);
             robot_Position.setPaddingRelative(
-                    (int) (robotMap.getWidth() / robotPosition.getMapInfo().getGridWidth() * x
-                            + robotPosition.getMapInfo().getOriginX() - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.cos(angle))),
-                    (int) ((robotMap.getHeight()) - ((robotMap.getHeight() / robotPosition.getMapInfo().getGridHeight() * y
-                            + robotPosition.getMapInfo().getOriginY()) - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.sin(angle)))),
+                    (int) ((double) robotMap.getWidth() / robotPosition.getMapInfo().getGridWidth() * (x
+                            - robotPosition.getMapInfo().getOriginX() - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.cos(angle)))),
+                    (int) (((double) robotMap.getHeight()) - (((double) robotMap.getHeight() / robotPosition.getMapInfo().getGridHeight() * (y
+                            - robotPosition.getMapInfo().getOriginY()) - (Content.ROBOT_SIZE / robotPosition.getMapInfo().getResolution() * Math.sin(angle))))),
                     0, 0);
             mapLin.addView(robot_Position);
         } else if (messageEvent.getState() == 1004) {
@@ -811,224 +813,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             Toast.makeText(mContext, "到达指定位置开始杀毒", Toast.LENGTH_SHORT).show();
             spinner.setSelection((Integer) messageEvent.getT());
             toLightControlBtn.setChecked(true);
-
-
-//phone 发送的命令
-        } else if (messageEvent.getState() == 10000) {//callback信息的返回
-            if (Content.server != null) {
-                gsonUtils.setCallback((String) messageEvent.getT());
-                Content.server.broadcast(gsonUtils.putCallBackMsg(Content.REQUEST_MSG));
-            }
-        } else if (messageEvent.getState() == 10001) {//后退
-            handler1.postDelayed(runnable1, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == 10002) {//前进
-            handler2.postDelayed(runnable2, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == 10003) {//左转
-            handler3.postDelayed(runnable3, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == 10004) {//右转
-            handler4.postDelayed(runnable4, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == 10005) {//开始消毒检测
-            spinner.setSelection((Integer) messageEvent.getT());
-            toLightControlBtn.setChecked(true);
-        } else if (messageEvent.getState() == 10006) {//停止消毒检测
-            toLightControlBtn.setChecked(false);
-        } else if (messageEvent.getState() == 10007) {//停前
-            handler2.removeCallbacks(runnable2);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == 10008) {//停退
-            handler1.removeCallbacks(runnable1);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == 10009) {//停左
-            handler3.removeCallbacks(runnable3);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == 10010) {//停右
-            handler4.removeCallbacks(runnable4);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == 10011) {//地图列表
-            TaskManager.getInstances(mContext).loadMapList();
-        } else if (messageEvent.getState() == 10012) {//地图列表获取后发送
-            RobotMap robotMap = (RobotMap) messageEvent.getT();
-            if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putMapListMessage(Content.SENDMAPNAME, robotMap));
-            }
-        } else if (messageEvent.getState() == 10013) {//存储任务队列
-            String messageEventT = (String) messageEvent.getT();
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = new JSONObject(messageEventT);
-                String taskName = jsonObject.getString(Content.TASK_NAME);
-                List<SaveTaskBean> points = new ArrayList<>();
-                for (int i = 0; i < jsonObject.getJSONArray(Content.SAVETASKQUEUE).length(); i++) {
-                    SaveTaskBean saveTaskBean = new SaveTaskBean();
-                    JSONObject jsonObject1 = (JSONObject) jsonObject.getJSONArray(Content.SAVETASKQUEUE).get(i);
-                    saveTaskBean.setPositionName(jsonObject1.getString(Content.POINT_NAME));
-                    saveTaskBean.setTime(jsonObject1.getInt(Content.SPINNERTIME));
-                    points.add(saveTaskBean);
-                }
-                TaskManager.getInstances(mContext).save_taskQueue(Content.mapName, taskName, points);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (messageEvent.getState() == 10014) {//删除任务队列
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = new JSONObject((String) messageEvent.getT());
-                String taskName = jsonObject.getString(Content.TASK_NAME);
-                TaskManager.getInstances(mContext).deleteTaskQueue(Content.mapName, taskName);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (messageEvent.getState() == 10015) {//获取任务列表
-            TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
-        } else if (messageEvent.getState() == 10016) {//返回任务列表
-            RobotTaskQueueList robotTaskQueueList = (RobotTaskQueueList) messageEvent.getT();
-            List<String> list = new ArrayList<>();
-            for (int i = 0; i < robotTaskQueueList.getData().size(); i++) {
-                list.add(robotTaskQueueList.getData().get(i).getName());
-            }
-            gsonUtils.setData(list);
-            if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDTASKQUEUE));
-            }
-        } else if (messageEvent.getState() == 10017) {//返回地图点数据
-            RobotPositions robotPositions = (RobotPositions) messageEvent.getT();
-            gsonUtils.setmRobotPositions(robotPositions);
-            if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
-            }
-        } else if (messageEvent.getState() == 10019) {//请求地图图片
-            TaskManager.getInstances(mContext).getMapPic(Content.mapName);
-        } else if (messageEvent.getState() == 10020) {//返回地图图片
-            byte[] bytes = (byte[]) messageEvent.getT();
-            if (Content.server != null) {
-                Content.server.broadcast(bytes);
-            }
-        } else if (messageEvent.getState() == 10021) {//添加点
-            String s = (String) messageEvent.getT();
-            try {
-                JSONObject jsonObject = new JSONObject(s);
-                PositionListBean positionListBean = new PositionListBean();
-                positionListBean.setName(jsonObject.getString(Content.POINT_NAME));
-                positionListBean.setGridX((int) x);
-                positionListBean.setGridY((int) y);
-                positionListBean.setAngle(angle);
-                positionListBean.setType(2);
-                positionListBean.setMapName(Content.mapName);
-                TaskManager.getInstances(mContext).add_Position(positionListBean);
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        } else if (messageEvent.getState() == 10022) {//开始任务
-            TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
-        } else if (messageEvent.getState() == 10023) {//停止任务
-            TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
-            toLightControlBtn.setChecked(false);
-        } else if (messageEvent.getState() == 10024) {//返回机器人位置
-            RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
-            gsonUtils.setX((double) robotPosition.getGridPosition().getX());
-            gsonUtils.setY((double) robotPosition.getGridPosition().getY());
-            gsonUtils.setGridHeight((int) robotPosition.getMapInfo().getGridHeight());
-            gsonUtils.setGridWidth((int) robotPosition.getMapInfo().getGridWidth());
-            gsonUtils.setOriginX((double) robotPosition.getMapInfo().getOriginX());
-            gsonUtils.setOriginY((double) robotPosition.getMapInfo().getOriginY());
-            gsonUtils.setResolution((double) robotPosition.getMapInfo().getResolution());
-            gsonUtils.setAngle((double) robotPosition.getAngle());
-            if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putRobotPosition(Content.SENDGPSPOSITION));
-            }
-        } else if (messageEvent.getState() == 10025) {//开始扫描地图
-            TaskManager.getInstances(mContext).start_scan_map((String) messageEvent.getT());
-        } else if (messageEvent.getState() == 10026) {//选定地图
-            TaskManager.getInstances(mContext).getMapPic(Content.mapName);
-            TaskManager.getInstances(mContext).use_map(Content.mapName);
-            myHandler.removeCallbacks(runnablePosition);
-            myHandler.postDelayed(runnablePosition, 1000);
-        } else if (messageEvent.getState() == 10027) {//转圈初始化结果
-            Log.d("zdzd ", "初始化结果： " + (String) messageEvent.getT() + ",     isDevelop :" + isDevelop);
-            if ("successed".equals((String) messageEvent.getT()) && isDevelop) {
-                handlerInitialize.postDelayed(runnableInitialize, 1000);
-            }
-            if (Content.server != null) {
-                Content.server.broadcast((String) messageEvent.getT());
-            }
-        } else if (messageEvent.getState() == 10028) {//请求地图点列表
-            TaskManager.getInstances(mContext).getPosition(Content.mapName);
-        } else if (messageEvent.getState() == 10029) {//取消扫描地图并保存
-            TaskManager.getInstances(mContext).stopScanMap();
-            isDevelop = false;
-        } else if (messageEvent.getState() == 10030) {//拓展地图
-            isDevelop = true;
-            NavigationService.initialize(Content.mapName);
-        } else if (messageEvent.getState() == 10031) {//删除地图
-            TaskManager.getInstances(mContext).deleteMap((String) messageEvent.getT());
-        } else if (messageEvent.getState() == 10032) {//删除点
-            TaskManager.getInstances(mContext).deletePosition(Content.mapName, (String) messageEvent.getT());
-        } else if (messageEvent.getState() == 10033) {//电池电量
-            byte[] bytes = (byte[]) messageEvent.getT();
-            battery = bytes[23];
-            robotPower.setText("电池容量：" + battery + "%");
-            if (Content.server != null) {
-                gsonUtils.setBattery(battery + "%");
-                Content.server.broadcast(gsonUtils.putBattery(Content.BATTERY_DATA));
-            }
-        } else if (messageEvent.getState() == 10034) {
-            Log.d("zdzd :", "是否完成初始化" + (String) messageEvent.getT());
-            if ("true".equals((String) messageEvent.getT())) {
-                handlerInitialize.removeCallbacks(runnableInitialize);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.finish_initialize)));
-                TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
-            } else {
-                handler1.postDelayed(runnableInitialize, 1000);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.is_initialize)));
-            }
-        } else if (messageEvent.getState() == 10035) {
-            Log.d("zdzd :", "是否完成初始化error: " + (String) messageEvent.getT());
-            EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.fail_initialize)) + (String) messageEvent.getT());
-            handlerInitialize.removeCallbacks(runnableInitialize);
-        } else if (messageEvent.getState() == 10036) {//取消扫描不保存地图
-            TaskManager.getInstances(mContext).cancleScanMap();
-        }
-
-
-//test request
-        else if (messageEvent.getState() == 20001) {
-            checkLztekLamp.setUvcMode();
-            checkLztekLamp.startUvc1Lamp();
-            checkLztekLamp.startUvc2Lamp();
-            checkLztekLamp.startUvc3Lamp();
-        } else if (messageEvent.getState() == 20002) {
-            checkLztekLamp.stopUvc1Lamp();
-            checkLztekLamp.stopUvc2Lamp();
-            checkLztekLamp.stopUvc3Lamp();
-        } else if (messageEvent.getState() == 20003) {
-            checkLztekLamp.startLedLamp();
-        } else if (messageEvent.getState() == 20004) {
-            checkLztekLamp.stopLedLamp();
-        } else if (messageEvent.getState() == 20005) {
-            String s = checkLztekLamp.testGpioSensorState();
-            Log.d("zdzd : ", "sensor返回值： " + s);
-            gsonUtils.setTestCallBack(s);
-            if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putTestSensorCallBack(Content.TEST_SENSOR_CALLBACK));
-            }
-        } else if (messageEvent.getState() == 20006) {
-            uvcWarning.startWarning();
-        } else if (messageEvent.getState() == 20007) {
-            uvcWarning.stopWarning();
         }
     }
-
 
 }

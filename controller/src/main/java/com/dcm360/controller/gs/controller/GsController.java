@@ -3,6 +3,7 @@ package com.dcm360.controller.gs.controller;
 import android.annotation.SuppressLint;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
@@ -22,6 +23,7 @@ import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToP
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotOdomRaw;
@@ -601,5 +603,17 @@ public enum GsController implements IGsRobotController {
     public void reportChargeStatus(String state, RobotStatus<ChargeStatus> status) {
         if (gsControllerService != null)
             gsControllerService.reportChargeStatus(state).enqueue(new ResponseCallback<ChargeStatus>().call(status));
+    }
+
+    @Override
+    public void getRecordStatus(RobotStatus<RecordStatusBean> status) {
+        if (gsControllerService != null)
+            gsControllerService.getRecordStatus().enqueue(new ResponseCallback<RecordStatusBean>().call(status));
+    }
+
+    @Override
+    public void getVirtualObstacleData(String mapName, RobotStatus<VirtualObstacleBean> status) {
+        if (gsControllerService != null)
+            gsControllerService.getVirtualObstacleData(mapName).enqueue(new ResponseCallback<VirtualObstacleBean>().call(status));
     }
 }

@@ -39,6 +39,24 @@ public class GsonUtils {
     private RobotPositions mRobotPositions = null;
     private String battery = null;
     private String testCallBack = null;
+    private String healthyMsg = null;
+    private String taskState = null;
+
+    public String getHealthyMsg() {
+        return healthyMsg;
+    }
+
+    public void setHealthyMsg(String healthyMsg) {
+        this.healthyMsg = healthyMsg;
+    }
+
+    public String getTaskState() {
+        return taskState;
+    }
+
+    public void setTaskState(String taskState) {
+        this.taskState = taskState;
+    }
 
     public String getTestCallBack() {
         return testCallBack;
@@ -180,11 +198,34 @@ public class GsonUtils {
         this.tvTime = tvTime;
     }
 
+    public String putTaskHistory(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.TEST_SENSOR_CALLBACK, testCallBack);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
     public String putTestSensorCallBack(String type){
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.TEST_SENSOR_CALLBACK, testCallBack);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
+    public String putSocketMsg(String type){
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(Content.ROBOT_HEALTHY, healthyMsg);
+            jsonObject.put(Content.ROBOT_TASK_STATE, taskState);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -335,6 +376,7 @@ public class GsonUtils {
                 object.put(Content.TASK_Y, taskBean.getY());
                 object.put(Content.TASK_ANGLE, taskBean.getAngle());
                 object.put(Content.TASK_DISINFECT_TIME, taskBean.getDisinfectTime());
+                object.put(Content.POINT_STATE, taskBean.getPointState());
                 jsonArray.put(i, object);
             }
             jsonObject.put(taskName, jsonArray);
