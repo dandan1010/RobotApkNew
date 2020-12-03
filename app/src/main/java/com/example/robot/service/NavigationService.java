@@ -71,7 +71,7 @@ public class NavigationService extends Service {
     }
 
     public static void initialize_directly(String mapName) {//不转圈初始化
-        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, "Origin", new RobotStatus<Status>() {
+        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, "Charging", new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "不转圈初始化成功" + status.getMsg());

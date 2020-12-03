@@ -22,6 +22,7 @@ import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToP
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
@@ -195,5 +196,7 @@ public interface IGsRobotController {
     void getVirtualObstacleData(String mapName, RobotStatus<VirtualObstacleBean> status);//获取虚拟墙
 
     void getRecordStatus(RobotStatus<RecordStatusBean> status);
+
+    void updateVirtualObstacleData(UpdataVirtualObstacleBean updataVirtualObstacleBean, String mapName, String obstacle_name, RobotStatus<Status> status);//添加虚拟强
 
 }

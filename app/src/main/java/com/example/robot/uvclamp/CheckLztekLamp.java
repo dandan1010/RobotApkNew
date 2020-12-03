@@ -353,6 +353,7 @@ public class CheckLztekLamp {
                     Log.d(TAG, "读取数据 ： " + editText.getText().toString());
                     EventBus.getDefault().post(new EventBusMessage(1004, data));
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
+                    EventBus.getDefault().post(new EventBusMessage(10040, editText.getText().toString()));
                 }
             } catch (Exception e) {
                 android.util.Log.d(TAG, "[COM]Read Faild: " + e.getMessage(), e);

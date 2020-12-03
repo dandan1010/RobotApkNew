@@ -11,7 +11,8 @@ public final class Content {
     public static final String dns = "0.0.0.0";//域名服务器
     public static WebSocketServer server = null;
     public static String CONNECT_ADDRESS = null;
-    public static String CONN_TYPE = "conn_type";
+    public static String CONN_OK = "conn_ok";
+    public static String NO_CONN = "no_conn";
     public static final double ROBOT_SIZE = 0.215f; //机器人大小(中心点到雷达距离 M)
     public static final String ROBOROT_INF_TWO = "ws://10.7.6.88:8089";//机器人底盘 webdocket
     public static final String ROBOROT_INF = "http://10.7.6.88:8080"; //机器人底盘
@@ -35,8 +36,8 @@ public final class Content {
     */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = 0;
-    public static String mapName = "testapp";
-    public static String taskName = "task0";
+    public static String mapName = "test00";
+    public static String taskName = "";
 
     public static final String MAP_NAME = "map_Name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字
@@ -108,10 +109,24 @@ public final class Content {
 
     public static final String ROBOT_HEALTHY = "robot_healthy";//机器人健康
     public static final String ROBOT_TASK_STATE = "robot_task_state";//机器人任务状态
+    public static final String ROBOT_TASK_HISTORY = "ROBOT_TASK_HISTORY";//机器人历史任务
 
-
+    public static final String GET_VIRTUAL = "get_virtual";//获取虚拟墙数据
+    public static final String UPDATA_VIRTUAL = "updata_virtual";//更新虚拟墙
+    public static final String SEND_VIRTUAL = "send_virtual";//返回虚拟墙数据
+    public static final String VIRTUAL_X = "virtual_x";//虚拟墙数据
+    public static final String VIRTUAL_Y = "virtual_y";//虚拟墙数据
 
     public static boolean completeFlag = false;
+
+
+
+    //db Name
+    public static final String dbName = "taskHistory";
+    public static final String tableName = "taskHistory";
+    public static final String dbTaskName = "taskName";
+    public static final String dbTime = "time";
+    public static final String dbData = "data";
 
 
     //test

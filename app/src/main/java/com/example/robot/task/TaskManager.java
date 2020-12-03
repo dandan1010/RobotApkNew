@@ -21,12 +21,14 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.NavigationStatus;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.dcm360.controller.utils.WebSocketUtil;
 import com.example.robot.R;
+import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.bean.TaskBean;
 import com.example.robot.service.NavigationService;
@@ -65,6 +67,8 @@ public class TaskManager {
     private RobotPositions mRobotPositions = null;
     private SqLiteOpenHelperUtils sqLiteOpenHelperUtils;
     private GsonUtils gsonUtils;
+    private long startTime;
+    private PointStateBean pointStateBean;
 
 
     private TaskManager(Context mContext) {
@@ -236,6 +240,7 @@ public class TaskManager {
         });
 
     }
+
     /**
      * 扩展扫描地图
      */
@@ -312,9 +317,9 @@ public class TaskManager {
 
     /**
      * 取消扫描地图——不保存
-     * */
+     */
 
-    public void cancleScanMap(){
+    public void cancleScanMap() {
         GsController.INSTANCE.cancelScanMap(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
@@ -406,7 +411,7 @@ public class TaskManager {
             for (int j = 0; j < list.size(); j++) {
                 Log.d(TAG, "ZDZD :mRobotPositions  ===" + mRobotPositions.getData().size());
                 for (int i = 0; i < mRobotPositions.getData().size(); i++) {
-                    Log.d(TAG, "ZDZD : " + mRobotPositions.getData().get(i).getName() + "    LISTnAME :" +list.get(j).getPositionName());
+                    Log.d(TAG, "ZDZD : " + mRobotPositions.getData().get(i).getName() + "    LISTnAME :" + list.get(j).getPositionName());
                     if (list.get(j).getPositionName().equals(mRobotPositions.getData().get(i).getName())) {
                         TaskBean taskBean = new TaskBean(mRobotPositions.getData().get(i).getName(),
                                 mRobotPositions.getData().get(i).getGridX(),
@@ -418,6 +423,7 @@ public class TaskManager {
                 }
             }
             SharedPrefUtil.getInstance(mContext, mapName).setPositionMsg(taskName, arrayList);
+
         }
         return arrayList;
     }
@@ -427,7 +433,7 @@ public class TaskManager {
         for (int i = 0; i < mTaskArrayList.size(); i++) {
             pois.add(mTaskArrayList.get(i).getName());
         }
-        //pois.add("Origin");
+        pois.add("Charging");
 
         RobotTaskQueue taskQueue = new RobotTaskQueue();
         taskQueue.setName(taskName);
@@ -477,6 +483,8 @@ public class TaskManager {
                     Content.time = 300;
                     Content.taskState = 1;
                     Content.taskIndex = 0;
+                    startTime = System.currentTimeMillis();
+                    Log.d("zdzd", "开始时间：" + startTime);
 //                    myHandler.removeCallbacks(runnable);
 //                    myHandler.postDelayed(runnable, 1000);
 //                    is_task_queue_finished();
@@ -495,25 +503,34 @@ public class TaskManager {
 
     private ArrayList<TaskBean> getTaskPositionMsg(String mapName, String taskName) {
         mTaskArrayList.clear();
+        pointStateBean = new PointStateBean();
         String taskMsg = SharedPrefUtil.getInstance(mContext, mapName).getPositionMsg(taskName);
         Log.d(TAG, "获取地图数据startTaskQueue ：" + taskMsg);
+        pointStateBean.setTaskName(taskName);
+        List<PointStateBean.PointState> pointStates = new ArrayList<>();
         if (taskMsg != null) {
             try {
                 JSONObject jsonObject = new JSONObject(taskMsg);
                 JSONArray jsonArray = jsonObject.getJSONArray(taskName);
-                for (int i =0; i < jsonArray.length(); i++) {
-                    JSONObject jsonObject1= (JSONObject) jsonArray.get(i);
+                for (int i = 0; i < jsonArray.length(); i++) {
+                    JSONObject jsonObject1 = (JSONObject) jsonArray.get(i);
                     TaskBean taskBean = new TaskBean(jsonObject1.getString(Content.TASK_NAME),
                             jsonObject1.getInt(Content.TASK_X),
                             jsonObject1.getInt(Content.TASK_Y),
                             jsonObject1.getInt(Content.TASK_DISINFECT_TIME),
                             jsonObject1.getDouble(Content.TASK_ANGLE));
                     mTaskArrayList.add(taskBean);
+                    PointStateBean.PointState pointState = new PointStateBean.PointState();
+                    pointState.setPointName(jsonObject1.getString(Content.TASK_NAME));
+                    pointState.setPointState("没有执行");
+                    pointStates.add(pointState);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
+        pointStateBean.setList(pointStates);
+
         return mTaskArrayList;
     }
 
@@ -572,9 +589,9 @@ public class TaskManager {
                 Content.taskState = 0;
                 Content.taskIndex = 0;
                 Content.taskName = null;
-//                myHandler.removeCallbacks(runnable);
-//                myHandler.removeCallbacks(runnable_is_finfish);
-                navigate_Position(mapName, "Origin");
+                sqLiteOpenHelperUtils.saveTaskHistory(Content.taskName, "" + (System.currentTimeMillis() - startTime), "" + System.currentTimeMillis());
+                startTime = 0;
+                navigate_Position(mapName, "Charing");
             }
 
             @Override
@@ -749,110 +766,29 @@ public class TaskManager {
         });
     }
 
-    /**
-     * 任务是否完成
-     */
-//    public void is_task_queue_finished() {
-//        GsController.INSTANCE.isTaskQueueFinished(new RobotStatus<Status>() {
-//            @Override
-//            public void success(Status status) {
-//                Log.d(TAG, "is_task_queue_finished success" + status.getData());
-//                if ("true".equals(status.getData())) {
-//                    Content.taskState = 0;
-//                    Content.robotState = 1;
-//                    Content.time = 4000;
-//                    Toast.makeText(mContext, "任务完成", Toast.LENGTH_SHORT).show();
-//                    Content.taskName = null;
-//                    myHandler.removeCallbacks(runnable);
-//                    myHandler.removeCallbacks(runnable_is_finfish);
-//                    EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.task_finish)));
-//                } else {
-//                    myHandler.removeCallbacks(runnable_is_finfish);
-//                    myHandler.postDelayed(runnable_is_finfish, 1000);
-//                }
-//            }
-//
-//            @Override
-//            public void error(Throwable error) {
-//                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.task_finish) + error.getMessage()));
-//            }
-//        });
-//    }
-
-    Handler myHandler = new Handler() {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            super.handleMessage(msg);
-            if (msg.what == 1) {
-                EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
-                Log.d(TAG, "暂停任务");
-                Content.robotState = 5;
-                Content.time = 1000;
-                pauseTaskQueue();
-                Content.taskIndex ++;
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.arrive_location)));
-
-            }
-        }
-    };
-
-//    Runnable runnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            Log.d(TAG, "机器人X ：" + mRobotPosition.getGridPosition().getX() + ",  Y : " + mRobotPosition.getGridPosition().getY());
-//            Log.d(TAG, "机器人目标X ：" + mTaskArrayList.get(Content.taskIndex).getX() + ",  Y : " + mTaskArrayList.get(Content.taskIndex).getY());
-//
-//            if (mRobotPosition != null && mRobotPosition.getGridPosition().getX() == mTaskArrayList.get(Content.taskIndex).getX()
-//                    && mRobotPosition.getGridPosition().getY() == mTaskArrayList.get(Content.taskIndex).getY()) {
-//                Log.d(TAG, "到达知道哪个位置，开始消毒");
-//                Log.d(TAG, "到达知道哪个位置，开始消毒");
-//                myHandler.removeMessages(1);
-//                myHandler.sendEmptyMessage(1);
-//            } else {
-//                Log.d(TAG, "没到位置，继续移动");
-//                myHandler.removeCallbacks(this::run);
-//                myHandler.postDelayed(this::run, 1000);
-//            }
-//        }
-//    };
-
-//    Runnable runnable_is_finfish = new Runnable() {
-//        @Override
-//        public void run() {
-//            is_task_queue_finished();
-//        }
-//    };
-
     //获取虚拟墙
-    public void getVirtual_obstacles(String mapName){
+    public void getVirtual_obstacles(String mapName) {
         RobotManagerController.getInstance().getRobotController().getRecordStatus(new RobotStatus<RecordStatusBean>() {
             @Override
             public void success(RecordStatusBean status) {
-                Log.d("zdzd " , "lines : getRecordStatus " + status.getMsg());
+                Log.d("zdzd ", "lines : getRecordStatus " + status.getMsg());
 
                 RobotManagerController.getInstance().getRobotController().getVirtualObstacleData(mapName, new RobotStatus<VirtualObstacleBean>() {
                     @Override
                     public void success(VirtualObstacleBean virtualObstacleBean) {
-                        Log.d("zdzd " , "lines : virtualObstacleBean " + virtualObstacleBean.toString());
-                        VirtualObstacleBean.ObstaclesEntity obstaclesEntity = virtualObstacleBean.getObstacles();
-                        List<VirtualObstacleBean.ObstaclesEntity.LinesEntity> linesEntity = obstaclesEntity.getLines();
-                        for (int i = 0; i < linesEntity.size(); i++) {
-                            Log.d("zdzd " , "lines : start " + linesEntity.get(i).getStart().getX());
-                            Log.d("zdzd " , "lines : end " + linesEntity.get(i).getEnd().getX());
-                        }
-
+                        EventBus.getDefault().post(new EventBusMessage(10042, virtualObstacleBean));
                     }
 
                     @Override
                     public void error(Throwable error) {
-                        Log.d("zdzd " , "lines : virtualObstacleBean " + error.getMessage());
+                        Log.d("zdzd ", "lines : virtualObstacleBean " + error.getMessage());
                     }
                 });
             }
 
             @Override
             public void error(Throwable error) {
-                Log.d("zdzd " , "lines : getRecordStatus error " + error.getMessage());
+                Log.d("zdzd ", "lines : getRecordStatus error " + error.getMessage());
             }
         });
 
@@ -860,7 +796,20 @@ public class TaskManager {
     }
 
     //添加虚拟墙
+    public void update_virtual_obstacles(UpdataVirtualObstacleBean updataVirtualObstacleBean,String mapName, String obstacle_name){
+        Log.d("update_virtual111 ", ""+ updataVirtualObstacleBean.toString());
+        RobotManagerController.getInstance().getRobotController().updateVirtualObstacleData(updataVirtualObstacleBean, mapName, obstacle_name, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d("update_virtual ", ""+ status.getMsg());
+            }
 
+            @Override
+            public void error(Throwable error) {
+                Log.d("update_virtual ", ""+ error.getMessage());
+            }
+        });
+    }
 
 
     @SuppressLint("CheckResult")
@@ -872,9 +821,9 @@ public class TaskManager {
                         return;
                     }
                     Log.d("zdzd888", "websocket3:" + data);
-                    EventBus.getDefault().post(new EventBusMessage(10037, mContext.getResources().getString(R.string.arrive_location)));
+                    EventBus.getDefault().post(new EventBusMessage(10037, data));
                 }, throwable -> {
-                    Log.d("zdzd999","导航：" + throwable.getMessage());
+                    Log.d("zdzd999", "导航：" + throwable.getMessage());
                 }));
 
         RobotManagerController.getInstance()
@@ -882,8 +831,12 @@ public class TaskManager {
                 .RobotStatus(new NavigationStatus() {
                                  @Override
                                  public void noticeType(String type, String destination) {
-                                     Log.d("zdzdxxx", "statustype：" + type );
+                                     Log.d("zdzdxxx", "statustype：" + type);
                                      String msg = "";
+                                     if (Content.taskIndex < mTaskArrayList.size() - 1 && !type.equals("HEADING")) {
+                                         pointStateBean.getList().get(Content.taskIndex).setPointState(type);
+                                         EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+                                     }
                                      if ("REACHED".equals(type)) {//已经到达目的地
                                          Log.d("zdzdContent.taskIndex", "" + Content.taskIndex);
                                          if (Content.taskIndex < mTaskArrayList.size() - 1) {
@@ -892,15 +845,26 @@ public class TaskManager {
                                              Log.d(TAG, "暂停任务");
                                              Content.robotState = 5;
                                              Content.time = 1000;
-                                             Content.taskIndex ++;
+                                             Content.taskIndex++;
+                                         } else if (Content.taskIndex >= mTaskArrayList.size()) {
+                                             Log.d(TAG, "任务完成");
+                                             sqLiteOpenHelperUtils.saveTaskHistory(Content.taskName, "" + (System.currentTimeMillis() - startTime), "" + System.currentTimeMillis());
+                                             startTime = 0;
+                                             Content.taskState = 0;
+                                             Content.robotState = 1;
+                                             Content.time = 4000;
+                                             Toast.makeText(mContext, "任务完成", Toast.LENGTH_SHORT).show();
+                                             Content.taskName = null;
                                          }
                                      } else if (type.equals("UNREACHABLE")) {//目的地无法到达
-
+                                         msg = "目的地无法到达";
+                                         Content.taskIndex++;
                                      } else if (type.equals("LOCALIZATION_FAILED")) {
                                          msg = "定位失败";
+                                         Content.taskIndex++;
                                      } else if (type.equals("GOAL_NOT_SAFE")) {
-
                                          msg = "目的地有障碍物";
+                                         Content.taskIndex++;
                                      } else if (type.equals("TOO_CLOSE_TO_OBSTACLES")) {
                                          msg = "离障碍物太近";
                                      } else if (type.equals("HEADING")) {
@@ -914,7 +878,7 @@ public class TaskManager {
                                  public void statusCode(int code, String msg) {
                                      //String status = StatusCode.getCodeMsg(code);
                                      //MyLogcat.showMessageLog(status + ">>>" + msg);
-                                    Log.d("zdzdxxx", "statusCode：" + code + "  , msg : " + msg);
+                                     Log.d("zdzdxxx", "statusCode：" + code + "  , msg : " + msg);
                                      switch (code) {
                                          case 403:
                                          case 304:
@@ -951,7 +915,6 @@ public class TaskManager {
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
 
     }
-
 
 
 }

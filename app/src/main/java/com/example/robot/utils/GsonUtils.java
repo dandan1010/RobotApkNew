@@ -1,11 +1,16 @@
 package com.example.robot.utils;
 
+import android.content.Context;
+import android.database.Cursor;
 import android.util.Log;
 
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.example.robot.MyApplication;
+import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.TaskBean;
+import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +45,12 @@ public class GsonUtils {
     private String battery = null;
     private String testCallBack = null;
     private String healthyMsg = null;
-    private String taskState = null;
+    private PointStateBean taskState = null;
+    private VirtualObstacleBean virtualObstacleBean;
+
+    public void setVirtualObstacleBean(VirtualObstacleBean virtualObstacleBean) {
+        this.virtualObstacleBean = virtualObstacleBean;
+    }
 
     public String getHealthyMsg() {
         return healthyMsg;
@@ -50,11 +60,11 @@ public class GsonUtils {
         this.healthyMsg = healthyMsg;
     }
 
-    public String getTaskState() {
+    public PointStateBean getTaskState() {
         return taskState;
     }
 
-    public void setTaskState(String taskState) {
+    public void setTaskState(PointStateBean taskState) {
         this.taskState = taskState;
     }
 
@@ -198,7 +208,30 @@ public class GsonUtils {
         this.tvTime = tvTime;
     }
 
-    public String putTaskHistory(String type){
+    public String putVirtualObstacle(String type) {
+        jsonObject = new JSONObject();
+        JSONArray jsonArray = new JSONArray();
+        try {
+            jsonObject.put(TYPE, type);
+            for (int i = 0; i < virtualObstacleBean.getData().getObstacles().getPolylines().size(); i++) {
+                JSONArray jsArray = new JSONArray();
+                for (int j = 0; j< virtualObstacleBean.getData().getObstacles().getPolylines().get(i).size(); j++){
+                    JSONObject js = new JSONObject();
+                    js.put(Content.VIRTUAL_X, virtualObstacleBean.getData().getObstacles().getPolylines().get(i).get(i).getX());
+                    js.put(Content.VIRTUAL_X, virtualObstacleBean.getData().getObstacles().getPolylines().get(i).get(i).getY());
+                    jsArray.put(j, js);
+                }
+                jsonArray.put(i, jsArray);
+            }
+            jsonObject.put(Content.SEND_VIRTUAL, jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG, "JS string : " + jsonObject.toString());
+        return jsonObject.toString();
+    }
+
+    public String putTestSensorCallBack(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -209,30 +242,57 @@ public class GsonUtils {
         return jsonObject.toString();
     }
 
-    public String putTestSensorCallBack(String type){
-        jsonObject = new JSONObject();
-        try {
-            jsonObject.put(TYPE, type);
-            jsonObject.put(Content.TEST_SENSOR_CALLBACK, testCallBack);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObject.toString();
-    }
-
-    public String putSocketMsg(String type){
+    public String putSocketHealthyMsg(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.ROBOT_HEALTHY, healthyMsg);
-            jsonObject.put(Content.ROBOT_TASK_STATE, taskState);
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return jsonObject.toString();
     }
 
-    public String putConnMsg(String type){
+    public String putSocketTaskMsg(String type) {
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            JSONArray jsonArray = new JSONArray();
+            for (int i = 0; i < taskState.getList().size(); i++) {
+                JSONObject js = new JSONObject();
+                js.put(Content.POINT_NAME, taskState.getList().get(i).getPointName());
+                js.put(Content.POINT_STATE, taskState.getList().get(i).getPointState());
+                jsonArray.put(i, js);
+            }
+            jsonObject.put(Content.ROBOT_TASK_STATE, jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
+    public String putSocketTaskHistory(String type, Context context) {
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            JSONArray jsonArray = new JSONArray();
+            SqLiteOpenHelperUtils sqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
+            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory(Content.taskName);
+            while (cursor.moveToNext()) {
+                JSONObject js = new JSONObject();
+                js.put(Content.dbTaskName, cursor.getColumnName(cursor.getColumnIndex(Content.dbTaskName)));
+                js.put(Content.dbTime, cursor.getColumnName(cursor.getColumnIndex(Content.dbTime)));
+                js.put(Content.dbData, cursor.getColumnName(cursor.getColumnIndex(Content.dbData)));
+                jsonArray.put(js);
+            }
+            jsonObject.put(Content.ROBOT_TASK_HISTORY, jsonArray);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return jsonObject.toString();
+    }
+
+    public String putConnMsg(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -244,7 +304,7 @@ public class GsonUtils {
         return jsonObject.toString();
     }
 
-    public String putCallBackMsg(String type){
+    public String putCallBackMsg(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -255,7 +315,7 @@ public class GsonUtils {
         return jsonObject.toString();
     }
 
-    public String putBattery(String type){
+    public String putBattery(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -266,7 +326,7 @@ public class GsonUtils {
         return jsonObject.toString();
     }
 
-    public String putTVTime(String type){
+    public String putTVTime(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -277,7 +337,7 @@ public class GsonUtils {
         return jsonObject.toString();
     }
 
-    public String putRobotPosition(String type){
+    public String putRobotPosition(String type) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -362,7 +422,8 @@ public class GsonUtils {
         }
         return type;
     }
-//存储任务
+
+    //存储任务
     public String putJsonPositionMessage(String taskName, ArrayList<TaskBean> arrayList) {
         jsonObject = new JSONObject();
         JSONArray jsonArray = new JSONArray();
@@ -376,7 +437,6 @@ public class GsonUtils {
                 object.put(Content.TASK_Y, taskBean.getY());
                 object.put(Content.TASK_ANGLE, taskBean.getAngle());
                 object.put(Content.TASK_DISINFECT_TIME, taskBean.getDisinfectTime());
-                object.put(Content.POINT_STATE, taskBean.getPointState());
                 jsonArray.put(i, object);
             }
             jsonObject.put(taskName, jsonArray);

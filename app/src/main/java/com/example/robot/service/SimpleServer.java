@@ -34,30 +34,28 @@ public class SimpleServer extends WebSocketServer {
 //        conn.send("OK conn");
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
         address = remoteSocketAddress.getHostName();
+        Log.d("zdzd_server", address);
         if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
             gsonUtils.setMapName(Content.mapName);
             gsonUtils.setTaskName(Content.taskName);
-            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE)); //This method sends a message to all clients connected
+            broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
             System.out.println("new connection to " + conn.getRemoteSocketAddress());
             Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
-            Log.d("zdzd " , "连接的地址open：" + Content.CONNECT_ADDRESS);
+            Log.d("zdzd_server" , "连接的地址open：" + Content.CONNECT_ADDRESS);
         } else {
             gsonUtils.setMapName(Content.CONNECT_ADDRESS);
-            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE));
+            broadcast(gsonUtils.putConnMsg(Content.NO_CONN));
         }
-        Log.d("zdzd ", remoteSocketAddress.getHostName());
-        Log.d("zdzd ", remoteSocketAddress.getHostString());
-        Log.d("zdzd ", String.valueOf(remoteSocketAddress.getAddress()));
-        Log.d("zdzd ", String.valueOf(remoteSocketAddress.getPort()));
-        Log.d("zdzd ", String.valueOf(remoteSocketAddress.isUnresolved()));
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
-        if (address.equals(Content.CONNECT_ADDRESS)) {
+        InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
+        Log.d("zdzd_server", "close : " + remoteSocketAddress.getHostName());
+        if (Content.CONNECT_ADDRESS.equals(remoteSocketAddress.getHostName())) {
             Content.CONNECT_ADDRESS = null;
-            Log.d("zdzd ", "连接的地址close：" + Content.CONNECT_ADDRESS);
+            Log.d("zdzd_server", "连接的地址close：" + Content.CONNECT_ADDRESS);
         }
     }
 
@@ -65,16 +63,6 @@ public class SimpleServer extends WebSocketServer {
     public void onMessage(WebSocket conn, String message) {
         System.out.println("received message from " + conn.getRemoteSocketAddress());
         Log.d("zdzd : ", "收到信息 ： " + message);
-//        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
-//            Content.CONNECT_ADDRESS = message;
-//            gsonUtils.setMapName(Content.mapName);
-//            gsonUtils.setTaskName(Content.taskName);
-//            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE));
-//        } else if (Content.CONNECT_ADDRESS.equals(message)) {
-//            gsonUtils.setMapName(Content.mapName);
-//            gsonUtils.setTaskName(Content.taskName);
-//            broadcast(gsonUtils.putConnMsg(Content.CONN_TYPE));
-//        }
         try {
             differentiateType(message);
         } catch (JSONException e) {
@@ -118,6 +106,7 @@ public class SimpleServer extends WebSocketServer {
 
     private void differentiateType(String message) throws JSONException {
         Log.d("zdzd ", "getType :  " + gsonUtils.getType(message));
+        String mapName;
         switch (gsonUtils.getType(message)) {
             case Content.STARTDOWN:
                 EventBus.getDefault().post(new EventBusMessage(10001, message));
@@ -164,7 +153,9 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10015, message));
                 break;
             case Content.GETMAPPIC://地图图片
-                EventBus.getDefault().post(new EventBusMessage(10019, message));
+                jsonObject = new JSONObject(message);
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10019, mapName));
                 break;
             case Content.ADD_POSITION://添加点
                 EventBus.getDefault().post(new EventBusMessage(10021, message));
@@ -179,7 +170,7 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.START_SCAN_MAP://开始扫描地图
                 jsonObject = new JSONObject(message);
-                String mapName = jsonObject.getString(Content.MAP_NAME);
+                mapName = jsonObject.getString(Content.MAP_NAME);
                 EventBus.getDefault().post(new EventBusMessage(10025, mapName));
                 break;
             case Content.USE_MAP://选定地图
@@ -207,6 +198,17 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.CANCEL_SCAN_MAP_NO://取消扫描不保存地图
                 EventBus.getDefault().post(new EventBusMessage(10036, message));
+                break;
+            case Content.ROBOT_TASK_HISTORY://任务历史
+                EventBus.getDefault().post(new EventBusMessage(10039, message));
+                break;
+            case Content.GET_VIRTUAL://获取虚拟强数据
+                jsonObject = new JSONObject(message);
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10041, mapName));
+                break;
+            case Content.UPDATA_VIRTUAL://更新虚拟强
+                EventBus.getDefault().post(new EventBusMessage(10043, message));
                 break;
 
 

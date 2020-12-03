@@ -21,6 +21,7 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotMove;
@@ -382,6 +383,11 @@ public class GSRobotController implements RobotController {
     @Override
     public void getRecordStatus(RobotStatus<RecordStatusBean> status) {
         GsController.INSTANCE.getRecordStatus(status);
+    }
+
+    @Override
+    public void updateVirtualObstacleData(UpdataVirtualObstacleBean updataVirtualObstacleBean, String mapName, String obstacle_name, RobotStatus<Status> status) {
+        GsController.INSTANCE.updateVirtualObstacleData(updataVirtualObstacleBean, mapName, obstacle_name, status);
     }
 
 }

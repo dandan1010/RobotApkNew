@@ -27,16 +27,4 @@ public class MyApplication extends Application {
         super.onCreate();
 
     }
-
-//    Runnable runnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            intentService = new Intent(getApplicationContext(), NavigationService.class);
-//            startService(intentService);
-//            handler.sendEmptyMessage(1);
-//        }
-//    };
-
-
-
 }

@@ -23,6 +23,7 @@ import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationToP
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
@@ -615,5 +616,11 @@ public enum GsController implements IGsRobotController {
     public void getVirtualObstacleData(String mapName, RobotStatus<VirtualObstacleBean> status) {
         if (gsControllerService != null)
             gsControllerService.getVirtualObstacleData(mapName).enqueue(new ResponseCallback<VirtualObstacleBean>().call(status));
+    }
+
+    @Override
+    public void updateVirtualObstacleData(UpdataVirtualObstacleBean updataVirtualObstacleBean,String mapName, String obstacle_name, RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.updateVirtualObstacleData(updataVirtualObstacleBean, mapName, obstacle_name).enqueue(new ResponseCallback<Status>().call(status));
     }
 }

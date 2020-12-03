@@ -24,6 +24,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPath;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotPathData;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.protector_bean.RobotProtector;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
@@ -760,5 +761,11 @@ public interface GsControllerService {
 
     @GET("/gs-robot/real_time_data/node_status")
     Call<RecordStatusBean> getRecordStatus();
+
+    /**
+     * 添加虚拟墙
+     * */
+    @POST("/gs-robot/cmd/update_virtual_obstacles")
+    Call<Status> updateVirtualObstacleData(@Body UpdataVirtualObstacleBean updataVirtualObstacleBean, @Query("map_name") String paramString, @Query("obstacle_name") String obstacle_name);
 
 }

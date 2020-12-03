@@ -13,12 +13,10 @@ import android.os.Message;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.Switch;
@@ -27,16 +25,14 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
-import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.example.robot.R;
 import com.example.robot.adapter.MapManagerAdapter;
 import com.example.robot.adapter.TaskAdapter;
@@ -45,16 +41,14 @@ import com.example.robot.receiver.AlarmReceiver;
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
 import com.example.robot.task.TaskManager;
+import com.example.robot.utils.AlarmUtils;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
+import com.example.robot.utils.TimeUtils;
+import com.example.robot.utils.VirtualBeanUtils;
 import com.example.robot.uvclamp.CheckLztekLamp;
 import com.example.robot.uvclamp.UvcWarning;
-import com.lztek.toolkit.AddrInfo;
-
-import org.greenrobot.eventbus.EventBus;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
@@ -165,6 +159,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private double angle;
     private ImageView imageView;
     private int deletePositions = -1;
+    private TimeUtils mTimeUtils;
+    private AlarmUtils mAlarmUtils;
+    private VirtualBeanUtils mVirtualBeanUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -184,12 +181,12 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     }
 
     private void initView() {
-        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(mContext);
-        linearLayoutManager1.setOrientation(LinearLayoutManager.VERTICAL);
-        mapRecycler.setLayoutManager(linearLayoutManager1);
-        mapRecycler.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
-        mapManagerAdapter = new MapManagerAdapter(this, R.layout.item_recycler);
-        mapManagerAdapter.setOnItemClickListener(this);
+//        LinearLayoutManager linearLayoutManager1 = new LinearLayoutManager(mContext);
+//        linearLayoutManager1.setOrientation(LinearLayoutManager.VERTICAL);
+//        mapRecycler.setLayoutManager(linearLayoutManager1);
+//        mapRecycler.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+//        mapManagerAdapter = new MapManagerAdapter(this, R.layout.item_recycler);
+//        mapManagerAdapter.setOnItemClickListener(this);
 
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
@@ -198,19 +195,19 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         spinner.setSelection(3);
         myHandler = new MyHandler(this);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        robotTaskList.setLayoutManager(linearLayoutManager);
-        robotTaskList.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
-        taskAdapter = new TaskAdapter(this, R.layout.item_recycler);
-
-        taskAdapter.setOnItemClickListener(new TaskAdapter.OnItemClickListener() {
-            @Override
-            public void OnItemClickListener(View view, int position, String itemString) {
-                deletePositions = position;
-                Content.taskName = itemString;
-            }
-        });
+//        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext);
+//        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+//        robotTaskList.setLayoutManager(linearLayoutManager);
+//        robotTaskList.addItemDecoration(new DividerItemDecoration(mContext, DividerItemDecoration.VERTICAL));
+//        taskAdapter = new TaskAdapter(this, R.layout.item_recycler);
+//
+//        taskAdapter.setOnItemClickListener(new TaskAdapter.OnItemClickListener() {
+//            @Override
+//            public void OnItemClickListener(View view, int position, String itemString) {
+//                deletePositions = position;
+//                Content.taskName = itemString;
+//            }
+//        });
         TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
 
         //checkLztekLamp.openBatteryPort();
@@ -219,6 +216,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         } else {
             Log.d(TAG, "网络设置成功");
         }
+
+        mTimeUtils = new TimeUtils(mContext);
+        mAlarmUtils = new AlarmUtils(mContext);
+        mVirtualBeanUtils  = new VirtualBeanUtils(mContext);
     }
 
     @Override
@@ -268,7 +269,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     checkLztekLamp.stopUvc2Lamp();
                     checkLztekLamp.stopUvc3Lamp();
                     spinner.setEnabled(true);
-                    tvText = calculateDays(System.currentTimeMillis());
+                    tvText = mTimeUtils.calculateDays(System.currentTimeMillis());
                     residualTime.setText(tvText);
                     gsonUtils.setTvTime(tvText);
                     if (Content.server != null) {
@@ -391,12 +392,32 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 TaskManager.getInstances(mContext).deletePosition(Content.mapName, "bbb");
                 break;
             case R.id.alarm_btn:
-                setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000);
+                mAlarmUtils.setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000, 30 * 60 * 1000);
                 break;
             case R.id.getVirtualObstacleData:
                 TaskManager.getInstances(mContext).getVirtual_obstacles(Content.mapName);
                 break;
             case R.id.updateVirtualObstacleData:
+                mVirtualBeanUtils.updateVirtual(4, Content.mapName,"carpets", null);
+                mVirtualBeanUtils.updateVirtual(6, Content.mapName, "decelerations",null);
+                mVirtualBeanUtils.updateVirtual(1, Content.mapName, "slopes",null);
+                mVirtualBeanUtils.updateVirtual(5, Content.mapName, "displays",null);
+                //最外边「」
+                List<List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity>> polylinesEntities = new ArrayList<>();
+                //每个「」
+                List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity> polylinesEntitiesList = new ArrayList<>();
+                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityStart = new UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity();
+                polylinesEntityStart.setX(110.0);
+                polylinesEntityStart.setY(100.0);
+                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityEnd = new UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity();
+                polylinesEntityEnd.setX(130.0);
+                polylinesEntityEnd.setY(130.0);
+                polylinesEntitiesList.add(polylinesEntityStart);
+                polylinesEntitiesList.add(polylinesEntityEnd);
+
+                polylinesEntities.add(polylinesEntitiesList);
+                mVirtualBeanUtils.updateVirtual(0, Content.mapName, "obstacles", polylinesEntities);
+
                 break;
             default:
                 break;
@@ -536,8 +557,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     public void OnItemLongClickListener(View view, int position) {
         String mapName = data.get(position).getName();
         data.remove(position);
-        mapManagerAdapter.refeshList(data);
-        mapManagerAdapter.notifyDataSetChanged();
+//        mapManagerAdapter.refeshList(data);
+//        mapManagerAdapter.notifyDataSetChanged();
         TaskManager.getInstances(mContext).deleteMap(mapName);
     }
 
@@ -562,7 +583,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
                     if (!completeFlag) {
                         startUvcDetection();
-                        tvText = calculateDays(workTime);
+                        tvText = mTimeUtils.calculateDays(workTime);
                         residualTime.setText(tvText);
                         gsonUtils.setTvTime(tvText);
                         if (Content.server != null) {
@@ -703,34 +724,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         }
     }
 
-    public String calculateDays(long date) {
-
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date curDate = new Date(date);//获取当前时间
-        String str = formatter.format(curDate);
-        long days = 0, hours = 0, minutes = 0, second = 0;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date d1 = null;
-        try {
-            d1 = df.parse(str);
-            Date d2 = new Date(System.currentTimeMillis());//你也可以获取当前时间
-            long diff = d1.getTime() - d2.getTime();//这样得到的差值是微秒级别
-            days = diff / (1000 * 60 * 60 * 24);
-            hours = (diff - days * (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
-            minutes = (diff - days * (1000 * 60 * 60 * 24) - hours * (1000 * 60 * 60)) / (1000 * 60);
-            second = (diff - days * (1000 * 60 * 60 * 24) - hours * (1000 * 60 * 60) - minutes * (1000 * 60)) / 1000;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        if (hours == 0 && minutes == 0 && second == 0) {
-            Log.d(TAG, "TIME completeFlag  " + completeFlag);
-            completeFlag = true;
-
-            return "杀毒完成";
-        }
-        return hours + "小时" + minutes + "分" + second + "秒";
-    }
-
     private Runnable runnablePosition = new Runnable() {
         @Override
         public void run() {
@@ -738,21 +731,6 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             myHandler.postDelayed(this, 1000);
         }
     };
-
-    private void setAlarmTime(String taskName, long triggerAtMillis) {
-        Log.d("AlarmReceiver", "开启定时任务 ：" + triggerAtMillis);
-        mAlarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent("android.alarm.task.action");
-        intent.putExtra("mapName", Content.mapName);
-        intent.putExtra("taskName", taskName);
-        intent.setClass(this, AlarmReceiver.class);
-        mPendingIntent = PendingIntent.getBroadcast(
-                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        //闹铃间隔， 这里设为1分钟闹一次，在第2步我们将每隔1分钟收到一次广播
-        int interval = 24 * 60 * 60 * 1000;
-        mAlarmManager.setRepeating(AlarmManager.RTC, triggerAtMillis, interval, mPendingIntent);
-//        am.set(AlarmManager.RTC, triggerAtMillis, sender);
-    }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
@@ -763,9 +741,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         if (messageEvent.getState() == 1001) {
             RobotMap robotMap = (RobotMap) messageEvent.getT();
             data = robotMap.getData();
-            mapManagerAdapter.refeshList(data);
-            mapRecycler.setAdapter(mapManagerAdapter);
-            mapManagerAdapter.notifyDataSetChanged();
+//            mapManagerAdapter.refeshList(data);
+//            mapRecycler.setAdapter(mapManagerAdapter);
+//            mapManagerAdapter.notifyDataSetChanged();
         } else if (messageEvent.getState() == 1002) {
             bytes = (byte[]) messageEvent.getT();
             Glide.with(mContext).load(bytes).into(robotMap);
@@ -806,9 +784,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             for (int i = 0; i < robotTaskQueueList.getData().size(); i++) {
                 list.add(robotTaskQueueList.getData().get(i).getName());
             }
-            taskAdapter.refeshList(list);
-            robotTaskList.setAdapter(taskAdapter);
-            taskAdapter.notifyDataSetChanged();
+//            taskAdapter.refeshList(list);
+//            robotTaskList.setAdapter(taskAdapter);
+//            taskAdapter.notifyDataSetChanged();
         } else if (messageEvent.getState() == 1007) {
             Toast.makeText(mContext, "到达指定位置开始杀毒", Toast.LENGTH_SHORT).show();
             spinner.setSelection((Integer) messageEvent.getT());

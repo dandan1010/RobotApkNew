@@ -11,7 +11,7 @@ import com.example.robot.service.SocketServices;
 public class BootCompletedReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("BootCompletedReceiver", "开机启动");
+        Log.d("BootCompletedReceiver", "开机启动q1111");
         Intent intentServer = new Intent(context, SocketServices.class);
         context.startService(intentServer);
 //        Intent intent1 = new Intent(context, RobotDetailActivity.class);

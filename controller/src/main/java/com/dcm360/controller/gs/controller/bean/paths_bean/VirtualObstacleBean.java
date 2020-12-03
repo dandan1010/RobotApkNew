@@ -5,165 +5,640 @@ import java.util.List;
 public class VirtualObstacleBean implements Cloneable {
 
     /**
-     * obstacles : {"polylines":[[{"x":476,"y":672},{"x":489,"y":748},{"x":522,"y":719},{"x":554,"y":765},{"x":569,"y":676}]],"rectangles":[{"start":{"x":529,"y":281},"end":{"x":613,"y":362}}],"polygons":[[{"x":476,"y":672},{"x":489,"y":748},{"x":522,"y":719},{"x":554,"y":765},{"x":569,"y":676}]],"circles":[{"center":{"x":109,"y":76},"radius":60.108235708594876}],"lines":[{"start":{"x":449,"y":806},"end":{"x":560,"y":802}}]}
-     * description : for test
-     * ID :
-     * mapName : test
-     * createDate :
+     * msg : successed
+     * data : {"carpets":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"decelerations":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"highlight":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"slopesWorld":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"obstaclesWorld":{"polylines":[[{"x":1.1250000882893794,"y":0.7250000823289149},{"x":0.4250000778585665,"y":-0.47499993555247855},{"x":0.4250000778585665,"y":-0.47499993555247855}]],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"displaysWorld":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"highlightWorld":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"obstacles":{"polylines":[[{"x":118,"y":110},{"x":104,"y":86},{"x":104,"y":86}]],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"decelerationsWorld":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"slopes":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"displays":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]},"carpetsWorld":{"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}}
+     * successed : true
+     * errorCode :
      */
-    private ObstaclesEntity obstacles;
-    private String description;
-    private String ID;
-    private String mapName;
-    private String createDate;
+    private String msg;
+    private DataEntity data;
+    private boolean successed;
+    private String errorCode;
 
-    public void setObstacles(ObstaclesEntity obstacles) {
-        this.obstacles = obstacles;
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setData(DataEntity data) {
+        this.data = data;
     }
 
-    public void setID(String ID) {
-        this.ID = ID;
+    public void setSuccessed(boolean successed) {
+        this.successed = successed;
     }
 
-    public void setMapName(String mapName) {
-        this.mapName = mapName;
+    public void setErrorCode(String errorCode) {
+        this.errorCode = errorCode;
     }
 
-    public void setCreateDate(String createDate) {
-        this.createDate = createDate;
+    public String getMsg() {
+        return msg;
     }
 
-    public ObstaclesEntity getObstacles() {
-        return obstacles;
+    public DataEntity getData() {
+        return data;
     }
 
-    public String getDescription() {
-        return description;
+    public boolean isSuccessed() {
+        return successed;
     }
 
-    public String getID() {
-        return ID;
+    public String getErrorCode() {
+        return errorCode;
     }
 
-    public String getMapName() {
-        return mapName;
-    }
-
-    public String getCreateDate() {
-        return createDate;
-    }
-
-    public class ObstaclesEntity {
+    public static class DataEntity {
         /**
-         * polylines : [[{"x":476,"y":672},{"x":489,"y":748},{"x":522,"y":719},{"x":554,"y":765},{"x":569,"y":676}]]
-         * rectangles : [{"start":{"x":529,"y":281},"end":{"x":613,"y":362}}]
-         * polygons : [[{"x":476,"y":672},{"x":489,"y":748},{"x":522,"y":719},{"x":554,"y":765},{"x":569,"y":676}]]
-         * circles : [{"center":{"x":109,"y":76},"radius":60.108235708594876}]
-         * lines : [{"start":{"x":449,"y":806},"end":{"x":560,"y":802}}]
+         * carpets : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * decelerations : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * highlight : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * slopesWorld : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * obstaclesWorld : {"polylines":[[{"x":1.1250000882893794,"y":0.7250000823289149},{"x":0.4250000778585665,"y":-0.47499993555247855},{"x":0.4250000778585665,"y":-0.47499993555247855}]],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * displaysWorld : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * highlightWorld : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * obstacles : {"polylines":[[{"x":118,"y":110},{"x":104,"y":86},{"x":104,"y":86}]],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * decelerationsWorld : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * slopes : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * displays : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
+         * carpetsWorld : {"polylines":[],"rectangles":[],"polygons":[],"circles":[],"lines":[]}
          */
-        private List<List<PolylinesEntity>> polylines;
-        private List<RectanglesEntity> rectangles;
-        private List<List<PolygonsEntity>> polygons;
-        private List<CirclesEntity> circles;
-        private List<LinesEntity> lines;
+        private CarpetsEntity carpets;
+        private DecelerationsEntity decelerations;
+        private HighlightEntity highlight;
+        private SlopesWorldEntity slopesWorld;
+        private ObstaclesWorldEntity obstaclesWorld;
+        private DisplaysWorldEntity displaysWorld;
+        private HighlightWorldEntity highlightWorld;
+        private ObstaclesEntity obstacles;
+        private DecelerationsWorldEntity decelerationsWorld;
+        private SlopesEntity slopes;
+        private DisplaysEntity displays;
+        private CarpetsWorldEntity carpetsWorld;
 
-        public void setPolylines(List<List<PolylinesEntity>> polylines) {
-            this.polylines = polylines;
+        public void setCarpets(CarpetsEntity carpets) {
+            this.carpets = carpets;
         }
 
-        public void setRectangles(List<RectanglesEntity> rectangles) {
-            this.rectangles = rectangles;
+        public void setDecelerations(DecelerationsEntity decelerations) {
+            this.decelerations = decelerations;
         }
 
-        public void setPolygons(List<List<PolygonsEntity>> polygons) {
-            this.polygons = polygons;
+        public void setHighlight(HighlightEntity highlight) {
+            this.highlight = highlight;
         }
 
-        public void setCircles(List<CirclesEntity> circles) {
-            this.circles = circles;
+        public void setSlopesWorld(SlopesWorldEntity slopesWorld) {
+            this.slopesWorld = slopesWorld;
         }
 
-        public void setLines(List<LinesEntity> lines) {
-            this.lines = lines;
+        public void setObstaclesWorld(ObstaclesWorldEntity obstaclesWorld) {
+            this.obstaclesWorld = obstaclesWorld;
         }
 
-        public List<List<PolylinesEntity>> getPolylines() {
-            return polylines;
+        public void setDisplaysWorld(DisplaysWorldEntity displaysWorld) {
+            this.displaysWorld = displaysWorld;
         }
 
-        public List<RectanglesEntity> getRectangles() {
-            return rectangles;
+        public void setHighlightWorld(HighlightWorldEntity highlightWorld) {
+            this.highlightWorld = highlightWorld;
         }
 
-        public List<List<PolygonsEntity>> getPolygons() {
-            return polygons;
+        public void setObstacles(ObstaclesEntity obstacles) {
+            this.obstacles = obstacles;
         }
 
-        public List<CirclesEntity> getCircles() {
-            return circles;
+        public void setDecelerationsWorld(DecelerationsWorldEntity decelerationsWorld) {
+            this.decelerationsWorld = decelerationsWorld;
         }
 
-        public List<LinesEntity> getLines() {
-            return lines;
+        public void setSlopes(SlopesEntity slopes) {
+            this.slopes = slopes;
         }
 
-        public class PolylinesEntity {
+        public void setDisplays(DisplaysEntity displays) {
+            this.displays = displays;
+        }
+
+        public void setCarpetsWorld(CarpetsWorldEntity carpetsWorld) {
+            this.carpetsWorld = carpetsWorld;
+        }
+
+        public CarpetsEntity getCarpets() {
+            return carpets;
+        }
+
+        public DecelerationsEntity getDecelerations() {
+            return decelerations;
+        }
+
+        public HighlightEntity getHighlight() {
+            return highlight;
+        }
+
+        public SlopesWorldEntity getSlopesWorld() {
+            return slopesWorld;
+        }
+
+        public ObstaclesWorldEntity getObstaclesWorld() {
+            return obstaclesWorld;
+        }
+
+        public DisplaysWorldEntity getDisplaysWorld() {
+            return displaysWorld;
+        }
+
+        public HighlightWorldEntity getHighlightWorld() {
+            return highlightWorld;
+        }
+
+        public ObstaclesEntity getObstacles() {
+            return obstacles;
+        }
+
+        public DecelerationsWorldEntity getDecelerationsWorld() {
+            return decelerationsWorld;
+        }
+
+        public SlopesEntity getSlopes() {
+            return slopes;
+        }
+
+        public DisplaysEntity getDisplays() {
+            return displays;
+        }
+
+        public CarpetsWorldEntity getCarpetsWorld() {
+            return carpetsWorld;
+        }
+
+        public class CarpetsEntity {
             /**
-             * x : 476
-             * y : 672
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
              */
-            private int x;
-            private int y;
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
 
-            public void setX(int x) {
-                this.x = x;
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
             }
 
-            public void setY(int y) {
-                this.y = y;
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
             }
 
-            public int getX() {
-                return x;
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
             }
 
-            public int getY() {
-                return y;
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
             }
         }
 
-        public class RectanglesEntity {
+        public class DecelerationsEntity {
             /**
-             * start : {"x":529,"y":281}
-             * end : {"x":613,"y":362}
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
              */
-            private StartEntity start;
-            private EndEntity end;
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
 
-            public void setStart(StartEntity start) {
-                this.start = start;
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
             }
 
-            public void setEnd(EndEntity end) {
-                this.end = end;
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
             }
 
-            public StartEntity getStart() {
-                return start;
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
             }
 
-            public EndEntity getEnd() {
-                return end;
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
             }
 
-            public class StartEntity {
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+        }
+
+        public class HighlightEntity {
+            /**
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
+
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
+            }
+
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
+
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
+
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+        }
+
+        public class SlopesWorldEntity {
+            /**
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
+
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
+            }
+
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
+
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
+
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+        }
+
+        public class ObstaclesWorldEntity {
+            /**
+             * polylines : [[{"x":1.1250000882893794,"y":0.7250000823289149},{"x":0.4250000778585665,"y":-0.47499993555247855},{"x":0.4250000778585665,"y":-0.47499993555247855}]]
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<List<PolylinesEntity>> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
+
+            public void setPolylines(List<List<PolylinesEntity>> polylines) {
+                this.polylines = polylines;
+            }
+
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
+
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
+
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<List<PolylinesEntity>> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+
+            public class PolylinesEntity {
                 /**
-                 * x : 529
-                 * y : 281
+                 * x : 1.1250000882893794
+                 * y : 0.7250000823289149
+                 */
+                private double x;
+                private double y;
+
+                public void setX(double x) {
+                    this.x = x;
+                }
+
+                public void setY(double y) {
+                    this.y = y;
+                }
+
+                public double getX() {
+                    return x;
+                }
+
+                public double getY() {
+                    return y;
+                }
+            }
+        }
+
+        public class DisplaysWorldEntity {
+            /**
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
+
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
+            }
+
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
+
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
+
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+        }
+
+        public class HighlightWorldEntity {
+            /**
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
+
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
+            }
+
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
+
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
+
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+        }
+
+        public class ObstaclesEntity {
+            /**
+             * polylines : [[{"x":118,"y":110},{"x":104,"y":86},{"x":104,"y":86}]]
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<List<PolylinesEntity>> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
+
+            public void setPolylines(List<List<PolylinesEntity>> polylines) {
+                this.polylines = polylines;
+            }
+
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
+
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
+
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<List<PolylinesEntity>> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
+            }
+
+            public class PolylinesEntity {
+                /**
+                 * x : 118
+                 * y : 110
                  */
                 private int x;
                 private int y;
@@ -184,192 +659,227 @@ public class VirtualObstacleBean implements Cloneable {
                     return y;
                 }
             }
+        }
 
-            public class EndEntity {
-                /**
-                 * x : 613
-                 * y : 362
-                 */
-                private int x;
-                private int y;
+        public class DecelerationsWorldEntity {
+            /**
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
+             */
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
 
-                public void setX(int x) {
-                    this.x = x;
-                }
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
+            }
 
-                public void setY(int y) {
-                    this.y = y;
-                }
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
+            }
 
-                public int getX() {
-                    return x;
-                }
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
+            }
 
-                public int getY() {
-                    return y;
-                }
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
             }
         }
 
-        public class PolygonsEntity {
+        public class SlopesEntity {
             /**
-             * x : 476
-             * y : 672
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
              */
-            private int x;
-            private int y;
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
 
-            public void setX(int x) {
-                this.x = x;
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
             }
 
-            public void setY(int y) {
-                this.y = y;
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
             }
 
-            public int getX() {
-                return x;
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
             }
 
-            public int getY() {
-                return y;
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
+            }
+
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
+
+            public List<?> getPolylines() {
+                return polylines;
+            }
+
+            public List<?> getRectangles() {
+                return rectangles;
+            }
+
+            public List<?> getPolygons() {
+                return polygons;
+            }
+
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
             }
         }
 
-        public class CirclesEntity {
+        public class DisplaysEntity {
             /**
-             * center : {"x":109,"y":76}
-             * radius : 60.108235708594876
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
              */
-            private CenterEntity center;
-            private double radius;
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
 
-            public void setCenter(CenterEntity center) {
-                this.center = center;
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
             }
 
-            public void setRadius(double radius) {
-                this.radius = radius;
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
             }
 
-            public CenterEntity getCenter() {
-                return center;
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
             }
 
-            public double getRadius() {
-                return radius;
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
             }
 
-            public class CenterEntity {
-                /**
-                 * x : 109
-                 * y : 76
-                 */
-                private int x;
-                private int y;
+            public void setLines(List<?> lines) {
+                this.lines = lines;
+            }
 
-                public void setX(int x) {
-                    this.x = x;
-                }
+            public List<?> getPolylines() {
+                return polylines;
+            }
 
-                public void setY(int y) {
-                    this.y = y;
-                }
+            public List<?> getRectangles() {
+                return rectangles;
+            }
 
-                public int getX() {
-                    return x;
-                }
+            public List<?> getPolygons() {
+                return polygons;
+            }
 
-                public int getY() {
-                    return y;
-                }
+            public List<?> getCircles() {
+                return circles;
+            }
+
+            public List<?> getLines() {
+                return lines;
             }
         }
 
-        public class LinesEntity {
+        public class CarpetsWorldEntity {
             /**
-             * start : {"x":449,"y":806}
-             * end : {"x":560,"y":802}
+             * polylines : []
+             * rectangles : []
+             * polygons : []
+             * circles : []
+             * lines : []
              */
-            private StartEntity start;
-            private EndEntity end;
+            private List<?> polylines;
+            private List<?> rectangles;
+            private List<?> polygons;
+            private List<?> circles;
+            private List<?> lines;
 
-            public void setStart(StartEntity start) {
-                this.start = start;
+            public void setPolylines(List<?> polylines) {
+                this.polylines = polylines;
             }
 
-            public void setEnd(EndEntity end) {
-                this.end = end;
+            public void setRectangles(List<?> rectangles) {
+                this.rectangles = rectangles;
             }
 
-            public StartEntity getStart() {
-                return start;
+            public void setPolygons(List<?> polygons) {
+                this.polygons = polygons;
             }
 
-            public EndEntity getEnd() {
-                return end;
+            public void setCircles(List<?> circles) {
+                this.circles = circles;
             }
 
-            public class StartEntity {
-                /**
-                 * x : 449
-                 * y : 806
-                 */
-                private int x;
-                private int y;
-
-                public void setX(int x) {
-                    this.x = x;
-                }
-
-                public void setY(int y) {
-                    this.y = y;
-                }
-
-                public int getX() {
-                    return x;
-                }
-
-                public int getY() {
-                    return y;
-                }
+            public void setLines(List<?> lines) {
+                this.lines = lines;
             }
 
-            public class EndEntity {
-                /**
-                 * x : 560
-                 * y : 802
-                 */
-                private int x;
-                private int y;
+            public List<?> getPolylines() {
+                return polylines;
+            }
 
-                public void setX(int x) {
-                    this.x = x;
-                }
+            public List<?> getRectangles() {
+                return rectangles;
+            }
 
-                public void setY(int y) {
-                    this.y = y;
-                }
+            public List<?> getPolygons() {
+                return polygons;
+            }
 
-                public int getX() {
-                    return x;
-                }
+            public List<?> getCircles() {
+                return circles;
+            }
 
-                public int getY() {
-                    return y;
-                }
+            public List<?> getLines() {
+                return lines;
             }
         }
     }
 
-    @Override
-    public String toString() {
-        return "VirtualObstacleBean{" +
-                "obstacles=" + obstacles +
-                ", description='" + description + '\'' +
-                ", ID='" + ID + '\'' +
-                ", mapName='" + mapName + '\'' +
-                ", createDate='" + createDate + '\'' +
-                '}';
-    }
 }

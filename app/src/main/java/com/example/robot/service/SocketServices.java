@@ -17,19 +17,24 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
+import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
+import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.example.robot.R;
+import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
 import com.example.robot.utils.TimeUtils;
+import com.example.robot.utils.VirtualBeanUtils;
 import com.example.robot.uvclamp.CheckLztekLamp;
 import com.example.robot.uvclamp.UvcWarning;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -66,6 +71,7 @@ public class SocketServices extends Service {
     private String spinnerString;
     private boolean isDevelop = false;
     private boolean threadDestory = false;
+    private VirtualBeanUtils mVirtualBeanUtils;
 
     @Nullable
     @Override
@@ -97,6 +103,7 @@ public class SocketServices extends Service {
                 int port = Content.port;
                 Content.server = new SimpleServer(new InetSocketAddress(host, port));
                 Content.server.run();
+                Log.d("zdzd --- ", "thread run Content.server.run()");
             }
         }
     };
@@ -132,6 +139,7 @@ public class SocketServices extends Service {
             Log.d(TAG, "网络设置成功");
         }
         mTimeUtils = new TimeUtils(this);
+        mVirtualBeanUtils = new VirtualBeanUtils(this);
 
         checkLztekLamp = new CheckLztekLamp(this);
         Content.robotState = 1;
@@ -257,7 +265,7 @@ public class SocketServices extends Service {
                         Content.taskState = 3;
                         TaskManager.getInstances(mContext).pauseTaskQueue();
                     }
-                    TaskManager.getInstances(mContext).navigate_Position(Content.mapName, "Origin");
+                    TaskManager.getInstances(mContext).navigate_Position(Content.mapName, "Charing");
                     break;
                 case 5:
                     break;
@@ -455,7 +463,7 @@ public class SocketServices extends Service {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.SENDPOINTPOSITION));
             }
         } else if (messageEvent.getState() == 10019) {//请求地图图片
-            TaskManager.getInstances(mContext).getMapPic(Content.mapName);
+            TaskManager.getInstances(mContext).getMapPic((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10020) {//返回地图图片
             byte[] bytes = (byte[]) messageEvent.getT();
             if (Content.server != null) {
@@ -547,16 +555,70 @@ public class SocketServices extends Service {
             TaskManager.getInstances(mContext).cancleScanMap();
         } else if (messageEvent.getState() == 10037) {//系统健康
             if (Content.server != null) {
+                Log.d("socket_healthy: " , (String) messageEvent.getT());
                 gsonUtils.setHealthyMsg((String) messageEvent.getT());
-                Content.server.broadcast(gsonUtils.putSocketMsg(Content.ROBOT_HEALTHY));
+                Content.server.broadcast(gsonUtils.putSocketHealthyMsg(Content.ROBOT_HEALTHY));
             }
         } else if (messageEvent.getState() == 10038) {//任务状态
             if (Content.server != null) {
-                gsonUtils.setTaskState((String) messageEvent.getT());
-                Content.server.broadcast(gsonUtils.putSocketMsg(Content.ROBOT_TASK_STATE));
+                gsonUtils.setTaskState((PointStateBean) messageEvent.getT());
+                Content.server.broadcast(gsonUtils.putSocketTaskMsg(Content.ROBOT_TASK_STATE));
             }
+        } else if (messageEvent.getState() == 10039) {//任务历史
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putSocketTaskHistory(Content.ROBOT_TASK_HISTORY, mContext));
+            }
+        } else if (messageEvent.getState() == 10040) {//添加充点电
+            NavigationService.initialize_directly(Content.mapName);
+            String edtext = (String) messageEvent.getT();
+            Log.d("zdzd " , "充点电：" + edtext.substring(13, 15));
+            if (!"FF".equals(edtext.substring(13, 15))) {
+                PositionListBean positionListBean = new PositionListBean();
+                positionListBean.setName("Charing");
+                positionListBean.setGridX((int) x);
+                positionListBean.setGridY((int) y);
+                positionListBean.setAngle(angle);
+                positionListBean.setType(1);
+                positionListBean.setMapName(Content.mapName);
+                TaskManager.getInstances(mContext).add_Position(positionListBean);
+            }
+        } else if (messageEvent.getState() == 10041){//获取虚拟强数据
+            TaskManager.getInstances(mContext).getVirtual_obstacles((String) messageEvent.getT());
+        } else if (messageEvent.getState() == 10042) {//返回虚拟强数据
+            VirtualObstacleBean virtualObstacleBean = (VirtualObstacleBean) messageEvent.getT();
+            gsonUtils.setVirtualObstacleBean(virtualObstacleBean);
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putVirtualObstacle(Content.SEND_VIRTUAL));
+            }
+        } else if (messageEvent.getState() == 10043) {//更新虚拟强
+            mVirtualBeanUtils.updateVirtual(4, Content.mapName,"carpets", null);
+            mVirtualBeanUtils.updateVirtual(6, Content.mapName, "decelerations",null);
+            mVirtualBeanUtils.updateVirtual(1, Content.mapName, "slopes",null);
+            mVirtualBeanUtils.updateVirtual(5, Content.mapName, "displays",null);
+            String message = (String) messageEvent.getT();
+            //最外边「」
+            List<List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity>> polylinesEntities = new ArrayList<>();
+            //每个「」
+            List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity> polylinesEntitiesList = new ArrayList<>();
+            try {
+                JSONObject jsonObject = new JSONObject(message);
+                JSONArray jsonArray = jsonObject.getJSONArray(Content.UPDATA_VIRTUAL);
+                for (int i =0; i < jsonArray.length(); i++) {
+                    JSONArray jsarray = jsonArray.getJSONArray(i);
+                    for (int j = 0; j < jsarray.length(); j++) {
+                        JSONObject js = jsarray.getJSONObject(j);
+                        UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntity = new UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity();
+                        polylinesEntity.setX(js.getDouble(Content.VIRTUAL_X));
+                        polylinesEntity.setY(js.getDouble(Content.VIRTUAL_Y));
+                        polylinesEntitiesList.add(polylinesEntity);
+                    }
+                    polylinesEntities.add(polylinesEntitiesList);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            mVirtualBeanUtils.updateVirtual(0, Content.mapName, "obstacles", polylinesEntities);
         }
-
 
 //test request
         else if (messageEvent.getState() == 20001) {
