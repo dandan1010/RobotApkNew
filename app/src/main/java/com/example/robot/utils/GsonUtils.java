@@ -47,6 +47,16 @@ public class GsonUtils {
     private String healthyMsg = null;
     private PointStateBean taskState = null;
     private VirtualObstacleBean virtualObstacleBean;
+    private int level;
+    private String editTask;
+
+    public void setEditTask(String editTask) {
+        this.editTask = editTask;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
+    }
 
     public void setVirtualObstacleBean(VirtualObstacleBean virtualObstacleBean) {
         this.virtualObstacleBean = virtualObstacleBean;
@@ -217,8 +227,8 @@ public class GsonUtils {
                 JSONArray jsArray = new JSONArray();
                 for (int j = 0; j< virtualObstacleBean.getData().getObstacles().getPolylines().get(i).size(); j++){
                     JSONObject js = new JSONObject();
-                    js.put(Content.VIRTUAL_X, virtualObstacleBean.getData().getObstacles().getPolylines().get(i).get(i).getX());
-                    js.put(Content.VIRTUAL_X, virtualObstacleBean.getData().getObstacles().getPolylines().get(i).get(i).getY());
+                    js.put(Content.VIRTUAL_X, virtualObstacleBean.getData().getObstacles().getPolylines().get(i).get(j).getX());
+                    js.put(Content.VIRTUAL_Y, virtualObstacleBean.getData().getObstacles().getPolylines().get(i).get(j).getY());
                     jsArray.put(j, js);
                 }
                 jsonArray.put(i, jsArray);
@@ -277,9 +287,10 @@ public class GsonUtils {
             jsonObject.put(TYPE, type);
             JSONArray jsonArray = new JSONArray();
             SqLiteOpenHelperUtils sqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
-            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory(Content.taskName);
+            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
             while (cursor.moveToNext()) {
                 JSONObject js = new JSONObject();
+                js.put(Content.dbTaskMapName, cursor.getColumnName(cursor.getColumnIndex(Content.dbTaskMapName)));
                 js.put(Content.dbTaskName, cursor.getColumnName(cursor.getColumnIndex(Content.dbTaskName)));
                 js.put(Content.dbTime, cursor.getColumnName(cursor.getColumnIndex(Content.dbTime)));
                 js.put(Content.dbData, cursor.getColumnName(cursor.getColumnIndex(Content.dbData)));
@@ -384,8 +395,10 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.TV_TIME, tvTime);
+//            jsonObject.put(Content.TV_TIME, tvTime);
+            jsonObject.put(Content.SEND_SPEED_LEVEL, level);
             jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.EDITTASKQUEUE, editTask);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
             JSONArray mRobotPositionsArray = new JSONArray();

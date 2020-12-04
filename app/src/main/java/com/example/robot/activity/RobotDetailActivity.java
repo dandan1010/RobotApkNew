@@ -438,7 +438,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable1 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.navigationDown();
+            NavigationService.move(-0.2f, 0.0f);
             handler1.postDelayed(runnable1, 10);
         }
     };
@@ -448,7 +448,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable2 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.navigationUp();
+            NavigationService.move(0.2f, 0.0f);
             handler2.postDelayed(runnable2, 10);
         }
     };
@@ -458,7 +458,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable3 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.navigationLeft();
+            NavigationService.move(0.0f, 0.2f);
             handler3.postDelayed(runnable3, 10);
         }
     };
@@ -468,11 +468,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable4 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.navigationRight();
+            NavigationService.move(0.0f, -0.2f);
             handler4.postDelayed(runnable4, 10);
         }
     };
-
     /**
      * 移动按钮的touch事件
      */

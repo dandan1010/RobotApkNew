@@ -35,18 +35,19 @@ public class SharedPrefUtil {
         return sharedPrefUtil;
     }
 
-    public void deleteTaskQueue(String type) {
-        editor.remove(type);
+    public void deleteTaskQueue(String key) {
+        editor.remove(key);
         editor.commit();
     }
 
     public void setPositionMsg(String taskName, ArrayList<TaskBean> arrayList) {
         GsonUtils gsonUtils = new GsonUtils();
-        editor.putString(taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
+        editor.putString(Content.mapName + taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
         editor.commit();
     }
+
     public String getPositionMsg(String taskName) {
-        return sharedPreferences.getString(taskName, null);
+        return sharedPreferences.getString(Content.mapName + taskName, null);
     }
 
 }

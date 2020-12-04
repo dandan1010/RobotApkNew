@@ -768,4 +768,9 @@ public interface GsControllerService {
     @POST("/gs-robot/cmd/update_virtual_obstacles")
     Call<Status> updateVirtualObstacleData(@Body UpdataVirtualObstacleBean updataVirtualObstacleBean, @Query("map_name") String paramString, @Query("obstacle_name") String obstacle_name);
 
+    /**
+     * 导航速度
+     * */
+    @GET("/gs-robot/cmd/set_speed_level")
+    Call<Status> setSpeedLevel(@Query("level") String paramString);
 }

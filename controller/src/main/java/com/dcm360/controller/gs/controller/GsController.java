@@ -623,4 +623,10 @@ public enum GsController implements IGsRobotController {
         if (gsControllerService != null)
             gsControllerService.updateVirtualObstacleData(updataVirtualObstacleBean, mapName, obstacle_name).enqueue(new ResponseCallback<Status>().call(status));
     }
+
+    @Override
+    public void setSpeedLevel(String level, RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.setSpeedLevel(level).enqueue(new ResponseCallback<Status>().call(status));
+    }
 }

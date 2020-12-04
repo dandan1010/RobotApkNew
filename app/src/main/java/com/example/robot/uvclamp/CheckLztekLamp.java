@@ -9,6 +9,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 
 import com.example.robot.R;
+import com.example.robot.task.TaskManager;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.Content;
 import com.lztek.toolkit.AddrInfo;
@@ -193,6 +194,7 @@ public class CheckLztekLamp {
             while (threadFlag) {
                 outputStream = serialPort.getOutputStream();
                 try {
+                    Log.d(TAG, "led robotstatus : " + Content.robotState);
                     switch (Content.robotState) {
                         case 0:
                             break;
@@ -233,7 +235,7 @@ public class CheckLztekLamp {
                         index = 0;
                     }
                     Thread.sleep(Content.time);
-                    if (Content.robotState == 1 || Content.robotState == 5 || Content.robotState == 6) {
+                    if (Content.robotState == 1 || Content.robotState == 5 || Content.robotState == 6 || Content.robotState == 4) {
                         outputStream.write(hexBytes(mContext.getResources().getString(R.string.no_color_light)));
                         Thread.sleep(1000);
                     }
@@ -353,7 +355,19 @@ public class CheckLztekLamp {
                     Log.d(TAG, "读取数据 ： " + editText.getText().toString());
                     EventBus.getDefault().post(new EventBusMessage(1004, data));
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
-                    EventBus.getDefault().post(new EventBusMessage(10040, editText.getText().toString()));
+                    Log.d("zdzd " , "充点电：" + editText.getText().toString().substring(12, 14));
+                    String msg = "";
+                    if (!"FF".equals(editText.getText().toString().substring(12, 14))) {
+                        Content.robotState = 4;
+                        Content.time = 1000;
+                        msg = "充电";
+                    } else {
+                        msg = "放电";
+                        if (Content.taskName != null && data[23] > 80) {
+                            TaskManager.getInstances(mContext).resumeTaskQueue();
+                        }
+                    }
+                    EventBus.getDefault().post(new EventBusMessage(10000, msg));
                 }
             } catch (Exception e) {
                 android.util.Log.d(TAG, "[COM]Read Faild: " + e.getMessage(), e);

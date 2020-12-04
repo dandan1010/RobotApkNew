@@ -390,4 +390,9 @@ public class GSRobotController implements RobotController {
         GsController.INSTANCE.updateVirtualObstacleData(updataVirtualObstacleBean, mapName, obstacle_name, status);
     }
 
+    @Override
+    public void setSpeedLevel(String level, RobotStatus<Status> status) {
+        GsController.INSTANCE.setSpeedLevel(level, status);
+    }
+
 }

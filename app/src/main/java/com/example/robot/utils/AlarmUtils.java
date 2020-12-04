@@ -12,6 +12,7 @@ public class AlarmUtils {
 
     private Context mContext;
     private AlarmManager mAlarmManager;
+    private PendingIntent mPendingIntent;
 
     public AlarmUtils(Context mContext) {
         this.mContext = mContext;
@@ -29,5 +30,8 @@ public class AlarmUtils {
         //闹铃间隔， 这里设为1分钟闹一次，在第2步我们将每隔1分钟收到一次广播
         mAlarmManager.setRepeating(AlarmManager.RTC, triggerAtMillis, interval, mPendingIntent);
 //        am.set(AlarmManager.RTC, triggerAtMillis, sender);
+    }
+    public void cancelAlarmTime() {
+        mAlarmManager.cancel(mPendingIntent);
     }
 }

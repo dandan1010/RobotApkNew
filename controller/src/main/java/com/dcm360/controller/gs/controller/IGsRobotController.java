@@ -199,4 +199,5 @@ public interface IGsRobotController {
 
     void updateVirtualObstacleData(UpdataVirtualObstacleBean updataVirtualObstacleBean, String mapName, String obstacle_name, RobotStatus<Status> status);//添加虚拟强
 
+    void setSpeedLevel(String level, RobotStatus<Status> status);//导航速度
 }

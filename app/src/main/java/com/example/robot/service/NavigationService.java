@@ -5,6 +5,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.util.Log;
@@ -31,6 +32,8 @@ import com.example.robot.utils.EventBusMessage;
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.MaybeSource;
@@ -48,6 +51,8 @@ public class NavigationService extends Service {
     private static Context mContext;
     public static boolean isStartNavigationService = false;
     public static String positions = "";
+    private boolean serverIsRun = false;
+    private boolean threadIsRun = false;
 
     @Override
     public void onCreate() {
@@ -71,10 +76,11 @@ public class NavigationService extends Service {
     }
 
     public static void initialize_directly(String mapName) {//不转圈初始化
-        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, "Charging", new RobotStatus<Status>() {
+        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.CHARING_POINT, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "不转圈初始化成功" + status.getMsg());
+
             }
 
             @Override
@@ -133,55 +139,8 @@ public class NavigationService extends Service {
         });
     }
 
-    public static void navigationUp() {
-        Log.d(TAG, "执行命令 navigationUp=");
-        //Tx2RosManager.getInstanse().chargeState(false);充电
-        RobotManagerController.getInstance().getRobotController().move(0.2f, 0.0f, new RobotStatus<Status>() {
-            @Override
-            public void success(Status status) {
-
-            }
-
-            @Override
-            public void error(Throwable error) {
-
-            }
-        });
-    }
-
-    public static void navigationDown() {
-        Log.d(TAG, "执行命令 navigationDown=");
-        RobotManagerController.getInstance().getRobotController().move(-0.2f, 0.0f, new RobotStatus<Status>() {
-            @Override
-            public void success(Status status) {
-
-            }
-
-            @Override
-            public void error(Throwable error) {
-
-            }
-        });
-    }
-
-    public static void navigationLeft() {
-        Log.d(TAG, "执行命令 navigationLeft=");
-        RobotManagerController.getInstance().getRobotController().move(0.0f, 0.2f, new RobotStatus<Status>() {
-            @Override
-            public void success(Status status) {
-
-            }
-
-            @Override
-            public void error(Throwable error) {
-
-            }
-        });
-    }
-
-    public static void navigationRight() {
-        Log.d(TAG, "执行命令 navigationRight=");
-        RobotManagerController.getInstance().getRobotController().move(0.0f, -0.2f, new RobotStatus<Status>() {
+    public static void move(float linearSpeed, float angularSpeed) {
+        RobotManagerController.getInstance().getRobotController().move(linearSpeed, angularSpeed, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
 
@@ -196,7 +155,20 @@ public class NavigationService extends Service {
 
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
-        RobotManagerController.getInstance().getRobotController().connect_robot("http://10.7.6.88:8080");
+        threadIsRun = false;
+        if (thread != null) {
+            thread.interrupt();
+            if (Content.server != null) {
+                try {
+                    Content.server.stop();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        RobotManagerController.getInstance().getRobotController().connect_robot(Content.ROBOROT_INF);
         TaskManager.getInstances(mContext).robotStatus();
         ping();
 
@@ -225,8 +197,33 @@ public class NavigationService extends Service {
             Log.d(TAG, "底盘连接状态：" + connect);
 //            TaskQueueManager.getInstances().notifyMessage("底盘连接状态：" + connect, "01");
             isStartNavigationService = connect;
+            handler.postDelayed(runnable, 30 * 1000);
             TaskManager.getInstances(this).loadMapList();
         }
     }
-
+    Handler handler = new Handler();
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!serverIsRun) {
+                thread.start();
+                serverIsRun = true;
+            }
+        }
+    };
+    Thread thread = new Thread() {
+        @Override
+        public void run() {
+            super.run();
+            if (!threadIsRun) {
+                threadIsRun = true;
+                Log.d("zdzd --- ", "thread run");
+                String host = Content.ip;
+                int port = Content.port;
+                Content.server = new SimpleServer(new InetSocketAddress(host, port));
+                Content.server.run();
+                Log.d("zdzd --- ", "thread run Content.server.run()");
+            }
+        }
+    };
 }

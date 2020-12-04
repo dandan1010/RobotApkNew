@@ -16,13 +16,14 @@ public final class Content {
     public static final double ROBOT_SIZE = 0.215f; //机器人大小(中心点到雷达距离 M)
     public static final String ROBOROT_INF_TWO = "ws://10.7.6.88:8089";//机器人底盘 webdocket
     public static final String ROBOROT_INF = "http://10.7.6.88:8080"; //机器人底盘
+
     /**
      * robotState：
      * 0:关机
      * 1:静止
      * 2:
      * 3:移动
-     * 4:充电
+     * 4:正在充电
      * 5:uvc警告
      * 6:低电量
      */
@@ -67,12 +68,18 @@ public final class Content {
     public static final String SENDPOINTPOSITION = "sendPointPosition";//返回点数据
     public static final String ADD_POSITION = "add_position";//添加点
     public static final String DELETE_POSITION = "delete_position";//删除点
+    public static final String RENAME_POSITION = "rename_position";//重命名点
+    public static final String OLD_POSITION_NAME = "old_position_name";//原始点
+    public static final String NEW_POSITION_NAME = "new_position_name";//新点
+
     public static final String SPINNERTIME = "spinnerTime";//请求的时间
     public static final String TV_TIME = "tv_time";//返回时间
     public static final String SAVETASKQUEUE = "saveTaskQueue";//存储任务
     public static final String DELETETASKQUEUE = "deleteTaskQueue";//删除任务队列
     public static final String STARTTASKQUEUE = "startTaskQueue";//开始任务队列
     public static final String STOPTASKQUEUE = "stopTaskQueue";//停止任务队列
+    public static final String EDITTASKQUEUE = "editTaskQueue";//编辑任务队列
+    public static final String SAVEEDITTASKQUEUE = "saveeditTaskQueue";//编辑任务队列
 
     public static final String START_SCAN_MAP = "start_scan_map";//开始扫描地图
     public static final String CANCEL_SCAN_MAP = "cancel_scan_map";//取消扫描地图并且保存
@@ -80,12 +87,21 @@ public final class Content {
     public static final String DEVELOP_MAP = "develop_map";//扩展扫描地图
     public static final String DELETE_MAP = "delete_map";//删除地图
     public static final String USE_MAP = "use_map";//选定地图
+    public static final String RENAME_MAP = "rename_map";//重命名地图
+    public static final String OLD_MAP_NAME = "old_map_name";//原始地图名
+    public static final String NEW_MAP_NAME = "new_map_name";//新地图名
 
     public static final String BATTERY_DATA = "battery_data";//电池电量
+    public static final String BATTERY_LOW = "battery_low";//设置低电量回充
+    public static final String ADD_POWER_POINT = "ADD_POWER_POINT";//添加充电点
+    public static int battery = 30;//低电量回充
+    public static final String CHARING_POINT = "charing";//充电点
+    public static final String GET_SPEED_LEVEL = "get_speed_level";//获取导航速度
+    public static final String SEND_SPEED_LEVEL = "send_speed_level";//获取导航速度
+    public static final String SET_SPEED_LEVEL = "set_speed_level";//设置导航速度
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 
-    //task key
     public static final String TASK_X = "x";//x坐标
     public static final String TASK_Y = "y";//y坐标
     public static final String TASK_DISINFECT_TIME = "disinfect_Time";//执行任务的点的时间
@@ -109,7 +125,7 @@ public final class Content {
 
     public static final String ROBOT_HEALTHY = "robot_healthy";//机器人健康
     public static final String ROBOT_TASK_STATE = "robot_task_state";//机器人任务状态
-    public static final String ROBOT_TASK_HISTORY = "ROBOT_TASK_HISTORY";//机器人历史任务
+    public static final String ROBOT_TASK_HISTORY = "robot_task_history";//机器人历史任务
 
     public static final String GET_VIRTUAL = "get_virtual";//获取虚拟墙数据
     public static final String UPDATA_VIRTUAL = "updata_virtual";//更新虚拟墙
@@ -118,15 +134,30 @@ public final class Content {
     public static final String VIRTUAL_Y = "virtual_y";//虚拟墙数据
 
     public static boolean completeFlag = false;
+    public static final String TASK_ALARM = "task_alarm";//任务
 
 
+
+    //obstacles_name
+    public static final String carpets = "carpets";
+    public static final String decelerations = "decelerations";
+    public static final String slopes = "slopes";
+    public static final String displays = "displays";
+    public static final String obstacles = "obstacles";
 
     //db Name
-    public static final String dbName = "taskHistory";
-    public static final String tableName = "taskHistory";
+    public static final String dbName = "dbName";
+    public static final String tableName = "taskHistory";//历史数据
     public static final String dbTaskName = "taskName";
+    public static final String dbTaskMapName = "dbTaskMapName";
     public static final String dbTime = "time";
     public static final String dbData = "data";
+    public static final String dbAlarmName = "dbAlarmName";//表名
+    public static final String dbAlarmMapTaskName = "dbAlarmMapTaskName";
+    public static final String dbAlarmTime = "dbAlarmTime";//时间
+    public static final String dbAlarmCycle = "dbAlarmCycle";//周期
+    public static final String dbAlarmIsRun = "dbAlarmIsRun";//周期任务是否执行
+    public static final String TASK_TYPE = "task_type";//是否是定时任务
 
 
     //test

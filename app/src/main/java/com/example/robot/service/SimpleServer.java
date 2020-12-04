@@ -41,7 +41,7 @@ public class SimpleServer extends WebSocketServer {
             broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
             System.out.println("new connection to " + conn.getRemoteSocketAddress());
             Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
-            Log.d("zdzd_server" , "连接的地址open：" + Content.CONNECT_ADDRESS);
+            Log.d("zdzd_server", "连接的地址open：" + Content.CONNECT_ADDRESS);
         } else {
             gsonUtils.setMapName(Content.CONNECT_ADDRESS);
             broadcast(gsonUtils.putConnMsg(Content.NO_CONN));
@@ -82,8 +82,8 @@ public class SimpleServer extends WebSocketServer {
         } else {
             System.err.println("an error occured on connection " + ex.getMessage());
             ex.printStackTrace();
-
         }
+
     }
 
     @Override
@@ -107,6 +107,7 @@ public class SimpleServer extends WebSocketServer {
     private void differentiateType(String message) throws JSONException {
         Log.d("zdzd ", "getType :  " + gsonUtils.getType(message));
         String mapName;
+        String taskName;
         switch (gsonUtils.getType(message)) {
             case Content.STARTDOWN:
                 EventBus.getDefault().post(new EventBusMessage(10001, message));
@@ -147,7 +148,9 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10013, message));
                 break;
             case Content.DELETETASKQUEUE://删除任务
-                EventBus.getDefault().post(new EventBusMessage(10014, message));
+                jsonObject = new JSONObject(message);
+                taskName = jsonObject.getString(Content.TASK_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10014, taskName));
                 break;
             case Content.GETTASKQUEUE://任务列表
                 EventBus.getDefault().post(new EventBusMessage(10015, message));
@@ -179,7 +182,9 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10026, message));
                 break;
             case Content.GETPOINTPOSITION://地图点数据
-                EventBus.getDefault().post(new EventBusMessage(10028, message));
+                jsonObject = new JSONObject(message);
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10028, mapName));
                 break;
             case Content.CANCEL_SCAN_MAP://取消扫描并且保存地图
                 EventBus.getDefault().post(new EventBusMessage(10029, message));
@@ -209,6 +214,35 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.UPDATA_VIRTUAL://更新虚拟强
                 EventBus.getDefault().post(new EventBusMessage(10043, message));
+                break;
+            case Content.TASK_ALARM://定时任务
+                EventBus.getDefault().post(new EventBusMessage(10044, message));
+                break;
+            case Content.RENAME_MAP://重命名地图
+                EventBus.getDefault().post(new EventBusMessage(10045, message));
+                break;
+            case Content.SET_SPEED_LEVEL://设置导航速度
+                jsonObject = new JSONObject(message);
+                int level = jsonObject.getInt(Content.SET_SPEED_LEVEL);
+                EventBus.getDefault().post(new EventBusMessage(10046, level));
+                break;
+            case Content.RENAME_POSITION://点重命名
+                EventBus.getDefault().post(new EventBusMessage(10047, message));
+                break;
+            case Content.BATTERY_LOW://低电量回充
+                jsonObject = new JSONObject(message);
+                Content.battery = jsonObject.getInt(Content.BATTERY_LOW);
+                break;
+            case Content.GET_SPEED_LEVEL://获取导航速度
+                EventBus.getDefault().post(new EventBusMessage(10048, message));
+                break;
+            case Content.ADD_POWER_POINT://添加充电点
+                EventBus.getDefault().post(new EventBusMessage(10050, message));
+                break;
+            case Content.EDITTASKQUEUE://编辑任务
+                jsonObject = new JSONObject(message);
+                taskName = jsonObject.getString(Content.TASK_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10051, taskName));
                 break;
 
 
