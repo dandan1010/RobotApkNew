@@ -45,26 +45,23 @@ public class SqLiteOpenHelperUtils {
         sqLiteDatabase.execSQL("insert into " + Content.dbAlarmName + "(" + Content.dbAlarmMapTaskName + ", " + Content.dbAlarmTime + ", " + Content.dbAlarmCycle + ", " + Content.dbAlarmIsRun + ") values ('" + mapTaskName + "','" + time + "','" + data + "','" + isRun + "')");
     }
 
-    public Cursor searchAlarmTask(String isRun) {
+    public Cursor searchAlarmTask(String type, String searchKey) {
         sqLiteDatabase = taskSqLite.getReadableDatabase();
-        Cursor cursor = sqLiteDatabase.query(Content.dbAlarmName, new String[]{"_id", Content.dbAlarmMapTaskName, Content.dbAlarmTime, Content.dbAlarmCycle, Content.dbAlarmIsRun}, Content.dbAlarmIsRun + "=?", new String[]{isRun}, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(Content.dbAlarmName, new String[]{"_id", Content.dbAlarmMapTaskName, Content.dbAlarmTime, Content.dbAlarmCycle, Content.dbAlarmIsRun}, type + "=?", new String[]{searchKey}, null, null, null);
         return cursor;
     }
 
-    public void updateAlarmTask(String mapTaskName, String isRun) {
+    public void updateAlarmTask(String mapTaskName,String type, String isRun) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + Content.dbAlarmIsRun + "='" + isRun + "' where " + Content.dbAlarmMapTaskName + "='" + mapTaskName + "'");
-    Log.d("cursor sqlite", "update " + Content.dbAlarmName + " set " + Content.dbAlarmIsRun + "='" + isRun + "' where " + Content.dbAlarmMapTaskName + "='" + mapTaskName + "'");
+        sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + type + "='" + isRun + "' where " + Content.dbAlarmMapTaskName + "='" + mapTaskName + "'");
     }
 
     public void deleteAlarmTask(String mapTaskName) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.delete(Content.dbAlarmName, Content.dbAlarmMapTaskName + "=?", new String[]{mapTaskName});
-
     }
 
     public void close(){
-        Log.d("zdzd : " , "sqlite close");
         sqLiteDatabase.close();
     }
 

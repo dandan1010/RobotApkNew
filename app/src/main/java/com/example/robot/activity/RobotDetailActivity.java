@@ -37,7 +37,6 @@ import com.example.robot.R;
 import com.example.robot.adapter.MapManagerAdapter;
 import com.example.robot.adapter.TaskAdapter;
 import com.example.robot.bean.SaveTaskBean;
-import com.example.robot.receiver.AlarmReceiver;
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
 import com.example.robot.task.TaskManager;
@@ -51,11 +50,7 @@ import com.example.robot.uvclamp.CheckLztekLamp;
 import com.example.robot.uvclamp.UvcWarning;
 
 import java.lang.ref.WeakReference;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -172,8 +167,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         mContext = RobotDetailActivity.this;
         robot_Position = new ImageView(mContext);
 
-        Intent intentServer = new Intent(this, SocketServices.class);
-        startService(intentServer);
+        //Intent intentServer = new Intent(this, SocketServices.class);
+        //startService(intentServer);
 
         initView();
         initListener();
@@ -392,7 +387,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 TaskManager.getInstances(mContext).deletePosition(Content.mapName, "bbb");
                 break;
             case R.id.alarm_btn:
-                mAlarmUtils.setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000, 30 * 60 * 1000);
+                //mAlarmUtils.setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000, 30 * 60 * 1000);
                 break;
             case R.id.getVirtualObstacleData:
                 TaskManager.getInstances(mContext).getVirtual_obstacles(Content.mapName);
@@ -402,21 +397,30 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 mVirtualBeanUtils.updateVirtual(6, Content.mapName, "decelerations",null);
                 mVirtualBeanUtils.updateVirtual(1, Content.mapName, "slopes",null);
                 mVirtualBeanUtils.updateVirtual(5, Content.mapName, "displays",null);
-                //最外边「」
-                List<List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity>> polylinesEntities = new ArrayList<>();
-                //每个「」
-                List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity> polylinesEntitiesList = new ArrayList<>();
-                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityStart = new UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity();
-                polylinesEntityStart.setX(110.0);
-                polylinesEntityStart.setY(100.0);
-                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityEnd = new UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity();
-                polylinesEntityEnd.setX(130.0);
-                polylinesEntityEnd.setY(130.0);
-                polylinesEntitiesList.add(polylinesEntityStart);
-                polylinesEntitiesList.add(polylinesEntityEnd);
-
-                polylinesEntities.add(polylinesEntitiesList);
-                mVirtualBeanUtils.updateVirtual(0, Content.mapName, "obstacles", polylinesEntities);
+//                //最外边「」
+//                List<UpdataVirtualObstacleBean.ObstaclesEntity.LinesEntity> polylinesEntities = new ArrayList<>();
+//                //每个「」
+//                List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity> polylinesEntitiesList = new ArrayList<>();
+//                UpdataVirtualObstacleBean.ObstaclesEntity.LinesEntity polylinesEntityStart = new UpdataVirtualObstacleBean.ObstaclesEntity.LinesEntity();
+//                polylinesEntityStart.setX(110.0);
+//                polylinesEntityStart.setY(100.0);
+//                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityEnd = new UpdataVirtualObstacleBean.ObstaclesEntity.LinesEntity();
+//                polylinesEntityEnd.setX(130.0);
+//                polylinesEntityEnd.setY(130.0);
+//                polylinesEntitiesList.add(polylinesEntityStart);
+//                polylinesEntitiesList.add(polylinesEntityEnd);
+//
+//                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityStart1 = new UpdataVirtualObstacleBean.ObstaclesEntity.LinesEntity();
+//                polylinesEntityStart1.setX(80.0);
+//                polylinesEntityStart1.setY(70.0);
+//                UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity polylinesEntityEnd1 = new UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity();
+//                polylinesEntityEnd1.setX(80.0);
+//                polylinesEntityEnd1.setY(130.0);
+//                polylinesEntitiesList.add(polylinesEntityStart1);
+//                polylinesEntitiesList.add(polylinesEntityEnd1);
+//
+//                polylinesEntities.add(polylinesEntitiesList);
+//                mVirtualBeanUtils.updateVirtual(0, Content.mapName, "obstacles", polylinesEntities);
 
                 break;
             default:
@@ -787,9 +791,9 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 //            robotTaskList.setAdapter(taskAdapter);
 //            taskAdapter.notifyDataSetChanged();
         } else if (messageEvent.getState() == 1007) {
-            Toast.makeText(mContext, "到达指定位置开始杀毒", Toast.LENGTH_SHORT).show();
-            spinner.setSelection((Integer) messageEvent.getT());
-            toLightControlBtn.setChecked(true);
+//            Toast.makeText(mContext, "到达指定位置开始杀毒", Toast.LENGTH_SHORT).show();
+//            spinner.setSelection((Integer) messageEvent.getT());
+//            toLightControlBtn.setChecked(true);
         }
     }
 

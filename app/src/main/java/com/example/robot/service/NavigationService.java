@@ -28,6 +28,7 @@ import com.example.robot.controller.RobotManagerController;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
+import com.example.robot.utils.ServerConnoct;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -76,16 +77,18 @@ public class NavigationService extends Service {
     }
 
     public static void initialize_directly(String mapName) {//不转圈初始化
-        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.CHARING_POINT, new RobotStatus<Status>() {
+        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.CHARGING_POINT, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "不转圈初始化成功" + status.getMsg());
-
+                EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "不转圈初始化成功" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
+
             }
         });
 
@@ -155,19 +158,6 @@ public class NavigationService extends Service {
 
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
-        threadIsRun = false;
-        if (thread != null) {
-            thread.interrupt();
-            if (Content.server != null) {
-                try {
-                    Content.server.stop();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
         RobotManagerController.getInstance().getRobotController().connect_robot(Content.ROBOROT_INF);
         TaskManager.getInstances(mContext).robotStatus();
         ping();
@@ -197,7 +187,7 @@ public class NavigationService extends Service {
             Log.d(TAG, "底盘连接状态：" + connect);
 //            TaskQueueManager.getInstances().notifyMessage("底盘连接状态：" + connect, "01");
             isStartNavigationService = connect;
-            handler.postDelayed(runnable, 30 * 1000);
+            handler.postDelayed(runnable, 10 * 1000);
             TaskManager.getInstances(this).loadMapList();
         }
     }
@@ -205,25 +195,8 @@ public class NavigationService extends Service {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            if (!serverIsRun) {
-                thread.start();
-                serverIsRun = true;
-            }
+            ServerConnoct.getInstance().connect(mContext);
         }
     };
-    Thread thread = new Thread() {
-        @Override
-        public void run() {
-            super.run();
-            if (!threadIsRun) {
-                threadIsRun = true;
-                Log.d("zdzd --- ", "thread run");
-                String host = Content.ip;
-                int port = Content.port;
-                Content.server = new SimpleServer(new InetSocketAddress(host, port));
-                Content.server.run();
-                Log.d("zdzd --- ", "thread run Content.server.run()");
-            }
-        }
-    };
+
 }

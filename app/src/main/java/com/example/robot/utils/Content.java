@@ -16,6 +16,7 @@ public final class Content {
     public static final double ROBOT_SIZE = 0.215f; //机器人大小(中心点到雷达距离 M)
     public static final String ROBOROT_INF_TWO = "ws://10.7.6.88:8089";//机器人底盘 webdocket
     public static final String ROBOROT_INF = "http://10.7.6.88:8080"; //机器人底盘
+    public static final String SYSTEM_DATE = "system_date";//系统时间
 
     /**
      * robotState：
@@ -37,8 +38,10 @@ public final class Content {
     */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = 0;
-    public static String mapName = "test00";
-    public static String taskName = "";
+    public static String mapName = null;
+    public static String taskName = null;
+
+    public static boolean is_initialize_finished = false;
 
     public static final String MAP_NAME = "map_Name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字
@@ -79,7 +82,10 @@ public final class Content {
     public static final String STARTTASKQUEUE = "startTaskQueue";//开始任务队列
     public static final String STOPTASKQUEUE = "stopTaskQueue";//停止任务队列
     public static final String EDITTASKQUEUE = "editTaskQueue";//编辑任务队列
-    public static final String SAVEEDITTASKQUEUE = "saveeditTaskQueue";//编辑任务队列
+    public static final String EDITTASKQUEUETYPE = "edittaskqueuetype";//任务类别
+    public static final String EDITTASKQUEUETIME = "edittaskqueuetime";//任务类别
+    public static final String GET_TASK_STATE = "get_task_state";//是否有正在执行的任务
+
 
     public static final String START_SCAN_MAP = "start_scan_map";//开始扫描地图
     public static final String CANCEL_SCAN_MAP = "cancel_scan_map";//取消扫描地图并且保存
@@ -92,13 +98,18 @@ public final class Content {
     public static final String NEW_MAP_NAME = "new_map_name";//新地图名
 
     public static final String BATTERY_DATA = "battery_data";//电池电量
-    public static final String BATTERY_LOW = "battery_low";//设置低电量回充
-    public static final String ADD_POWER_POINT = "ADD_POWER_POINT";//添加充电点
+    public static final String GET_LOW_BATTERY = "get_low_battery";//获取低电量回充
+    public static final String SET_LOW_BATTERY = "set_slow_battery";//设置低电量回充
+    public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
-    public static final String CHARING_POINT = "charing";//充电点
+    public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//获取导航速度
-    public static final String SEND_SPEED_LEVEL = "send_speed_level";//获取导航速度
     public static final String SET_SPEED_LEVEL = "set_speed_level";//设置导航速度
+    public static final String GET_LED_LEVEL = "get_led_level";//获取led亮度
+    public static final String SET_LED_LEVEL = "set_led_level";//设置led亮度
+    public static int led = 30;//led亮度
+    public static final String GET_VOICE_LEVEL = "get_voice_level";//获取voice亮度
+    public static final String SET_VOICE_LEVEL = "set_voice_level";//设置voice亮度
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 

@@ -47,15 +47,40 @@ public class GsonUtils {
     private String healthyMsg = null;
     private PointStateBean taskState = null;
     private VirtualObstacleBean virtualObstacleBean;
-    private int level;
+    private int speed_level;
+    private int led_level;
+    private int low_battery;
     private String editTask;
+    private List<String> editTaskType;
+    private String editTime;
+    private String task_state;
+
+    public void setEditTime(String editTime) {
+        this.editTime = editTime;
+    }
+
+    public void setLow_battery(int low_battery) {
+        this.low_battery = low_battery;
+    }
+
+    public void setSpeed_level(int speed_level) {
+        this.speed_level = speed_level;
+    }
+
+    public void setLed_level(int led_level) {
+        this.led_level = led_level;
+    }
+
+    public void setTask_state(String task_state) {
+        this.task_state = task_state;
+    }
+
+    public void setEditTaskType(List<String> editTaskType) {
+        this.editTaskType = editTaskType;
+    }
 
     public void setEditTask(String editTask) {
         this.editTask = editTask;
-    }
-
-    public void setLevel(int level) {
-        this.level = level;
     }
 
     public void setVirtualObstacleBean(VirtualObstacleBean virtualObstacleBean) {
@@ -290,10 +315,10 @@ public class GsonUtils {
             Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
             while (cursor.moveToNext()) {
                 JSONObject js = new JSONObject();
-                js.put(Content.dbTaskMapName, cursor.getColumnName(cursor.getColumnIndex(Content.dbTaskMapName)));
-                js.put(Content.dbTaskName, cursor.getColumnName(cursor.getColumnIndex(Content.dbTaskName)));
-                js.put(Content.dbTime, cursor.getColumnName(cursor.getColumnIndex(Content.dbTime)));
-                js.put(Content.dbData, cursor.getColumnName(cursor.getColumnIndex(Content.dbData)));
+                js.put(Content.dbTaskMapName, cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)));
+                js.put(Content.dbTaskName, cursor.getString(cursor.getColumnIndex(Content.dbTaskName)));
+                js.put(Content.dbTime, cursor.getString(cursor.getColumnIndex(Content.dbTime)));
+                js.put(Content.dbData, cursor.getString(cursor.getColumnIndex(Content.dbData)));
                 jsonArray.put(js);
             }
             jsonObject.put(Content.ROBOT_TASK_HISTORY, jsonArray);
@@ -395,10 +420,20 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-//            jsonObject.put(Content.TV_TIME, tvTime);
-            jsonObject.put(Content.SEND_SPEED_LEVEL, level);
+            jsonObject.put(Content.GET_SPEED_LEVEL, speed_level);
+            jsonObject.put(Content.GET_LED_LEVEL, led_level);
+            jsonObject.put(Content.GET_LOW_BATTERY, low_battery);
             jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.GET_TASK_STATE, task_state);
             jsonObject.put(Content.EDITTASKQUEUE, editTask);
+            jsonObject.put(Content.EDITTASKQUEUETIME, editTime);
+            JSONArray edTypeArray = new JSONArray();
+            if (editTaskType != null) {
+                for (int i = 0; i < editTaskType.size(); i++) {
+                    edTypeArray.put(i, editTaskType.get(i));
+                }
+            }
+            jsonObject.put(Content.EDITTASKQUEUETYPE, edTypeArray);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
             JSONArray mRobotPositionsArray = new JSONArray();
@@ -445,7 +480,7 @@ public class GsonUtils {
             for (int i = 0; i < arrayList.size(); i++) {
                 TaskBean taskBean = arrayList.get(i);
                 JSONObject object = new JSONObject();
-                object.put(Content.TASK_NAME, taskBean.getName());
+                object.put(Content.POINT_NAME, taskBean.getName());
                 object.put(Content.TASK_X, taskBean.getX());
                 object.put(Content.TASK_Y, taskBean.getY());
                 object.put(Content.TASK_ANGLE, taskBean.getAngle());

@@ -2,28 +2,55 @@ package com.example.robot.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import com.example.robot.service.SimpleServer;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
 
 public class ServerConnoct {
 
     private static ServerConnoct serverConnoct;
-    private Context mContext;
+    private Thread thread;
 
-    private ServerConnoct(Context context) {
-        this.mContext = context;
+    private ServerConnoct() {
     }
 
     /**
      * 获取唯一的instance
      */
-    public static ServerConnoct getInstance(Context context) {
+    public static ServerConnoct getInstance() {
         if (serverConnoct == null) {
             synchronized (ServerConnoct.class) {
                 if (serverConnoct == null) {
-                    serverConnoct = new ServerConnoct(context);
+                    serverConnoct = new ServerConnoct();
                 }
             }
         }
         return serverConnoct;
+    }
+
+    public void connect(Context mContext) {
+        if (thread != null) {
+            thread.interrupt();
+            if (Content.server != null) {
+                Content.server = null;
+            }
+        }
+        thread = new Thread() {
+            @Override
+            public void run() {
+                super.run();
+                Log.d("zdzd --- ", "thread run");
+                String host = Content.ip;
+                int port = Content.port;
+                Content.server = new SimpleServer(new InetSocketAddress(host, port), mContext);
+                Content.server.run();
+                Log.d("zdzd --- ", "thread run Content.server.run()");
+            }
+        };
+        thread.start();
     }
 
 }

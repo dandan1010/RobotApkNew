@@ -29,7 +29,7 @@ public class CheckLztekLamp {
     private SerialPort serialPort;
     private SerialPort batterySerialPort;
     /**
-     * 250:前边sensor
+     * 250:uvc
      * 248:左边sensor
      * 249:后边sensor
      * 218:右边sensor
@@ -54,8 +54,13 @@ public class CheckLztekLamp {
     }
 
     public void setUvcMode() {
-        for (int i = 4; i < 7; i++) {
+        for (int i = 3; i < 7; i++) {
             mLztek.setGpioOutputMode(port[i]);
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -70,14 +75,12 @@ public class CheckLztekLamp {
         boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
         boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
-        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
 
-        if (k1 || k2 || k3 || k4) {
+        if (k1 || k2 || k3) {
             return true;
         } else {
             return false;
         }
-
     }
 
     public String testGpioSensorState() {
@@ -86,7 +89,6 @@ public class CheckLztekLamp {
         boolean k1 = mLztek.getGpioValue(port[0]) == 1 ? true : false;
         boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
-        boolean k4 = mLztek.getGpioValue(port[3]) == 1 ? true : false;
         if (k1) {
             sensorString = sensorString + "右边有人靠近";
         }
@@ -94,9 +96,6 @@ public class CheckLztekLamp {
             sensorString = sensorString + "左边有人靠近";
         }
         if (k3) {
-            sensorString = sensorString + "后边有人靠近";
-        }
-        if (k4) {
             sensorString = sensorString + "前边有人靠近";
         }
         if ("".equals(sensorString)) {
@@ -113,7 +112,6 @@ public class CheckLztekLamp {
 
     public void startLedLamp() {
         mLztek.setGpioValue(port[7], 0);
-        Log.v("zdzd", "startLedLamp");
         threadFlag = true;
         openSerialPort();
     }
@@ -121,7 +119,6 @@ public class CheckLztekLamp {
     public void stopLedLamp() {
         mLztek.setGpioValue(port[7], 1);
         threadFlag = false;
-        Log.v("zdzd", "stopLedLamp");
     }
 
     public void startUvc1Lamp() {
@@ -147,6 +144,13 @@ public class CheckLztekLamp {
     public void stopUvc3Lamp() {
         mLztek.setGpioValue(port[4], 1);
     }
+    public void startUvc4Lamp() {
+        mLztek.setGpioValue(port[3], 0);
+    }
+
+    public void stopUvc4Lamp() {
+        mLztek.setGpioValue(port[3], 1);
+    }
 
     public boolean getEthEnable() {
         return mLztek.getEthEnable();
@@ -159,6 +163,14 @@ public class CheckLztekLamp {
     }
     public AddrInfo getAddrInfo () {
         return mLztek.getEthAddrInfo();
+    }
+
+
+    /**
+     * 设置系统时间
+     * */
+    public void setSystemTime(long milliseconds){
+        mLztek.setSystemTime(milliseconds);
     }
 
     /**
@@ -300,7 +312,7 @@ public class CheckLztekLamp {
     Handler handler = new Handler();
 
     /**
-     * 间隔1分钟写入请求一次电池数据
+     * 间隔5秒写入请求一次电池数据
      */
     Runnable runnable = new Runnable() {
         @Override
@@ -325,7 +337,7 @@ public class CheckLztekLamp {
                     }
                 }
             }
-            handler.postDelayed(this::run, 60 * 1000);
+            handler.postDelayed(this::run, 5 * 1000);
         }
     };
 
@@ -363,6 +375,8 @@ public class CheckLztekLamp {
                         msg = "充电";
                     } else {
                         msg = "放电";
+                        Content.robotState = 1;
+                        Content.time = 4000;
                         if (Content.taskName != null && data[23] > 80) {
                             TaskManager.getInstances(mContext).resumeTaskQueue();
                         }

@@ -60,7 +60,10 @@ public class MapManagerAdapter extends RecyclerView.Adapter<RecycleHolder> {
     }
 
     public void convert(RecycleHolder holder, RobotMap.DataBean data, int position) {
-        holder.setText(R.id.map_recycler_tv, data.getName());
+        if (holder.getAdapterPosition() == position){
+            holder.setText(R.id.map_recycler_tv, data.getName());
+        }
+
     }
 
     @Override

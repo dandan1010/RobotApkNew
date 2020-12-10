@@ -3,12 +3,10 @@
 
     <string-array name="spinner_time">
         <item>1分钟</item>
+        <item>2分钟</item>
+        <item>3分钟</item>
+        <item>4分钟</item>
         <item>5分钟</item>
-        <item>10分钟 </item>
-        <item>15分钟</item>
-        <item>20分钟</item>
-        <item>25分钟</item>
-        <item>30分钟</item>
     </string-array>
 
     <string-array name="move_light">

@@ -2,6 +2,7 @@ package com.example.robot.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.WorldPoseBean;
@@ -12,23 +13,24 @@ import java.util.ArrayList;
 public class SharedPrefUtil {
 
     private static SharedPrefUtil sharedPrefUtil;
+    private static final String SpName = "SpName";
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
 
 
-    private SharedPrefUtil(Context context, String map_name) {
-        sharedPreferences = context.getSharedPreferences(map_name, Context.MODE_PRIVATE);
+    private SharedPrefUtil(Context context) {
+        sharedPreferences = context.getSharedPreferences(SpName, Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
     }
 
     /**
      * 获取唯一的instance
      */
-    public static SharedPrefUtil getInstance(Context context, String map_name) {
+    public static SharedPrefUtil getInstance(Context context) {
         if (sharedPrefUtil == null) {
             synchronized (SharedPrefUtil.class) {
                 if (sharedPrefUtil == null) {
-                    sharedPrefUtil = new SharedPrefUtil(context, map_name);
+                    sharedPrefUtil = new SharedPrefUtil(context);
                 }
             }
         }
@@ -40,14 +42,44 @@ public class SharedPrefUtil {
         editor.commit();
     }
 
-    public void setPositionMsg(String taskName, ArrayList<TaskBean> arrayList) {
+    public void setPositionMsg(String mapName, String taskName, ArrayList<TaskBean> arrayList) {
         GsonUtils gsonUtils = new GsonUtils();
-        editor.putString(Content.mapName + taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
+        editor.putString(mapName +","+ taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
         editor.commit();
     }
 
-    public String getPositionMsg(String taskName) {
-        return sharedPreferences.getString(Content.mapName + taskName, null);
+    public String getPositionMsg(String mapName, String taskName) {
+        return sharedPreferences.getString(mapName +","+ taskName, null);
+    }
+
+    public void setSharedPrefLed(String key, int level){
+        editor.putInt(key, level);
+        editor.commit();
+    }
+
+    public int getSharedPrefLed(String key) {
+        Log.d("get battery " , ""+sharedPreferences.getInt(key, 0));
+        return sharedPreferences.getInt(key, 0);
+    }
+
+    public void setSharedPrefBattery(String key, int level){
+        editor.putInt(key, level);
+        editor.commit();
+    }
+
+    public int getSharedPrefBattery(String key) {
+        Log.d("get battery " , ""+sharedPreferences.getInt(key, Content.battery));
+        return sharedPreferences.getInt(key, Content.battery);
+    }
+
+    public void setSharedPrefSpeed(String key, int level){
+        editor.putInt(key, level);
+        editor.commit();
+    }
+
+    public int getSharedPrefSpeed(String key) {
+        Log.d("get battery " , ""+sharedPreferences.getInt(key, 0));
+        return sharedPreferences.getInt(key, 0);
     }
 
 }

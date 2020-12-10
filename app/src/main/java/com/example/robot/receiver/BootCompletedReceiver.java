@@ -7,14 +7,20 @@ import android.util.Log;
 
 import com.example.robot.activity.RobotDetailActivity;
 import com.example.robot.service.SocketServices;
+import com.example.robot.utils.AlarmUtils;
+import com.example.robot.utils.Content;
+import com.example.robot.utils.SharedPrefUtil;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
+    private AlarmUtils mAlarmUtils;
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("BootCompletedReceiver", "开机启动q1111");
         Intent intentServer = new Intent(context, SocketServices.class);
         context.startService(intentServer);
-        //Intent intent1 = new Intent(context, RobotDetailActivity.class);
-        //context.startActivity(intent1);
+        mAlarmUtils = new AlarmUtils(context);
+        mAlarmUtils.setAlarmTime(System.currentTimeMillis(), 60 * 1000);
+        Content.battery = SharedPrefUtil.getInstance(context).getSharedPrefBattery(Content.SET_LOW_BATTERY);
+        Content.led = SharedPrefUtil.getInstance(context).getSharedPrefLed(Content.SET_LED_LEVEL);
     }
 }

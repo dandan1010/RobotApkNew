@@ -39,9 +39,12 @@ public class TimeUtils {
         if (hours == 0 && minutes == 0 && second == 0) {
             Log.d(TAG, "TIME completeFlag  " + Content.completeFlag);
             Content.completeFlag = true;
-
             return "杀毒完成";
+        } else {
+            Log.d(TAG, "TIME completeFlag  " + Content.completeFlag);
+            Content.completeFlag = false;
         }
+        Log.d(TAG, "TIME completeFlag  : " + hours + "小时" + minutes + "分" + second + "秒");
         return hours + "小时" + minutes + "分" + second + "秒";
     }
 }

@@ -1,12 +1,19 @@
 package com.example.robot.service;
 
+import android.app.Service;
+import android.content.Context;
+import android.media.AudioManager;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.example.robot.task.TaskManager;
+import com.example.robot.utils.AlarmUtils;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
+import com.example.robot.utils.ServerConnoct;
+import com.example.robot.utils.SharedPrefUtil;
+import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.java_websocket.WebSocket;
@@ -24,9 +31,11 @@ public class SimpleServer extends WebSocketServer {
     private GsonUtils gsonUtils;
     private JSONObject jsonObject;
     private String address = "";
+    private Context mContext;
 
-    public SimpleServer(InetSocketAddress address) {
+    public SimpleServer(InetSocketAddress address, Context mContext) {
         super(address);
+        this.mContext = mContext;
     }
 
     @Override
@@ -35,17 +44,17 @@ public class SimpleServer extends WebSocketServer {
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
         address = remoteSocketAddress.getHostName();
         Log.d("zdzd_server", address);
-        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
+//        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
             gsonUtils.setMapName(Content.mapName);
             gsonUtils.setTaskName(Content.taskName);
             broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
             System.out.println("new connection to " + conn.getRemoteSocketAddress());
             Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
             Log.d("zdzd_server", "连接的地址open：" + Content.CONNECT_ADDRESS);
-        } else {
-            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
-            broadcast(gsonUtils.putConnMsg(Content.NO_CONN));
-        }
+//        } else {
+//            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
+//            conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
+//        }
     }
 
     @Override
@@ -83,7 +92,7 @@ public class SimpleServer extends WebSocketServer {
             System.err.println("an error occured on connection " + ex.getMessage());
             ex.printStackTrace();
         }
-
+        ServerConnoct.getInstance().connect(mContext);
     }
 
     @Override
@@ -96,16 +105,17 @@ public class SimpleServer extends WebSocketServer {
     public void stop() throws IOException, InterruptedException {
         super.stop();
         System.out.println("server stop successfully");
+        ServerConnoct.getInstance().connect(mContext);
     }
 
     @Override
     public void stop(int timeout) throws InterruptedException {
         super.stop(timeout);
         System.out.println("server timeout stop successfully :" + timeout);
+        ServerConnoct.getInstance().connect(mContext);
     }
 
     private void differentiateType(String message) throws JSONException {
-        Log.d("zdzd ", "getType :  " + gsonUtils.getType(message));
         String mapName;
         String taskName;
         switch (gsonUtils.getType(message)) {
@@ -148,12 +158,12 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10013, message));
                 break;
             case Content.DELETETASKQUEUE://删除任务
-                jsonObject = new JSONObject(message);
-                taskName = jsonObject.getString(Content.TASK_NAME);
-                EventBus.getDefault().post(new EventBusMessage(10014, taskName));
+                EventBus.getDefault().post(new EventBusMessage(10014, message));
                 break;
             case Content.GETTASKQUEUE://任务列表
-                EventBus.getDefault().post(new EventBusMessage(10015, message));
+                jsonObject = new JSONObject(message);
+                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(10015, mapName));
                 break;
             case Content.GETMAPPIC://地图图片
                 jsonObject = new JSONObject(message);
@@ -164,8 +174,6 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10021, message));
                 break;
             case Content.STARTTASKQUEUE://开始任务
-                jsonObject = new JSONObject(message);
-                Content.taskName = jsonObject.getString(Content.TASK_NAME);
                 EventBus.getDefault().post(new EventBusMessage(10022, message));
                 break;
             case Content.STOPTASKQUEUE://停止任务
@@ -225,13 +233,10 @@ public class SimpleServer extends WebSocketServer {
                 jsonObject = new JSONObject(message);
                 int level = jsonObject.getInt(Content.SET_SPEED_LEVEL);
                 EventBus.getDefault().post(new EventBusMessage(10046, level));
+                SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_SPEED_LEVEL, level);
                 break;
             case Content.RENAME_POSITION://点重命名
                 EventBus.getDefault().post(new EventBusMessage(10047, message));
-                break;
-            case Content.BATTERY_LOW://低电量回充
-                jsonObject = new JSONObject(message);
-                Content.battery = jsonObject.getInt(Content.BATTERY_LOW);
                 break;
             case Content.GET_SPEED_LEVEL://获取导航速度
                 EventBus.getDefault().post(new EventBusMessage(10048, message));
@@ -240,9 +245,43 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10050, message));
                 break;
             case Content.EDITTASKQUEUE://编辑任务
+                EventBus.getDefault().post(new EventBusMessage(10051, message));
+                break;
+            case Content.SYSTEM_DATE://设置系统时间
+                long date = new JSONObject(Content.SYSTEM_DATE).getLong(Content.SYSTEM_DATE);
+                EventBus.getDefault().post(new EventBusMessage(10052, date));
+                break;
+            case Content.GET_TASK_STATE://是否有任务正在执行
+                EventBus.getDefault().post(new EventBusMessage(10053, message));
+                break;
+            case Content.SET_LED_LEVEL://设置led亮度
+                int led_level = new JSONObject(message).getInt(Content.SET_LED_LEVEL);
+                Log.d("level ", ""+led_level);
+//                EventBus.getDefault().post(new EventBusMessage(10054, led_level));
+                SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_LED_LEVEL, led_level);
+                break;
+            case Content.GET_LED_LEVEL://获取ledl亮度
+                EventBus.getDefault().post(new EventBusMessage(10055, message));
+                break;
+            case Content.SET_LOW_BATTERY://设置低电量回充
                 jsonObject = new JSONObject(message);
-                taskName = jsonObject.getString(Content.TASK_NAME);
-                EventBus.getDefault().post(new EventBusMessage(10051, taskName));
+                Content.battery = jsonObject.getInt(Content.SET_LOW_BATTERY);
+                Log.d("battery " , ""+Content.battery);
+                SharedPrefUtil.getInstance(mContext).setSharedPrefBattery(Content.SET_LOW_BATTERY, Content.battery);
+                break;
+            case Content.GET_LOW_BATTERY://获取低电量回冲
+                EventBus.getDefault().post(new EventBusMessage(10056, message));
+                break;
+            case Content.GET_VOICE_LEVEL://获取音量
+                EventBus.getDefault().post(new EventBusMessage(10057, message));
+                AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
+                int max = mAudioManager.getStreamMaxVolume( AudioManager.STREAM_SYSTEM );
+                int current = mAudioManager.getStreamVolume( AudioManager.STREAM_SYSTEM );
+                Log.d("SYSTEM", "max : " + max + " current : " + current);
+                break;
+            case Content.SET_VOICE_LEVEL://设置音量
+//                AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
+//                mAudioManager1.setStreamVolume(AudioManager.STREAM_SYSTEM, );
                 break;
 
 

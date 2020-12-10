@@ -37,6 +37,8 @@
         android:name="android.permission.READ_LOGS"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.SET_TIME"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:name=".MyApplication"
@@ -65,6 +67,13 @@
                 <action android:name="android.alarm.task.action" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".receiver.ServerReceiver">
+            <intent-filter>
+                <action android:name="android.server.start" />
+                <action android:name="android.server.stop" />
+            </intent-filter>
+        </receiver>
+
         <service android:name=".service.SocketServices"/>
     </application>
 
