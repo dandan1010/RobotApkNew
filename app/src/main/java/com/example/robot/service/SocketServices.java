@@ -564,9 +564,10 @@ public class SocketServices extends Service {
                 if (isDevelop) {
                     TaskManager.getInstances(mContext).start_develop_map(Content.mapName);
                 }
-                Content.is_initialize_finished = true;
+                Content.is_initialize_finished = 1;
                 Log.d("zdzd :", "是否完成初始化" + Content.is_initialize_finished);
             } else {
+                Content.is_initialize_finished = 0;
                 handler1.postDelayed(runnableInitialize, 1000);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.is_initialize)));
             }
@@ -574,6 +575,7 @@ public class SocketServices extends Service {
             Log.d("zdzd :", "是否完成初始化error: " + (String) messageEvent.getT());
             EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.fail_initialize)) + (String) messageEvent.getT());
             handlerInitialize.removeCallbacks(runnableInitialize);
+            Content.is_initialize_finished = 2;
         } else if (messageEvent.getState() == 10036) {//取消扫描不保存地图
             TaskManager.getInstances(mContext).cancleScanMap();
         } else if (messageEvent.getState() == 10037) {//系统健康

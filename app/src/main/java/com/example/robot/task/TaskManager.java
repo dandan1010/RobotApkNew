@@ -765,12 +765,12 @@ public class TaskManager {
      * 使用地图
      */
     public void use_map(String map_name) {
-        Content.is_initialize_finished = false;
         Log.d(TAG, "use_map： " + map_name);
         RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "use_map success");
+                Content.is_initialize_finished = 0;
                 if (Content.robotState == 4) {
                     NavigationService.initialize_directly(Content.mapName);
                 } else {
@@ -946,30 +946,8 @@ public class TaskManager {
                                 //MyLogcat.showMessageLog(status + ">>>" + msg);
                                 Log.d("zdzdxxx", "statusCode：" + code + "  , msg : " + msg);
                                 EventBus.getDefault().post(new EventBusMessage(10000, "机器人状态 ：" + code + ",  " + msg));
-                                switch (code) {
 
-                                    case 403:
-                                        break;
-                                    case 304:
-                                        break;
-                                    case 408:
 
-                                        break;
-                                    case 409:
-                                        msg = "正在寻找充电桩";
-                                        break;
-                                    case 410:
-                                        msg = "正在移动到充电桩前面";
-                                        break;
-                                    case 411:
-                                        msg = "正在尝试对桩充电";
-                                        break;
-                                    case 702:
-                                        msg = "触发虚拟墙,请人工移动";
-                                        break;
-                                    default:
-                                        break;
-                                }
                             }
                         },
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",

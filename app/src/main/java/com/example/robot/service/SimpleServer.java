@@ -302,7 +302,7 @@ public class SimpleServer extends WebSocketServer {
                 AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
                 mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
                         voice,
-                        AudioManager.FLAG_PLAY_SOUND);
+                        AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
                 break;
 
 

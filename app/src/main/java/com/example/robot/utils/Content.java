@@ -48,7 +48,12 @@ public final class Content {
     public static String mapName = null;
     public static String taskName = null;
 
-    public static boolean is_initialize_finished = false;
+    /**
+     * 0:正在初始化
+     * 1:初始化成功
+     * 2:初始化失败
+     * */
+    public static int is_initialize_finished = -1;
 
     public static final String MAP_NAME = "map_Name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字

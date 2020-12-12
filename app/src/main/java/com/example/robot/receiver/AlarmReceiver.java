@@ -89,7 +89,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         @Override
         public void run() {
             Log.d("ALARMreceiver :", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
-            if (Content.is_initialize_finished ) {
+            if (Content.is_initialize_finished == 1) {
                 handler.removeCallbacks(this::run);
                 if (Content.taskName != null && Content.mapName != null) {
                     Log.d("ALARMreceiver :", "" + SocketServices.battery + " ,  " + Content.battery);
@@ -104,13 +104,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                         Content.mapName = null;
                         Content.taskName = null;
                     } else {
-                        Log.d("ALARM starttask :", " ,  " + Content.mapName + " , " + Content.taskName);
+                        Log.d("ALARM starttask :",  Content.mapName + " , " + Content.taskName);
                         TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
                     }
                 } else {
                     Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
                 }
-            } else {
+            } else if (Content.is_initialize_finished != 2){
                 handler.postDelayed(runnable, 1000);
             }
         }
