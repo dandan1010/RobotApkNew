@@ -28,6 +28,7 @@ import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
+import com.example.robot.utils.AssestFile;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
@@ -46,6 +47,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class SocketServices extends Service {
     private TimeUtils mTimeUtils;
     public static MyHandler myHandler;
     private long pauseTime = 0;
-    private byte battery = 0;
+    public static byte battery = 0;
     private boolean isTaskFlag = false;
     private float x;
     private float y;
@@ -150,15 +152,9 @@ public class SocketServices extends Service {
         super.onDestroy();
         Log.d("zdzd --- ", "server onDestroy");
         EventBus.getDefault().unregister(this);
-        try {
-            Content.server.stop();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        threadDestory = false;
         stopService(intentService);
+        Intent intentServer = new Intent(mContext, SocketServices.class);
+        mContext.startService(intentServer);
     }
 
     public void onCheckedChanged(int index) {
@@ -239,6 +235,16 @@ public class SocketServices extends Service {
                         if (Content.taskState == 2) {
                             TaskManager.getInstances(mContext).resumeTaskQueue();
                         }
+                        if (Content.isLastTask) {
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                            Log.d(TAG, "任务完成");
+                            mSqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - Content.startTime)/ 1000 / 60) + "分钟", mAlarmUtils.getTimeYear(System.currentTimeMillis()));
+                            Content.startTime = System.currentTimeMillis();
+                            Content.taskState = 0;
+                            Content.robotState = 1;
+                            Content.time = 4000;
+                            Content.taskName = null;
+                        }
                     }
                     break;
                 case 3:
@@ -255,13 +261,12 @@ public class SocketServices extends Service {
                     checkLztekLamp.stopUvc2Lamp();
                     checkLztekLamp.stopUvc3Lamp();
                     checkLztekLamp.stopUvc4Lamp();
-
+                    uvcWarning.stopWarning();
+                    toLightControlBtn = false;
                     Content.robotState = 6;
                     Content.time = 4000;
-                    if (Content.taskState == 1) {
-                        Content.taskState = 3;
-                        TaskManager.getInstances(mContext).pauseTaskQueue();
-                    }
+                    TaskManager.getInstances(mContext).pauseTaskQueue();
+                    Content.taskState = 3;
                     TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
                     break;
                 case 5:
@@ -284,20 +289,23 @@ public class SocketServices extends Service {
         if (Content.server != null) {
             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
         }
-        if (battery < Content.battery) {//是否到达回冲电量
+        if (battery > 80 && Content.taskName != null && Content.taskState == 3) {
+            TaskManager.getInstances(mContext).resumeTaskQueue();
+        } else if (battery < Content.battery) {//是否到达回冲电量
             myHandler.sendEmptyMessageDelayed(4, 1000);
         } else {
             ledtime++;
+            Log.d(TAG, "toLightControlBtn : " + toLightControlBtn);
             if (!toLightControlBtn) {
                 ledtime = 0;
                 return;
-            }
-            if (ledtime <= 10) {
+            } else if (ledtime <= 10) {
                 if (checkLztekLamp.getGpioSensorState()) {
                     //有人靠近
                     Log.v(TAG, "10秒重置");
                     ledtime = 0;
                 }
+                myHandler.sendEmptyMessageDelayed(1, 1000);
             } else {
                 Log.d(TAG, "警告结束，关闭警告和led，开启uvc灯");
                 ledtime = 0;
@@ -308,7 +316,6 @@ public class SocketServices extends Service {
                 startUvcDetection();
                 return;
             }
-            myHandler.sendEmptyMessageDelayed(1, 1000);
         }
     }
 
@@ -387,9 +394,9 @@ public class SocketServices extends Service {
             Content.time = 300;
             Content.robotState = 3;
         } else if (messageEvent.getState() == 10005) {//开始消毒检测
-            int index = (int) messageEvent.getT();
-            toLightControlBtn = true;
-            onCheckedChanged(index);
+//            int index = (int) messageEvent.getT();
+//            toLightControlBtn = true;
+//            onCheckedChanged(index);
         } else if (messageEvent.getState() == 10006) {//停止消毒检测
             toLightControlBtn = false;
             onCheckedChanged(0);
@@ -496,13 +503,13 @@ public class SocketServices extends Service {
                 e.printStackTrace();
             }
         } else if (messageEvent.getState() == 10023) {//停止任务
-            try {
-                TaskManager.getInstances(mContext).stopTaskQueue(new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME));
+            Log.d("stoptask ", "taskName : " + Content.taskName);
+            if (Content.taskName != null) {
+                TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
                 toLightControlBtn = false;
                 onCheckedChanged(0);
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
+            mSqLiteOpenHelperUtils.updateAllAlarmTask(Content.dbAlarmIsRun, "false");
         } else if (messageEvent.getState() == 10024) {//返回机器人位置
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
             x = (float) robotPosition.getGridPosition().getX();
@@ -699,7 +706,7 @@ public class SocketServices extends Service {
                     String taskName = new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME);
                     taskMsg = SharedPrefUtil.getInstance(mContext).getPositionMsg(mapName, taskName);
 
-                    Cursor cursor = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmMapTaskName, Content.mapName + "," + taskName);
+                    Cursor cursor = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmMapTaskName, mapName + "," + taskName);
                     List<String> list = new ArrayList<>();
                     while (cursor.moveToNext()) {
                         list.add(cursor.getString(cursor.getColumnIndex(Content.dbAlarmCycle)));
@@ -764,6 +771,13 @@ public class SocketServices extends Service {
             uvcWarning.startWarning();
         } else if (messageEvent.getState() == 20007) {
             uvcWarning.stopWarning();
+        }
+
+
+
+        else if (messageEvent.getState() == 30001) {
+            AssestFile assestFile = new AssestFile(mContext);
+            assestFile.writeBytesToFile((ByteBuffer) messageEvent.getT());
         }
     }
 

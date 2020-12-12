@@ -21,6 +21,7 @@ public class TaskSqLite extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("create table " + Content.tableName + "(_id integer primary key autoincrement, " + Content.dbTaskMapName + " varchar(50), " + Content.dbTaskName + " varchar(50), " + Content.dbTime + " varchar(50)," + Content.dbData + " varchar(50))");
         db.execSQL("create table " + Content.dbAlarmName + "(_id integer primary key autoincrement, " + Content.dbAlarmMapTaskName + " varchar(50), " + Content.dbAlarmTime + " varchar(100)," + Content.dbAlarmCycle + " varchar(200) ," + Content.dbAlarmIsRun + " varchar(200))");
+
     }
 
     @Override

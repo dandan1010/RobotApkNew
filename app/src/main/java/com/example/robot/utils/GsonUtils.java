@@ -7,6 +7,7 @@ import android.util.Log;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
+import com.example.robot.BuildConfig;
 import com.example.robot.MyApplication;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.TaskBean;
@@ -50,10 +51,15 @@ public class GsonUtils {
     private int speed_level;
     private int led_level;
     private int low_battery;
+    private int voice;
     private String editTask;
     private List<String> editTaskType;
     private String editTime;
     private String task_state;
+
+    public void setVoice(int voice) {
+        this.voice = voice;
+    }
 
     public void setEditTime(String editTime) {
         this.editTime = editTime;
@@ -86,29 +92,12 @@ public class GsonUtils {
     public void setVirtualObstacleBean(VirtualObstacleBean virtualObstacleBean) {
         this.virtualObstacleBean = virtualObstacleBean;
     }
-
-    public String getHealthyMsg() {
-        return healthyMsg;
-    }
-
     public void setHealthyMsg(String healthyMsg) {
         this.healthyMsg = healthyMsg;
     }
 
-    public PointStateBean getTaskState() {
-        return taskState;
-    }
-
     public void setTaskState(PointStateBean taskState) {
         this.taskState = taskState;
-    }
-
-    public String getTestCallBack() {
-        return testCallBack;
-    }
-
-    public double getAngle() {
-        return angle;
     }
 
     public void setAngle(double angle) {
@@ -119,88 +108,44 @@ public class GsonUtils {
         this.testCallBack = testCallBack;
     }
 
-    public String getCallback() {
-        return callback;
-    }
-
     public void setCallback(String callback) {
         this.callback = callback;
-    }
-
-    public String getBattery() {
-        return battery;
     }
 
     public void setBattery(String battery) {
         this.battery = battery;
     }
 
-    public RobotPositions getmRobotPositions() {
-        return mRobotPositions;
-    }
-
     public void setmRobotPositions(RobotPositions mRobotPositions) {
         this.mRobotPositions = mRobotPositions;
-    }
-
-    public double getX() {
-        return x;
     }
 
     public void setX(double x) {
         this.x = x;
     }
 
-    public double getY() {
-        return y;
-    }
-
     public void setY(double y) {
         this.y = y;
-    }
-
-    public int getGridHeight() {
-        return gridHeight;
     }
 
     public void setGridHeight(int gridHeight) {
         this.gridHeight = gridHeight;
     }
 
-    public int getGridWidth() {
-        return gridWidth;
-    }
-
     public void setGridWidth(int gridWidth) {
         this.gridWidth = gridWidth;
-    }
-
-    public double getOriginX() {
-        return originX;
     }
 
     public void setOriginX(double originX) {
         this.originX = originX;
     }
 
-    public double getOriginY() {
-        return originY;
-    }
-
     public void setOriginY(double originY) {
         this.originY = originY;
     }
 
-    public double getResolution() {
-        return resolution;
-    }
-
     public void setResolution(double resolution) {
         this.resolution = resolution;
-    }
-
-    public byte[] getBytes() {
-        return bytes;
     }
 
     public void setBytes(byte[] bytes) {
@@ -423,8 +368,10 @@ public class GsonUtils {
             jsonObject.put(Content.GET_SPEED_LEVEL, speed_level);
             jsonObject.put(Content.GET_LED_LEVEL, led_level);
             jsonObject.put(Content.GET_LOW_BATTERY, low_battery);
+            jsonObject.put(Content.GET_VOICE_LEVEL, voice);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.GET_TASK_STATE, task_state);
+            jsonObject.put(Content.versionCode, BuildConfig.VERSION_CODE);
             jsonObject.put(Content.EDITTASKQUEUE, editTask);
             jsonObject.put(Content.EDITTASKQUEUETIME, editTime);
             JSONArray edTypeArray = new JSONArray();
@@ -452,6 +399,7 @@ public class GsonUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("GSONUTILS " , jsonObject.toString());
         return jsonObject.toString();
     }
 

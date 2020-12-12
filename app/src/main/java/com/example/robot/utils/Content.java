@@ -1,5 +1,7 @@
 package com.example.robot.utils;
 
+import com.example.robot.service.SimpleServer;
+
 import org.java_websocket.server.WebSocketServer;
 
 public final class Content {
@@ -9,7 +11,7 @@ public final class Content {
     public static final String mask = "255.255.255.0";//子网掩码
     public static final String gateway = "10.7.5.1";//网关地址
     public static final String dns = "0.0.0.0";//域名服务器
-    public static WebSocketServer server = null;
+    public static SimpleServer server = null;
     public static String CONNECT_ADDRESS = null;
     public static String CONN_OK = "conn_ok";
     public static String NO_CONN = "no_conn";
@@ -17,6 +19,11 @@ public final class Content {
     public static final String ROBOROT_INF_TWO = "ws://10.7.6.88:8089";//机器人底盘 webdocket
     public static final String ROBOROT_INF = "http://10.7.6.88:8080"; //机器人底盘
     public static final String SYSTEM_DATE = "system_date";//系统时间
+    public static final String versionCode = "versionCode";//系统版本
+
+    public static boolean isLastTask = false;
+    public static long startTime = System.currentTimeMillis();
+    public static long endTime = System.currentTimeMillis();
 
     /**
      * robotState：
@@ -99,7 +106,7 @@ public final class Content {
 
     public static final String BATTERY_DATA = "battery_data";//电池电量
     public static final String GET_LOW_BATTERY = "get_low_battery";//获取低电量回充
-    public static final String SET_LOW_BATTERY = "set_slow_battery";//设置低电量回充
+    public static final String SET_LOW_BATTERY = "set_low_battery";//设置低电量回充
     public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
     public static final String CHARGING_POINT = "charging";//充电点
@@ -163,13 +170,13 @@ public final class Content {
     public static final String dbTaskMapName = "dbTaskMapName";
     public static final String dbTime = "time";
     public static final String dbData = "data";
+
     public static final String dbAlarmName = "dbAlarmName";//表名
     public static final String dbAlarmMapTaskName = "dbAlarmMapTaskName";
     public static final String dbAlarmTime = "dbAlarmTime";//时间
     public static final String dbAlarmCycle = "dbAlarmCycle";//周期
     public static final String dbAlarmIsRun = "dbAlarmIsRun";//周期任务是否执行
     public static final String TASK_TYPE = "task_type";//是否是定时任务
-
 
     //test
     public static final String TEST_UVCSTART = "test_uvcstart";

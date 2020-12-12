@@ -11,10 +11,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.robot.service.NavigationService;
+import com.example.robot.service.SocketServices;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
 import com.example.robot.utils.Content;
+import com.example.robot.utils.GsonUtils;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -43,10 +45,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                 Log.d("AlarmReceiver", "开启定时任务taskname ：" + Content.taskName);
                 Log.d("AlarmReceiver", "开启定时任务dbAlarmCycle ：" + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)));
                 Log.d("AlarmReceiver", "开启定时任务dbAlarmTime ：" + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)));
-                Log.d("AlarmReceiver ", week.equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))) +",  "
-                + mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))+", "
-                + TextUtils.isEmpty(Content.taskName)+ ", "
-                + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
+                Log.d("AlarmReceiver ", week.equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))) + ",  "
+                        + mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime))) + ", "
+                        + TextUtils.isEmpty(Content.taskName) + ", "
+                        + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
                 Log.d("AlarmReceiver", "size : " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)).length());
                 if (week.equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
@@ -58,7 +60,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     handler.post(runnable);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
-                        && TextUtils.isEmpty(Content.taskName)){
+                        && TextUtils.isEmpty(Content.taskName)) {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
@@ -67,7 +69,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     handler.post(runnable);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
-                        && TextUtils.isEmpty(Content.taskName)){
+                        && TextUtils.isEmpty(Content.taskName)) {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
@@ -86,10 +88,28 @@ public class AlarmReceiver extends BroadcastReceiver {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            Log.d("ALARMreceiver :", "" + Content.is_initialize_finished);
-            if (Content.is_initialize_finished) {
+            Log.d("ALARMreceiver :", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
+            if (Content.is_initialize_finished ) {
                 handler.removeCallbacks(this::run);
-                TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
+                if (Content.taskName != null && Content.mapName != null) {
+                    Log.d("ALARMreceiver :", "" + SocketServices.battery + " ,  " + Content.battery);
+                    if (SocketServices.battery < Content.battery) {
+                        Content.robotState = 6;
+                        Content.time = 4000;
+                        GsonUtils gsonUtils = new GsonUtils();
+                        gsonUtils.setTvTime("电量回充,不能开始任务");
+                        if (Content.server != null) {
+                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
+                        }
+                        Content.mapName = null;
+                        Content.taskName = null;
+                    } else {
+                        Log.d("ALARM starttask :", " ,  " + Content.mapName + " , " + Content.taskName);
+                        TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
+                    }
+                } else {
+                    Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
+                }
             } else {
                 handler.postDelayed(runnable, 1000);
             }

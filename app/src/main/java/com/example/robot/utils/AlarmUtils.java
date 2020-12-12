@@ -87,7 +87,7 @@ public class AlarmUtils {
     }
 
     public String getTimeYear(long time) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-ddHH:mm");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         return dateFormat.format(new Date(time));
     }
 

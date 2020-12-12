@@ -32,6 +32,7 @@ public class ServerConnoct {
     }
 
     public void connect(Context mContext) {
+        Log.d("zdzd --- ", "serverConnect connect");
         if (thread != null) {
             thread.interrupt();
             if (Content.server != null) {
@@ -43,11 +44,8 @@ public class ServerConnoct {
             public void run() {
                 super.run();
                 Log.d("zdzd --- ", "thread run");
-                String host = Content.ip;
-                int port = Content.port;
-                Content.server = new SimpleServer(new InetSocketAddress(host, port), mContext);
+                Content.server = SimpleServer.getInstance(mContext);
                 Content.server.run();
-                Log.d("zdzd --- ", "thread run Content.server.run()");
             }
         };
         thread.start();

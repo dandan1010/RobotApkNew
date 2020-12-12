@@ -442,7 +442,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable1 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.move(-0.2f, 0.0f);
+            NavigationService.move(-0.4f, 0.0f);
             handler1.postDelayed(runnable1, 10);
         }
     };
@@ -452,7 +452,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable2 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.move(0.2f, 0.0f);
+            NavigationService.move(0.4f, 0.0f);
             handler2.postDelayed(runnable2, 10);
         }
     };
@@ -462,7 +462,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable3 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.move(0.0f, 0.2f);
+            NavigationService.move(0.0f, 0.4f);
             handler3.postDelayed(runnable3, 10);
         }
     };
@@ -472,7 +472,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     Runnable runnable4 = new Runnable() {
         @Override
         public synchronized void run() {
-            NavigationService.move(0.0f, -0.2f);
+            NavigationService.move(0.0f, -0.4f);
             handler4.postDelayed(runnable4, 10);
         }
     };
@@ -626,7 +626,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                     checkLztekLamp.stopUvc1Lamp();
                     checkLztekLamp.stopUvc2Lamp();
                     checkLztekLamp.stopUvc3Lamp();
-
+                    uvcWarning.stopWarning();
                     Content.robotState = 6;
                     Content.time = 4000;
                     if (Content.taskState == 1) {

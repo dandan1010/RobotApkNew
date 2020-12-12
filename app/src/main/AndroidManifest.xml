@@ -69,8 +69,8 @@
         </receiver>
         <receiver android:name=".receiver.ServerReceiver">
             <intent-filter>
-                <action android:name="android.server.start" />
-                <action android:name="android.server.stop" />
+                <action android:name="com.android.robot.server.start" />
+                <action android:name="com.android.robot.server.stop" />
             </intent-filter>
         </receiver>
 

@@ -68,7 +68,6 @@ public class TaskManager {
     private RobotPositions mRobotPositions = null;
     private SqLiteOpenHelperUtils sqLiteOpenHelperUtils;
     private GsonUtils gsonUtils;
-    private long startTime;
     private PointStateBean pointStateBean;
     private AlarmUtils mAlarmUtils;
 
@@ -442,7 +441,7 @@ public class TaskManager {
         for (int i = 0; i < mTaskArrayList.size(); i++) {
             pois.add(mTaskArrayList.get(i).getName());
         }
-        pois.add(Content.CHARGING_POINT);
+        //pois.add(Content.CHARGING_POINT);
 
         RobotTaskQueue taskQueue = new RobotTaskQueue();
         taskQueue.setName(taskName);
@@ -470,7 +469,8 @@ public class TaskManager {
      * 开始执行任务队列
      */
     public void startTaskQueue(String mapName, String taskName) {
-        Log.d(TAG, "startTaskQueue 开始执行任务" + taskName);
+        Content.isLastTask = false;
+        Log.d(TAG, "startTaskQueue 开始执行任务" + taskName + "mapName : " + mapName);
         getTaskPositionMsg(mapName, taskName);
         robotTaskQueue = exeTaskPoi(mapName, taskName, mTaskArrayList);
 
@@ -494,8 +494,8 @@ public class TaskManager {
                     Content.time = 300;
                     Content.taskState = 1;
                     Content.taskIndex = 0;
-                    startTime = System.currentTimeMillis();
-                    Log.d("zdzd", "开始时间：" + startTime);
+                    Content.startTime = System.currentTimeMillis();
+                    Log.d("zdzd", "开始时间：" + Content.startTime);
 //                    myHandler.removeCallbacks(runnable);
 //                    myHandler.postDelayed(runnable, 1000);
 //                    is_task_queue_finished();
@@ -519,7 +519,7 @@ public class TaskManager {
         mTaskArrayList.clear();
         pointStateBean = new PointStateBean();
         String taskMsg = SharedPrefUtil.getInstance(mContext).getPositionMsg(mapName, taskName);
-        Log.d(TAG, "获取地图数据startTaskQueue ：" + taskMsg);
+        Log.d(TAG, "获取地图数据startTaskQueue ：" + taskMsg + ",   ,mapName : " + mapName);
         pointStateBean.setTaskName(taskName);
         List<PointStateBean.PointState> pointStates = new ArrayList<>();
         if (taskMsg != null) {
@@ -601,15 +601,14 @@ public class TaskManager {
                 Log.d(TAG, "停止任务队列成功");
                 Content.taskState = 0;
                 Content.taskIndex = 0;
-                sqLiteOpenHelperUtils.saveTaskHistory(mapName, Content.taskName,
-                        "" + ((System.currentTimeMillis() - startTime) / 1000 / 60) + "分钟",
-                        "" + mAlarmUtils.getTimeYear(System.currentTimeMillis()));
-                startTime = 0;
                 if (Content.taskName != null) {
                     navigate_Position(mapName, Content.CHARGING_POINT);
+                    sqLiteOpenHelperUtils.saveTaskHistory(mapName, Content.taskName,
+                            "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + "分钟",
+                            "" + mAlarmUtils.getTimeYear(System.currentTimeMillis()));
                 }
-                sqLiteOpenHelperUtils.updateAlarmTask(mapName + "," + Content.taskName, Content.dbAlarmIsRun, "false");
                 Content.taskName = null;
+                Content.startTime = System.currentTimeMillis();
             }
 
             @Override
@@ -669,6 +668,7 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "addPosition success");
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_position) + status.getMsg()));
+                getPosition(Content.mapName);
             }
 
             @Override
@@ -893,9 +893,11 @@ public class TaskManager {
                 .getRobotController()
                 .RobotStatus(
                         new NavigationStatus() {
+                            String statustype = "";
+                            int statusCode = 0;
                             @Override
                             public void noticeType(String type, String destination) {
-                                Log.d("zdzdxxx", "statustype：" + type);
+                                Log.d("zdzdxxx", "statustype：" + type + ",  taskIndex : " + Content.taskIndex);
                                 String msg = "";
                                 if (Content.taskIndex < mTaskArrayList.size() - 1 && !type.equals("HEADING")) {
                                     pointStateBean.getList().get(Content.taskIndex).setPointState(type);
@@ -910,15 +912,6 @@ public class TaskManager {
                                         Content.robotState = 5;
                                         Content.time = 1000;
                                         Content.taskIndex++;
-                                    } else if (Content.taskIndex >= mTaskArrayList.size()) {
-                                        Log.d(TAG, "任务完成");
-                                        sqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - startTime)/ 1000 / 60) + "分钟", "" + System.currentTimeMillis());
-                                        startTime = 0;
-                                        Content.taskState = 0;
-                                        Content.robotState = 1;
-                                        Content.time = 4000;
-                                        Toast.makeText(mContext, "任务完成", Toast.LENGTH_SHORT).show();
-                                        Content.taskName = null;
                                     }
                                     msg = "到达目的地";
                                 } else if (type.equals("UNREACHABLE")) {//目的地无法到达
@@ -932,11 +925,18 @@ public class TaskManager {
                                     Content.taskIndex++;
                                 } else if (type.equals("TOO_CLOSE_TO_OBSTACLES")) {
                                     msg = "离障碍物太近";
+                                    Content.taskIndex++;
                                 } else if (type.equals("HEADING")) {
                                     msg = "正在前往目的地";
                                 } else if (type.equals("PLANNING")) {
                                     msg = "正在规划路径";
                                 }
+
+                                if (Content.taskIndex >= mTaskArrayList.size()) {
+                                    Content.isLastTask = true;
+                                }
+
+                                Log.d("zdzdxxx", "statustype2：" + type + ",  taskIndex : " + Content.taskIndex  + "list : " + mTaskArrayList.size());
                                 EventBus.getDefault().post(new EventBusMessage(10000, "机器人状态 ：" + type + ",  " + msg));
                             }
 
@@ -947,10 +947,13 @@ public class TaskManager {
                                 Log.d("zdzdxxx", "statusCode：" + code + "  , msg : " + msg);
                                 EventBus.getDefault().post(new EventBusMessage(10000, "机器人状态 ：" + code + ",  " + msg));
                                 switch (code) {
+
                                     case 403:
+                                        break;
                                     case 304:
                                         break;
                                     case 408:
+
                                         break;
                                     case 409:
                                         msg = "正在寻找充电桩";
@@ -971,8 +974,5 @@ public class TaskManager {
                         },
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
-
     }
-
-
 }

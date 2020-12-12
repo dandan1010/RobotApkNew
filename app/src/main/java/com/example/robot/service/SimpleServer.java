@@ -33,9 +33,25 @@ public class SimpleServer extends WebSocketServer {
     private String address = "";
     private Context mContext;
 
-    public SimpleServer(InetSocketAddress address, Context mContext) {
+    private SimpleServer(InetSocketAddress address, Context mContext) {
         super(address);
         this.mContext = mContext;
+    }
+
+    /**
+     * 获取唯一的instance
+     */
+    public static SimpleServer getInstance(Context context) {
+        if (Content.server == null) {
+            synchronized (SimpleServer.class) {
+                if (Content.server == null) {
+                    String host = Content.ip;
+                    int port = Content.port;
+                    Content.server = new SimpleServer(new InetSocketAddress(host, port), context);
+                }
+            }
+        }
+        return Content.server;
     }
 
     @Override
@@ -45,8 +61,6 @@ public class SimpleServer extends WebSocketServer {
         address = remoteSocketAddress.getHostName();
         Log.d("zdzd_server", address);
 //        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
-            gsonUtils.setMapName(Content.mapName);
-            gsonUtils.setTaskName(Content.taskName);
             broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
             System.out.println("new connection to " + conn.getRemoteSocketAddress());
             Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
@@ -82,6 +96,7 @@ public class SimpleServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
         System.out.println("received ByteBuffer from " + conn.getRemoteSocketAddress());
+        EventBus.getDefault().post(new EventBusMessage(30001, message));
     }
 
     @Override
@@ -273,15 +288,21 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10056, message));
                 break;
             case Content.GET_VOICE_LEVEL://获取音量
-                EventBus.getDefault().post(new EventBusMessage(10057, message));
                 AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
-                int max = mAudioManager.getStreamMaxVolume( AudioManager.STREAM_SYSTEM );
-                int current = mAudioManager.getStreamVolume( AudioManager.STREAM_SYSTEM );
+                int max = mAudioManager.getStreamMaxVolume( AudioManager.STREAM_MUSIC );
+                int current = mAudioManager.getStreamVolume( AudioManager.STREAM_MUSIC );
                 Log.d("SYSTEM", "max : " + max + " current : " + current);
+                gsonUtils.setVoice(current);
+                broadcast(gsonUtils.putJsonMessage(Content.GET_VOICE_LEVEL));
                 break;
             case Content.SET_VOICE_LEVEL://设置音量
-//                AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
-//                mAudioManager1.setStreamVolume(AudioManager.STREAM_SYSTEM, );
+                jsonObject = new JSONObject(message);
+                int voice = jsonObject.getInt(Content.SET_VOICE_LEVEL);
+                Log.d("voice " , ""+voice);
+                AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
+                mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
+                        voice,
+                        AudioManager.FLAG_PLAY_SOUND);
                 break;
 
 

@@ -37,6 +37,7 @@ public class SqLiteOpenHelperUtils {
     public void deleteTaskHistory(String taskName) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.delete(Content.tableName, Content.dbTaskName + "=?", new String[]{taskName});
+        close();
     }
 
     //定时任务
@@ -56,9 +57,15 @@ public class SqLiteOpenHelperUtils {
         sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + type + "='" + isRun + "' where " + Content.dbAlarmMapTaskName + "='" + mapTaskName + "'");
     }
 
+    public void updateAllAlarmTask(String type, String isRun) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + type + "='" + isRun + "' where " + type + "='false'");
+    }
+
     public void deleteAlarmTask(String mapTaskName) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.delete(Content.dbAlarmName, Content.dbAlarmMapTaskName + "=?", new String[]{mapTaskName});
+        close();
     }
 
     public void close(){
