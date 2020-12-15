@@ -15,6 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.robot.BuildConfig;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -83,7 +85,7 @@ public class AssestFile {
     private static String getCrashFilePath(Context context) {
         String path = null;
         path = Environment.getExternalStorageDirectory().getPath()
-                + "/com.example.robot" +"/update.apk";
+                + "/" + BuildConfig.APPLICATION_ID +"/update.apk";
         File file = new File(path);
         if (!file.exists()) {
             file.mkdirs();

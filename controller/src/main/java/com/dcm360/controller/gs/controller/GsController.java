@@ -30,6 +30,7 @@ import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotOdomRaw;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotMove;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotRotate;
+import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.gs.controller.interceptor.GsMoreBaseUrlInterceptor;
 import com.dcm360.controller.gs.controller.listener.StatusMessageListener;
@@ -629,4 +630,17 @@ public enum GsController implements IGsRobotController {
         if (gsControllerService != null)
             gsControllerService.setSpeedLevel(level).enqueue(new ResponseCallback<Status>().call(status));
     }
+
+    @Override
+    public void reset_robot(RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.reset_robot().enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
+    public void getUltrasonicPhit(RobotStatus<UltrasonicPhitBean> status) {
+        if (gsControllerService != null)
+            gsControllerService.getUltrasonicPhit().enqueue(new ResponseCallback<UltrasonicPhitBean>().call(status));
+    }
+
 }

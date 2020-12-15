@@ -2,8 +2,6 @@ package com.example.robot.utils;
 
 import com.example.robot.service.SimpleServer;
 
-import org.java_websocket.server.WebSocketServer;
-
 public final class Content {
 
     public static final String ip = "10.7.5.176";//以太网ip
@@ -84,8 +82,8 @@ public final class Content {
     public static final String ADD_POSITION = "add_position";//添加点
     public static final String DELETE_POSITION = "delete_position";//删除点
     public static final String RENAME_POSITION = "rename_position";//重命名点
-    public static final String OLD_POSITION_NAME = "old_position_name";//原始点
-    public static final String NEW_POSITION_NAME = "new_position_name";//新点
+    public static final String OLD_POINT_NAME = "old_point_name";//原始点
+    public static final String NEW_POINT_NAME = "new_point_name";//新点
 
     public static final String SPINNERTIME = "spinnerTime";//请求的时间
     public static final String TV_TIME = "tv_time";//返回时间
@@ -122,6 +120,7 @@ public final class Content {
     public static int led = 30;//led亮度
     public static final String GET_VOICE_LEVEL = "get_voice_level";//获取voice亮度
     public static final String SET_VOICE_LEVEL = "set_voice_level";//设置voice亮度
+    public static final String RESET_ROBOT = "reset_robot";//重置设备
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 
@@ -184,13 +183,24 @@ public final class Content {
     public static final String TASK_TYPE = "task_type";//是否是定时任务
 
     //test
-    public static final String TEST_UVCSTART = "test_uvcstart";
-    public static final String TEST_UVCSTOP = "test_uvcstop";
+    public static final String TEST_UVCSTART_1 = "test_uvcstart_1";
+    public static final String TEST_UVCSTART_2 = "test_uvcstart_2";
+    public static final String TEST_UVCSTART_3 = "test_uvcstart_3";
+    public static final String TEST_UVCSTART_4 = "test_uvcstart_4";
+    public static final String TEST_UVCSTOP_1 = "test_uvcstop_1";
+    public static final String TEST_UVCSTOP_2 = "test_uvcstop_2";
+    public static final String TEST_UVCSTOP_3 = "test_uvcstop_3";
+    public static final String TEST_UVCSTOP_4 = "test_uvcstop_4";
+    public static final String TEST_UVCSTART_ALL = "test_uvcstart_ALL";
+    public static final String TEST_UVCSTOP_ALL = "test_uvcstop_ALL";
     public static final String TEST_SENSOR = "test_sensor";
-    public static final String TEST_SENSOR_CALLBACK = "test_sensor_callback";
-    public static final String TEST_WARINGSTART = "test_waringstart";
-    public static final String TEST_WARINGSTOP = "test_waringstop";
+    public static final String TEST_WARNINGSTART = "test_warningstart";
+    public static final String TEST_WARNINGSTOP = "test_warningstop";
     public static final String TEST_LIGHTSTART = "test_lightstart";
     public static final String TEST_LIGHTSTOP = "test_lightstop";
 
+
+    public static final String GET_ULTRASONIC = "get_ultrasonic";//声呐设备
+    public static final String GET_ULTRASONIC_X = "get_ultrasonic_x";//声呐设备x
+    public static final String GET_ULTRASONIC_Y = "get_ultrasonic_y";//声呐设备y
 }

@@ -71,6 +71,7 @@
             <intent-filter>
                 <action android:name="com.android.robot.server.start" />
                 <action android:name="com.android.robot.server.stop" />
+                <action android:name="com.android.update"/>
             </intent-filter>
         </receiver>
 

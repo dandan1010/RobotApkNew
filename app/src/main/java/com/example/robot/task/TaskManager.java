@@ -23,6 +23,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
+import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.NavigationStatus;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
@@ -470,7 +471,7 @@ public class TaskManager {
      */
     public void startTaskQueue(String mapName, String taskName) {
         Content.isLastTask = false;
-        Log.d(TAG, "startTaskQueue 开始执行任务" + taskName + "mapName : " + mapName);
+        Log.d(TAG, "startTaskQueue 开始执行任务" + taskName + "  mapName : " + mapName);
         getTaskPositionMsg(mapName, taskName);
         robotTaskQueue = exeTaskPoi(mapName, taskName, mTaskArrayList);
 
@@ -501,7 +502,6 @@ public class TaskManager {
 //                    is_task_queue_finished();
                 } else {
                     Content.taskName = null;
-                    Toast.makeText(mContext, "11111" + status.getMsg(), Toast.LENGTH_SHORT).show();
                     Log.d(TAG, "11111任务：" + status.getMsg());
                     EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.start_task) + status.getMsg()));
                 }
@@ -519,7 +519,7 @@ public class TaskManager {
         mTaskArrayList.clear();
         pointStateBean = new PointStateBean();
         String taskMsg = SharedPrefUtil.getInstance(mContext).getPositionMsg(mapName, taskName);
-        Log.d(TAG, "获取地图数据startTaskQueue ：" + taskMsg + ",   ,mapName : " + mapName);
+        Log.d(TAG, "获取地图数据startTaskQueue ：" + taskMsg + "   ,mapName : " + mapName);
         pointStateBean.setTaskName(taskName);
         List<PointStateBean.PointState> pointStates = new ArrayList<>();
         if (taskMsg != null) {
@@ -765,12 +765,12 @@ public class TaskManager {
      * 使用地图
      */
     public void use_map(String map_name) {
+        Content.is_initialize_finished = 0;
         Log.d(TAG, "use_map： " + map_name);
         RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "use_map success");
-                Content.is_initialize_finished = 0;
                 if (Content.robotState == 4) {
                     NavigationService.initialize_directly(Content.mapName);
                 } else {
@@ -893,26 +893,25 @@ public class TaskManager {
                 .getRobotController()
                 .RobotStatus(
                         new NavigationStatus() {
-                            String statustype = "";
-                            int statusCode = 0;
                             @Override
                             public void noticeType(String type, String destination) {
                                 Log.d("zdzdxxx", "statustype：" + type + ",  taskIndex : " + Content.taskIndex);
                                 String msg = "";
-                                if (Content.taskIndex < mTaskArrayList.size() - 1 && !type.equals("HEADING")) {
+                                if (Content.taskIndex < mTaskArrayList.size() && !type.equals("HEADING")) {
+                                    Log.d("zdzdxxx", "statustype33：" + type + ",  taskIndex : " + Content.taskIndex);
                                     pointStateBean.getList().get(Content.taskIndex).setPointState(type);
                                     EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
                                 }
                                 if ("REACHED".equals(type)) {//已经到达目的地
-                                    Log.d("zdzdContent.taskIndex", "" + Content.taskIndex + ",   " +mTaskArrayList.size());
+                                    Log.d("zdzdContent.taskIndex", "" + Content.taskIndex + " ,   " +mTaskArrayList.size());
                                     if (Content.taskIndex < mTaskArrayList.size()) {
                                         pauseTaskQueue();
                                         EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
                                         Log.d(TAG, "暂停任务");
                                         Content.robotState = 5;
                                         Content.time = 1000;
-                                        Content.taskIndex++;
                                     }
+                                    Content.taskIndex++;
                                     msg = "到达目的地";
                                 } else if (type.equals("UNREACHABLE")) {//目的地无法到达
                                     msg = "目的地无法到达";
@@ -926,18 +925,33 @@ public class TaskManager {
                                 } else if (type.equals("TOO_CLOSE_TO_OBSTACLES")) {
                                     msg = "离障碍物太近";
                                     Content.taskIndex++;
+                                } else if (type.equals("UNREACHED")) {
+                                    msg = "到达目的地附近，目的地有障碍物";
+                                    Content.taskIndex++;
                                 } else if (type.equals("HEADING")) {
                                     msg = "正在前往目的地";
                                 } else if (type.equals("PLANNING")) {
                                     msg = "正在规划路径";
                                 }
 
-                                if (Content.taskIndex >= mTaskArrayList.size()) {
+                                if (Content.taskIndex == mTaskArrayList.size()) {
                                     Content.isLastTask = true;
+                                    if (type.equals("UNREACHABLE") || type.equals("LOCALIZATION_FAILED") || type.equals("UNREACHED")
+                                            || type.equals("GOAL_NOT_SAFE") || type.equals("TOO_CLOSE_TO_OBSTACLES")) {
+                                        TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                                        Log.d(TAG, "任务完成");
+                                        sqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - Content.startTime)/ 1000 / 60) + "分钟",
+                                                mAlarmUtils.getTimeYear(System.currentTimeMillis()));
+                                        Content.startTime = System.currentTimeMillis();
+                                        Content.taskState = 0;
+                                        Content.robotState = 1;
+                                        Content.time = 4000;
+                                        Content.taskName = null;
+                                    }
                                 }
 
                                 Log.d("zdzdxxx", "statustype2：" + type + ",  taskIndex : " + Content.taskIndex  + "list : " + mTaskArrayList.size());
-                                EventBus.getDefault().post(new EventBusMessage(10000, "机器人状态 ：" + type + ",  " + msg));
+                                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.robot_state) + " ：" + type + ",  " + msg));
                             }
 
                             @Override
@@ -945,12 +959,45 @@ public class TaskManager {
                                 //String status = StatusCode.getCodeMsg(code);
                                 //MyLogcat.showMessageLog(status + ">>>" + msg);
                                 Log.d("zdzdxxx", "statusCode：" + code + "  , msg : " + msg);
-                                EventBus.getDefault().post(new EventBusMessage(10000, "机器人状态 ：" + code + ",  " + msg));
+                                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.robot_state) + " ：" + code + ",  " + msg));
+                                switch (code) {
 
-
+                                }
                             }
                         },
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
+    }
+
+    public void robot_reset(){
+        GsController.INSTANCE.reset_robot(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "reset_robot : " + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.reset_robot) + " : " + status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.reset_robot) + " : " + error.getMessage()));
+            }
+        });
+
+    }
+
+    public void getUltrasonicPhit(){
+        GsController.INSTANCE.getUltrasonicPhit(new RobotStatus<UltrasonicPhitBean>() {
+            @Override
+            public void success(UltrasonicPhitBean ultrasonicPhitBean) {
+                EventBus.getDefault().post(new EventBusMessage(10059, ultrasonicPhitBean));
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_ultrasonic_phit) + "成功"));
+
+            }
+
+            @Override
+            public void error(Throwable error) {
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_ultrasonic_phit) + error.getMessage()));
+            }
+        });
     }
 }

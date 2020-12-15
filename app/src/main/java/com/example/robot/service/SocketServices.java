@@ -22,6 +22,7 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
+import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.example.robot.R;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
@@ -548,7 +549,13 @@ public class SocketServices extends Service {
         } else if (messageEvent.getState() == 10031) {//删除地图
             TaskManager.getInstances(mContext).deleteMap((String) messageEvent.getT());
         } else if (messageEvent.getState() == 10032) {//删除点
-            TaskManager.getInstances(mContext).deletePosition(Content.mapName, (String) messageEvent.getT());
+            try {
+                TaskManager.getInstances(mContext).deletePosition(
+                        new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME),
+                        new JSONObject((String) messageEvent.getT()).getString(Content.POINT_NAME));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (messageEvent.getState() == 10033) {//电池电量
             byte[] bytes = (byte[]) messageEvent.getT();
             battery = bytes[23];
@@ -670,12 +677,12 @@ public class SocketServices extends Service {
             try {
                 JSONObject jsonObject = new JSONObject(message);
                 TaskManager.getInstances(mContext).renamePosition(jsonObject.getString(Content.MAP_NAME),
-                        jsonObject.getString(Content.OLD_POSITION_NAME),
-                        jsonObject.getString(Content.NEW_POSITION_NAME));
+                        jsonObject.getString(Content.OLD_POINT_NAME),
+                        jsonObject.getString(Content.NEW_POINT_NAME));
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } else if (messageEvent.getState() == 10048) {//获取设备信息
+        } else if (messageEvent.getState() == 10048) {//获取速度
             //TaskManager.getInstances(mContext).deviceStatus();
             int level = SharedPrefUtil.getInstance(mContext).getSharedPrefSpeed(Content.SET_SPEED_LEVEL);
             Log.d("level get speed", "" + level);
@@ -684,11 +691,11 @@ public class SocketServices extends Service {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_SPEED_LEVEL));
             }
         } else if (messageEvent.getState() == 10049) {//返回设备信息
-            RobotDeviceStatus robotDeviceStatus = (RobotDeviceStatus) messageEvent.getT();
-            if (Content.server != null) {
-                gsonUtils.setSpeed_level(robotDeviceStatus.getData().getSpeed());
-                Content.server.broadcast(gsonUtils.putVirtualObstacle(Content.GET_SPEED_LEVEL));
-            }
+//            RobotDeviceStatus robotDeviceStatus = (RobotDeviceStatus) messageEvent.getT();
+//            if (Content.server != null) {
+//                gsonUtils.setSpeed_level(robotDeviceStatus.getData().getSpeed());
+//                Content.server.broadcast(gsonUtils.putVirtualObstacle(Content.GET_SPEED_LEVEL));
+//            }
         } else if (messageEvent.getState() == 10050) {//添加充电点
             if (Content.robotState == 4) {
                 PositionListBean positionListBean = new PositionListBean();
@@ -727,6 +734,7 @@ public class SocketServices extends Service {
         } else if (messageEvent.getState() == 10053) {//是否有任务正在执行
             if (Content.server != null) {
                 gsonUtils.setTask_state(Content.taskName);
+                gsonUtils.setMapName(Content.mapName);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_TASK_STATE));
             }
         } else if (messageEvent.getState() == 10054) {//设置led亮度
@@ -745,33 +753,57 @@ public class SocketServices extends Service {
                 gsonUtils.setLow_battery(sharedPrefBattery);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_LOW_BATTERY));
             }
+        } else if (messageEvent.getState() == 10057) {//重置设备
+            TaskManager.getInstances(mContext).robot_reset();
+            mSqLiteOpenHelperUtils.reset_Db(Content.dbAlarmName);
+            mSqLiteOpenHelperUtils.reset_Db(Content.tableName);
+            SharedPrefUtil.getInstance(mContext).deleteAll();
+        } else if (messageEvent.getState() == 10058) {//声呐设备
+            TaskManager.getInstances(mContext).getUltrasonicPhit();
+        } else if (messageEvent.getState() == 10059) {//返回声呐设备信息
+            UltrasonicPhitBean ultrasonicPhitBean = (UltrasonicPhitBean) messageEvent.getT();
+            if (Content.server != null) {
+                gsonUtils.setUltrasonicPhitBean(ultrasonicPhitBean);
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_ULTRASONIC));
+            }
         }
 
 //test request
         else if (messageEvent.getState() == 20001) {
-            checkLztekLamp.setUvcMode();
-            checkLztekLamp.startUvc1Lamp();
-            checkLztekLamp.startUvc2Lamp();
-            checkLztekLamp.startUvc3Lamp();
-            checkLztekLamp.startUvc4Lamp();
+            checkLztekLamp.test_uvc_start1();
         } else if (messageEvent.getState() == 20002) {
-            checkLztekLamp.stopUvc1Lamp();
-            checkLztekLamp.stopUvc2Lamp();
-            checkLztekLamp.stopUvc3Lamp();
-            checkLztekLamp.stopUvc4Lamp();
+            checkLztekLamp.test_uvc_start1();
         } else if (messageEvent.getState() == 20003) {
-            checkLztekLamp.startLedLamp();
+            checkLztekLamp.test_uvc_start3();
         } else if (messageEvent.getState() == 20004) {
-            checkLztekLamp.stopLedLamp();
+            checkLztekLamp.test_uvc_start4();
         } else if (messageEvent.getState() == 20005) {
+            checkLztekLamp.test_uvc_stop1();
+        } else if (messageEvent.getState() == 20006) {
+            checkLztekLamp.test_uvc_stop2();
+        } else if (messageEvent.getState() == 20007) {
+            checkLztekLamp.test_uvc_stop3();
+        } else if (messageEvent.getState() == 20008) {
+            checkLztekLamp.test_uvc_stop4();
+        } else if (messageEvent.getState() == 20009) {
+            checkLztekLamp.test_uvc_startAll();
+        } else if (messageEvent.getState() == 20010) {
+            checkLztekLamp.test_uvc_stopAll();
+
+
+        } else if (messageEvent.getState() == 20011) {
+            checkLztekLamp.startLedLamp();
+        } else if (messageEvent.getState() == 20012) {
+            checkLztekLamp.stopLedLamp();
+        } else if (messageEvent.getState() == 20013) {
             String s = checkLztekLamp.testGpioSensorState();
             gsonUtils.setTestCallBack(s);
             if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putTestSensorCallBack(Content.TEST_SENSOR_CALLBACK));
+                Content.server.broadcast(gsonUtils.putTestSensorCallBack(Content.TEST_SENSOR));
             }
-        } else if (messageEvent.getState() == 20006) {
+        } else if (messageEvent.getState() == 20014) {
             uvcWarning.startWarning();
-        } else if (messageEvent.getState() == 20007) {
+        } else if (messageEvent.getState() == 20015) {
             uvcWarning.stopWarning();
         }
 

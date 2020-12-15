@@ -7,6 +7,7 @@ import android.util.Log;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
+import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.example.robot.BuildConfig;
 import com.example.robot.MyApplication;
 import com.example.robot.bean.PointStateBean;
@@ -56,6 +57,11 @@ public class GsonUtils {
     private List<String> editTaskType;
     private String editTime;
     private String task_state;
+    private UltrasonicPhitBean ultrasonicPhitBean;
+
+    public void setUltrasonicPhitBean(UltrasonicPhitBean ultrasonicPhitBean) {
+        this.ultrasonicPhitBean = ultrasonicPhitBean;
+    }
 
     public void setVoice(int voice) {
         this.voice = voice;
@@ -215,7 +221,7 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.TEST_SENSOR_CALLBACK, testCallBack);
+            jsonObject.put(Content.TEST_SENSOR, testCallBack);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -248,6 +254,7 @@ public class GsonUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("gsonutils ", "robot_state : " + jsonObject.toString());
         return jsonObject.toString();
     }
 
@@ -383,6 +390,16 @@ public class GsonUtils {
             jsonObject.put(Content.EDITTASKQUEUETYPE, edTypeArray);
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
+            JSONArray mUltrasonicPhitBeanArray = new JSONArray();
+            if (ultrasonicPhitBean != null) {
+                for (int i = 0; i < ultrasonicPhitBean.getGridPhits().size(); i++) {
+                    JSONObject object = new JSONObject();
+                    object.put(Content.GET_ULTRASONIC_X, ultrasonicPhitBean.getGridPhits().get(i).getX());
+                    object.put(Content.GET_ULTRASONIC_Y, ultrasonicPhitBean.getGridPhits().get(i).getY());
+                    mUltrasonicPhitBeanArray.put(i, object);
+                }
+            }
+            jsonObject.put(Content.GET_ULTRASONIC, mUltrasonicPhitBeanArray);
             JSONArray mRobotPositionsArray = new JSONArray();
             if (mRobotPositions != null) {
                 for (int i = 0; i < mRobotPositions.getData().size(); i++) {

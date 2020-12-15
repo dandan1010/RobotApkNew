@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.os.Environment;
 import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
@@ -16,7 +17,10 @@ import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
 import com.example.robot.utils.Content;
+import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.Serializable;
 import java.text.DateFormat;
@@ -89,6 +93,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         @Override
         public void run() {
             Log.d("ALARMreceiver :", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
+            Log.d("alarm path", Environment.getExternalStorageDirectory().getPath()
+                    + "/com.example.robot" +"/update.apk");
             if (Content.is_initialize_finished == 1) {
                 handler.removeCallbacks(this::run);
                 if (Content.taskName != null && Content.mapName != null) {

@@ -72,6 +72,11 @@ public class SqLiteOpenHelperUtils {
         sqLiteDatabase.close();
     }
 
+    public void reset_Db(String tab_name){
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("delete from " + tab_name + "");
+    }
+
 }
 
 

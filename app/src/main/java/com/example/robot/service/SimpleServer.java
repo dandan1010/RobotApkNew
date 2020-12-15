@@ -221,8 +221,7 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10031, deleteMapName));
                 break;
             case Content.DELETE_POSITION://删除点
-                jsonObject = new JSONObject(message);
-                EventBus.getDefault().post(new EventBusMessage(10032, jsonObject.getString(Content.POINT_NAME)));
+                EventBus.getDefault().post(new EventBusMessage(10032, message));
                 break;
             case Content.CANCEL_SCAN_MAP_NO://取消扫描不保存地图
                 EventBus.getDefault().post(new EventBusMessage(10036, message));
@@ -248,7 +247,7 @@ public class SimpleServer extends WebSocketServer {
                 jsonObject = new JSONObject(message);
                 int level = jsonObject.getInt(Content.SET_SPEED_LEVEL);
                 EventBus.getDefault().post(new EventBusMessage(10046, level));
-                SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_SPEED_LEVEL, level);
+                SharedPrefUtil.getInstance(mContext).setSharedPrefSpeed(Content.SET_SPEED_LEVEL, level);
                 break;
             case Content.RENAME_POSITION://点重命名
                 EventBus.getDefault().post(new EventBusMessage(10047, message));
@@ -272,10 +271,9 @@ public class SimpleServer extends WebSocketServer {
             case Content.SET_LED_LEVEL://设置led亮度
                 int led_level = new JSONObject(message).getInt(Content.SET_LED_LEVEL);
                 Log.d("level ", ""+led_level);
-//                EventBus.getDefault().post(new EventBusMessage(10054, led_level));
                 SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_LED_LEVEL, led_level);
                 break;
-            case Content.GET_LED_LEVEL://获取ledl亮度
+            case Content.GET_LED_LEVEL://获取led亮度
                 EventBus.getDefault().post(new EventBusMessage(10055, message));
                 break;
             case Content.SET_LOW_BATTERY://设置低电量回充
@@ -304,29 +302,62 @@ public class SimpleServer extends WebSocketServer {
                         voice,
                         AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
                 break;
+            case Content.RESET_ROBOT://重置设置
+                EventBus.getDefault().post(new EventBusMessage(10057, message));
+                break;
+            case Content.GET_ULTRASONIC://声呐设备
+                EventBus.getDefault().post(new EventBusMessage(10058, message));
+                break;
 
 
 //test request:
-            case Content.TEST_UVCSTART:
+            case Content.TEST_UVCSTART_1:
                 EventBus.getDefault().post(new EventBusMessage(20001, message));
                 break;
-            case Content.TEST_UVCSTOP:
+            case Content.TEST_UVCSTART_2:
                 EventBus.getDefault().post(new EventBusMessage(20002, message));
                 break;
-            case Content.TEST_LIGHTSTART:
+            case Content.TEST_UVCSTART_3:
                 EventBus.getDefault().post(new EventBusMessage(20003, message));
                 break;
-            case Content.TEST_LIGHTSTOP:
+            case Content.TEST_UVCSTART_4:
                 EventBus.getDefault().post(new EventBusMessage(20004, message));
                 break;
-            case Content.TEST_SENSOR:
+
+            case Content.TEST_UVCSTOP_1:
                 EventBus.getDefault().post(new EventBusMessage(20005, message));
                 break;
-            case Content.TEST_WARINGSTART:
+            case Content.TEST_UVCSTOP_2:
                 EventBus.getDefault().post(new EventBusMessage(20006, message));
                 break;
-            case Content.TEST_WARINGSTOP:
+            case Content.TEST_UVCSTOP_3:
                 EventBus.getDefault().post(new EventBusMessage(20007, message));
+                break;
+            case Content.TEST_UVCSTOP_4:
+                EventBus.getDefault().post(new EventBusMessage(20008, message));
+                break;
+
+            case Content.TEST_UVCSTART_ALL:
+                EventBus.getDefault().post(new EventBusMessage(20009, message));
+                break;
+
+            case Content.TEST_UVCSTOP_ALL:
+                EventBus.getDefault().post(new EventBusMessage(20010, message));
+                break;
+            case Content.TEST_LIGHTSTART:
+                EventBus.getDefault().post(new EventBusMessage(20011, message));
+                break;
+            case Content.TEST_LIGHTSTOP:
+                EventBus.getDefault().post(new EventBusMessage(20012, message));
+                break;
+            case Content.TEST_SENSOR:
+                EventBus.getDefault().post(new EventBusMessage(20013, message));
+                break;
+            case Content.TEST_WARNINGSTART:
+                EventBus.getDefault().post(new EventBusMessage(20014, message));
+                break;
+            case Content.TEST_WARNINGSTOP:
+                EventBus.getDefault().post(new EventBusMessage(20015, message));
                 break;
             default:
                 break;

@@ -29,6 +29,7 @@ import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotOdomRaw;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotMove;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotRotate;
+import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.gs.controller.listener.StatusMessageListener;
 import com.dcm360.controller.robot_interface.bean.Status;
@@ -200,4 +201,8 @@ public interface IGsRobotController {
     void updateVirtualObstacleData(UpdataVirtualObstacleBean updataVirtualObstacleBean, String mapName, String obstacle_name, RobotStatus<Status> status);//添加虚拟强
 
     void setSpeedLevel(String level, RobotStatus<Status> status);//导航速度
+
+    void reset_robot(RobotStatus<Status> status);//恢复出厂设置
+
+    void getUltrasonicPhit(RobotStatus<UltrasonicPhitBean> status);//声呐数据
 }

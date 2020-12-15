@@ -9,7 +9,10 @@ import com.example.robot.activity.RobotDetailActivity;
 import com.example.robot.service.SocketServices;
 import com.example.robot.utils.AlarmUtils;
 import com.example.robot.utils.Content;
+import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.SharedPrefUtil;
+
+import org.greenrobot.eventbus.EventBus;
 
 public class BootCompletedReceiver extends BroadcastReceiver {
     private AlarmUtils mAlarmUtils;

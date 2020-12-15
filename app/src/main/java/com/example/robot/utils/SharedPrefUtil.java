@@ -37,6 +37,10 @@ public class SharedPrefUtil {
         return sharedPrefUtil;
     }
 
+    /**
+     * 任务详情
+     * @param key
+     */
     public void deleteTaskQueue(String key) {
         editor.remove(key);
         editor.commit();
@@ -52,6 +56,11 @@ public class SharedPrefUtil {
         return sharedPreferences.getString(mapName +","+ taskName, null);
     }
 
+    /**
+     * LED亮度
+     * @param key
+     * @param level
+     */
     public void setSharedPrefLed(String key, int level){
         editor.putInt(key, level);
         editor.commit();
@@ -62,6 +71,12 @@ public class SharedPrefUtil {
         return sharedPreferences.getInt(key, 0);
     }
 
+
+    /**
+     * 低电量回充
+     * @param key
+     * @param level
+     */
     public void setSharedPrefBattery(String key, int level){
         editor.putInt(key, level);
         editor.commit();
@@ -72,6 +87,9 @@ public class SharedPrefUtil {
         return sharedPreferences.getInt(key, Content.battery);
     }
 
+    /**
+     * 速度
+     */
     public void setSharedPrefSpeed(String key, int level){
         editor.putInt(key, level);
         editor.commit();
@@ -80,6 +98,14 @@ public class SharedPrefUtil {
     public int getSharedPrefSpeed(String key) {
         Log.d("get battery " , ""+sharedPreferences.getInt(key, 0));
         return sharedPreferences.getInt(key, 0);
+    }
+
+    /**
+     * 清除所有数据
+     */
+    public void deleteAll(){
+        editor.clear();
+        editor.commit();
     }
 
 }

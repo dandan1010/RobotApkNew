@@ -31,6 +31,7 @@ import com.dcm360.controller.gs.controller.bean.raw_bean.RobotGpsRaw;
 import com.dcm360.controller.gs.controller.bean.raw_bean.RobotOdomRaw;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotMove;
 import com.dcm360.controller.gs.controller.bean.system_bean.RobotRotate;
+import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.robot_interface.bean.Status;
 
@@ -773,4 +774,17 @@ public interface GsControllerService {
      * */
     @GET("/gs-robot/cmd/set_speed_level")
     Call<Status> setSpeedLevel(@Query("level") String paramString);
+
+    /**
+     * 恢复出厂设置
+     * */
+    @GET("/gs-robot/cmd/reset_robot_setting")
+    Call<Status> reset_robot();
+
+    /**
+     * 声呐设备栅格化数据
+     */
+    @GET("/gs-robot/real_time_data/ultrasonic_phit")
+    Call<UltrasonicPhitBean> getUltrasonicPhit();
+
 }

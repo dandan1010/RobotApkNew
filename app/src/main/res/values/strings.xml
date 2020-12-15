@@ -34,5 +34,7 @@
     <string name="add_virtual_obstacle">添加虚拟墙虚拟强数据</string>
     <string name="set_speed_level">设置导航速度</string>
     <string name="device_status">获取设备信息</string>
-
+    <string name="robot_state">机器人状态</string>
+    <string name="reset_robot">恢复出厂设置</string>
+    <string name="get_ultrasonic_phit">获取声呐设备信息</string>
 </resources>
