@@ -62,7 +62,7 @@ public class AssestFile {
                 if (progress == 100) {
                     Log.d(TAG, "发广播安装apk");
                     Intent intent = new Intent("com.android.robot.update");
-                    intent.setPackage("com.example.wireless");
+                    intent.setPackage("com.example.wireLessApk");
                     mContext.sendBroadcast(intent);
                 }
             }

@@ -18,7 +18,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
     private AlarmUtils mAlarmUtils;
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("BootCompletedReceiver", "开机启动q1111");
+        Log.d("BootCompletedReceiver", "开机启动q1111" + intent.getAction());
         Intent intentServer = new Intent(context, SocketServices.class);
         context.startService(intentServer);
         mAlarmUtils = new AlarmUtils(context);

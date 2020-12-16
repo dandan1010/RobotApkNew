@@ -707,10 +707,10 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             uvcWarning.stopWarning();
             Content.robotState = 5;
             Content.time = 1000;
-            checkLztekLamp.setUvcMode();
-            checkLztekLamp.startUvc1Lamp();
-            checkLztekLamp.startUvc2Lamp();
-            checkLztekLamp.startUvc3Lamp();
+//            checkLztekLamp.setUvcMode();
+//            checkLztekLamp.startUvc1Lamp();
+//            checkLztekLamp.startUvc2Lamp();
+//            checkLztekLamp.startUvc3Lamp();
             myHandler.sendEmptyMessageDelayed(2, 1000);
         } else {
             if (pauseTime == 0) {

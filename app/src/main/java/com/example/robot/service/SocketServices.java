@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
-import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
@@ -46,7 +45,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -124,7 +122,7 @@ public class SocketServices extends Service {
     private void initView() {
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
-
+        checkLztekLamp.initUvcMode();
         gsonUtils = new GsonUtils();
         myHandler = new MyHandler(SocketServices.this);
         checkLztekLamp.openBatteryPort();
@@ -138,7 +136,6 @@ public class SocketServices extends Service {
         mSqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(this);
         mAlarmUtils = new AlarmUtils(this);
 
-        checkLztekLamp = new CheckLztekLamp(this);
         Content.robotState = 1;
         Content.time = 4000;
         checkLztekLamp.startCheckSensorAtTime();
@@ -175,10 +172,11 @@ public class SocketServices extends Service {
             Content.robotState = 1;
             Content.time = 4000;
             uvcWarning.stopWarning();
-            checkLztekLamp.stopUvc1Lamp();
-            checkLztekLamp.stopUvc2Lamp();
-            checkLztekLamp.stopUvc3Lamp();
-            checkLztekLamp.stopUvc4Lamp();
+            checkLztekLamp.setUvcMode(1);
+//                checkLztekLamp.stopUvc1Lamp();
+//                checkLztekLamp.stopUvc2Lamp();
+//                checkLztekLamp.stopUvc3Lamp();
+//                checkLztekLamp.stopUvc4Lamp();
             tvText = mTimeUtils.calculateDays(System.currentTimeMillis());
             gsonUtils.setTvTime(tvText);
             Log.d(TAG, "case 2  " + tvText);
@@ -216,7 +214,6 @@ public class SocketServices extends Service {
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
-
                     } else {
                         gsonUtils.setTvTime("消毒完成");
                         Log.d(TAG, "case 2  " + "消毒完成");
@@ -225,10 +222,7 @@ public class SocketServices extends Service {
                         }
                         toLightControlBtn = false;
                         onCheckedChanged(0);
-                        checkLztekLamp.stopUvc1Lamp();
-                        checkLztekLamp.stopUvc2Lamp();
-                        checkLztekLamp.stopUvc3Lamp();
-                        checkLztekLamp.stopUvc4Lamp();
+                        checkLztekLamp.setUvcMode(1);
                         Content.robotState = 1;
                         Content.time = 4000;
                         Content.completeFlag = false;
@@ -239,12 +233,16 @@ public class SocketServices extends Service {
                         if (Content.isLastTask) {
                             TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
                             Log.d(TAG, "任务完成");
-                            mSqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - Content.startTime)/ 1000 / 60) + "分钟", mAlarmUtils.getTimeYear(System.currentTimeMillis()));
+                            mSqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + "分钟", mAlarmUtils.getTimeYear(System.currentTimeMillis()));
                             Content.startTime = System.currentTimeMillis();
                             Content.taskState = 0;
                             Content.robotState = 1;
                             Content.time = 4000;
                             Content.taskName = null;
+                            checkLztekLamp.setUvcMode(1);
+                            if (Content.Working_mode == 1) {
+                                stopDemoMode();
+                            }
                         }
                     }
                     break;
@@ -258,10 +256,7 @@ public class SocketServices extends Service {
                     if (Content.server != null) {
                         Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                     }
-                    checkLztekLamp.stopUvc1Lamp();
-                    checkLztekLamp.stopUvc2Lamp();
-                    checkLztekLamp.stopUvc3Lamp();
-                    checkLztekLamp.stopUvc4Lamp();
+                    checkLztekLamp.setUvcMode(1);
                     uvcWarning.stopWarning();
                     toLightControlBtn = false;
                     Content.robotState = 6;
@@ -271,6 +266,12 @@ public class SocketServices extends Service {
                     TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
                     break;
                 case 5:
+                    if (checkLztekLamp.getGpioSensorState()) {
+                        checkLztekLamp.setUvcModeForDemo(1);
+                    } else {
+                        checkLztekLamp.setUvcModeForDemo(0);
+                    }
+                    myHandler.sendEmptyMessageDelayed(5, 1000);
                     break;
 
                 default:
@@ -290,7 +291,7 @@ public class SocketServices extends Service {
         if (Content.server != null) {
             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
         }
-        if (battery > 80 && Content.taskName != null && Content.taskState == 3) {
+        if (battery > 60 && Content.taskName != null && Content.taskState == 3) {
             TaskManager.getInstances(mContext).resumeTaskQueue();
         } else if (battery < Content.battery) {//是否到达回冲电量
             myHandler.sendEmptyMessageDelayed(4, 1000);
@@ -313,7 +314,8 @@ public class SocketServices extends Service {
                 uvcWarning.stopWarning();
                 Content.robotState = 5;
                 Content.time = 1000;
-                checkLztekLamp.setUvcMode();
+                uvcWarning.stopWarning();
+                checkLztekLamp.setUvcMode(0);
                 startUvcDetection();
                 return;
             }
@@ -328,21 +330,20 @@ public class SocketServices extends Service {
         if (!toLightControlBtn) {
             return;
         }
-        if (battery < Content.battery) {//是否到达回冲电量
+        if (battery > 60 && Content.taskName != null && Content.taskState == 3) {
+            TaskManager.getInstances(mContext).resumeTaskQueue();
+        } else if (battery < Content.battery) {//是否到达回冲电量
             myHandler.sendEmptyMessageDelayed(4, 1000);
         } else if (!checkLztekLamp.getGpioSensorState() && !isTaskFlag) {
             Log.d(TAG, "startUvcDetection" + "关led灯,开uvc灯");
             if (pauseTime != 0) {
+                uvcWarning.stopWarning();
+                checkLztekLamp.setUvcMode(0);
                 workTime = workTime + System.currentTimeMillis() - pauseTime;
+                pauseTime = 0;
             }
-            pauseTime = 0;
-            uvcWarning.stopWarning();
             Content.robotState = 5;
             Content.time = 1000;
-            checkLztekLamp.startUvc1Lamp();
-            checkLztekLamp.startUvc2Lamp();
-            checkLztekLamp.startUvc3Lamp();
-            checkLztekLamp.startUvc4Lamp();
             myHandler.sendEmptyMessageDelayed(2, 1000);
         } else {
             if (pauseTime == 0) {
@@ -352,10 +353,7 @@ public class SocketServices extends Service {
             uvcWarning.startWarning();
             Content.robotState = 5;
             Content.time = 1000;
-            checkLztekLamp.stopUvc1Lamp();
-            checkLztekLamp.stopUvc2Lamp();
-            checkLztekLamp.stopUvc3Lamp();
-            checkLztekLamp.stopUvc4Lamp();
+            checkLztekLamp.setUvcMode(1);
             myHandler.sendEmptyMessageDelayed(3, 1000);
         }
     }
@@ -395,12 +393,11 @@ public class SocketServices extends Service {
             Content.time = 300;
             Content.robotState = 3;
         } else if (messageEvent.getState() == 10005) {//开始消毒检测
-//            int index = (int) messageEvent.getT();
-//            toLightControlBtn = true;
-//            onCheckedChanged(index);
+            toLightControlBtn = true;
+            startDemoMode();
         } else if (messageEvent.getState() == 10006) {//停止消毒检测
             toLightControlBtn = false;
-            onCheckedChanged(0);
+            stopDemoMode();
         } else if (messageEvent.getState() == 10007) {//停前
             handler2.removeCallbacks(runnable2);
             Content.robotState = 1;
@@ -496,7 +493,6 @@ public class SocketServices extends Service {
                 e.printStackTrace();
             }
         } else if (messageEvent.getState() == 10022) {//开始任务
-//            TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
             try {
                 selectAlarmSqlite(new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME),
                         new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME));
@@ -805,11 +801,7 @@ public class SocketServices extends Service {
             uvcWarning.startWarning();
         } else if (messageEvent.getState() == 20015) {
             uvcWarning.stopWarning();
-        }
-
-
-
-        else if (messageEvent.getState() == 30001) {
+        } else if (messageEvent.getState() == 30001) {
             AssestFile assestFile = new AssestFile(mContext);
             assestFile.writeBytesToFile((ByteBuffer) messageEvent.getT());
         }
@@ -882,4 +874,14 @@ public class SocketServices extends Service {
             handler4.postDelayed(runnable4, 10);
         }
     };
+
+    private void startDemoMode() {
+        checkLztekLamp.setUvcModeForDemo(0);
+        myHandler.sendEmptyMessageDelayed(5, 1000);
+    }
+
+    public void stopDemoMode() {
+        checkLztekLamp.setUvcModeForDemo(1);
+        myHandler.removeMessages(5);
+    }
 }

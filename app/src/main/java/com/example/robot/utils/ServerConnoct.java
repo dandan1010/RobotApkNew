@@ -35,9 +35,6 @@ public class ServerConnoct {
         Log.d("zdzd --- ", "serverConnect connect");
         if (thread != null) {
             thread.interrupt();
-            if (Content.server != null) {
-                Content.server = null;
-            }
         }
         thread = new Thread() {
             @Override

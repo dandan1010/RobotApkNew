@@ -40,6 +40,7 @@ import com.example.robot.utils.EventBusMessage;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.utils.GsonUtils;
 import com.example.robot.utils.SharedPrefUtil;
+import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -497,9 +498,10 @@ public class TaskManager {
                     Content.taskIndex = 0;
                     Content.startTime = System.currentTimeMillis();
                     Log.d("zdzd", "开始时间：" + Content.startTime);
-//                    myHandler.removeCallbacks(runnable);
-//                    myHandler.postDelayed(runnable, 1000);
-//                    is_task_queue_finished();
+                    if (Content.Working_mode == 1) {
+                        EventBus.getDefault().post(new EventBusMessage(10005, -1));
+                    }
+
                 } else {
                     Content.taskName = null;
                     Log.d(TAG, "11111任务：" + status.getMsg());
@@ -577,11 +579,7 @@ public class TaskManager {
                 Content.taskState = 1;
                 Content.robotState = 3;
                 Content.time = 300;
-                //myHandler.removeCallbacks(runnable);
                 Log.d(TAG, "恢复任务index : " + Content.taskIndex + ",  pois : " + pois.size());
-//                if (Content.taskIndex < pois.size() - 1) {
-//                    myHandler.postDelayed(runnable, 1000);
-//                }
             }
 
             @Override
@@ -609,6 +607,9 @@ public class TaskManager {
                 }
                 Content.taskName = null;
                 Content.startTime = System.currentTimeMillis();
+                if (Content.Working_mode == 1) {
+                    EventBus.getDefault().post(new EventBusMessage(10006, -1));
+                }
             }
 
             @Override
@@ -688,6 +689,7 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "deletePosition success");
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_position) + status.getMsg()));
+
             }
 
             @Override
@@ -947,6 +949,9 @@ public class TaskManager {
                                         Content.robotState = 1;
                                         Content.time = 4000;
                                         Content.taskName = null;
+                                        if (Content.Working_mode == 1) {
+                                            EventBus.getDefault().post(new EventBusMessage(10006, -1));
+                                        }
                                     }
                                 }
 

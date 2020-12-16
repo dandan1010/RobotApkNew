@@ -48,6 +48,7 @@ public class SimpleServer extends WebSocketServer {
                     String host = Content.ip;
                     int port = Content.port;
                     Content.server = new SimpleServer(new InetSocketAddress(host, port), context);
+                    Content.server.run();
                 }
             }
         }

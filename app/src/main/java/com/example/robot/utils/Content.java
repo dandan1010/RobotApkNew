@@ -4,6 +4,13 @@ import com.example.robot.service.SimpleServer;
 
 public final class Content {
 
+    /**
+     * //测试版本不亮灯 ：0
+     * demo : 1
+     * 正式版本：2
+     */
+    public static final int Working_mode = 1;
+
     public static final String ip = "10.7.5.176";//以太网ip
     public static final int port = 8887;//端口
     public static final String mask = "255.255.255.0";//子网掩码

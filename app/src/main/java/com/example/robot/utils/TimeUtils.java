@@ -36,7 +36,7 @@ public class TimeUtils {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        if (hours == 0 && minutes == 0 && second == 0) {
+        if (hours <= 0 && minutes <= 0 && second <= 0) {
             Log.d(TAG, "TIME completeFlag  " + Content.completeFlag);
             Content.completeFlag = true;
             return "杀毒完成";
