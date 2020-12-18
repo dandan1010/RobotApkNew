@@ -8,12 +8,11 @@ public class TaskBean extends Object{
     private double angle;
 
 
-    public TaskBean(String name, int x, int y, int disinfectTime, double angle) {
+    public TaskBean(String name, int disinfectTime, int x, int y) {
         this.name = name;
         this.x = x;
         this.y = y;
         this.disinfectTime = disinfectTime;
-        this.angle = angle;
     }
 
     public TaskBean() {

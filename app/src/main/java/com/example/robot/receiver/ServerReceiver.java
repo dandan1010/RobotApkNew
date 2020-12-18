@@ -20,8 +20,6 @@ public class ServerReceiver extends BroadcastReceiver {
         } else if ("com.android.robot.server.stop".equals(intent.getAction())){
             Intent intentServer = new Intent(context, SocketServices.class);
             context.stopService(intentServer);
-        } else if (intent.getAction() == "com.android.update") {
-            EventBus.getDefault().post(new EventBusMessage(30001, ""));
         }
     }
 }

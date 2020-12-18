@@ -53,11 +53,15 @@ public class GsonUtils {
     private int led_level;
     private int low_battery;
     private int voice;
-    private String editTask;
     private List<String> editTaskType;
     private String editTime;
     private String task_state;
     private UltrasonicPhitBean ultrasonicPhitBean;
+    private List<TaskBean> taskBeans;
+
+    public void setTaskBeans(List<TaskBean> taskBeans) {
+        this.taskBeans = taskBeans;
+    }
 
     public void setUltrasonicPhitBean(UltrasonicPhitBean ultrasonicPhitBean) {
         this.ultrasonicPhitBean = ultrasonicPhitBean;
@@ -89,10 +93,6 @@ public class GsonUtils {
 
     public void setEditTaskType(List<String> editTaskType) {
         this.editTaskType = editTaskType;
-    }
-
-    public void setEditTask(String editTask) {
-        this.editTask = editTask;
     }
 
     public void setVirtualObstacleBean(VirtualObstacleBean virtualObstacleBean) {
@@ -286,6 +286,7 @@ public class GsonUtils {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.TASK_NAME, taskName);
+            jsonObject.put(Content.versionCode, BuildConfig.VERSION_CODE);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -379,7 +380,18 @@ public class GsonUtils {
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.GET_TASK_STATE, task_state);
             jsonObject.put(Content.versionCode, BuildConfig.VERSION_CODE);
-            jsonObject.put(Content.EDITTASKQUEUE, editTask);
+            JSONArray edPointArray = new JSONArray();
+            if (taskBeans != null) {
+                for (int i = 0; i < taskBeans.size(); i++) {
+                    JSONObject edJson = new JSONObject();
+                    edJson.put(Content.dbPointName, taskBeans.get(i).getName());
+                    edJson.put(Content.dbSpinnerTime, taskBeans.get(i).getDisinfectTime());
+                    edJson.put(Content.dbPointX, taskBeans.get(i).getX());
+                    edJson.put(Content.dbPointY, taskBeans.get(i).getY());
+                    edPointArray.put(i, edJson);
+                }
+            }
+            jsonObject.put(Content.EDITTASKQUEUE, edPointArray);
             jsonObject.put(Content.EDITTASKQUEUETIME, editTime);
             JSONArray edTypeArray = new JSONArray();
             if (editTaskType != null) {

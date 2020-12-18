@@ -185,10 +185,8 @@ public class NavigationService extends Service {
         Log.d(TAG, "底盘连接状态：" + connect);
         if (isStartNavigationService != connect) {
             Log.d(TAG, "底盘连接状态：" + connect);
-//            TaskQueueManager.getInstances().notifyMessage("底盘连接状态：" + connect, "01");
             isStartNavigationService = connect;
             handler.postDelayed(runnable, 10 * 1000);
-            TaskManager.getInstances(this).loadMapList();
         }
     }
     Handler handler = new Handler();

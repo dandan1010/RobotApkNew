@@ -1,5 +1,6 @@
 package com.example.robot.service;
 
+import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.example.robot.R;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
+import com.example.robot.bean.TaskBean;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
@@ -122,7 +124,6 @@ public class SocketServices extends Service {
     private void initView() {
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
-        checkLztekLamp.initUvcMode();
         gsonUtils = new GsonUtils();
         myHandler = new MyHandler(SocketServices.this);
         checkLztekLamp.openBatteryPort();
@@ -142,6 +143,7 @@ public class SocketServices extends Service {
         checkLztekLamp.startLedLamp();
         checkLztekLamp.openEth();
         checkLztekLamp.setEthAddress();
+        checkLztekLamp.initUvcMode();
 
     }
 
@@ -234,6 +236,7 @@ public class SocketServices extends Service {
                             TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
                             Log.d(TAG, "任务完成");
                             mSqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + "分钟", mAlarmUtils.getTimeYear(System.currentTimeMillis()));
+                            mSqLiteOpenHelperUtils.close();
                             Content.startTime = System.currentTimeMillis();
                             Content.taskState = 0;
                             Content.robotState = 1;
@@ -314,7 +317,6 @@ public class SocketServices extends Service {
                 uvcWarning.stopWarning();
                 Content.robotState = 5;
                 Content.time = 1000;
-                uvcWarning.stopWarning();
                 checkLztekLamp.setUvcMode(0);
                 startUvcDetection();
                 return;
@@ -494,8 +496,11 @@ public class SocketServices extends Service {
             }
         } else if (messageEvent.getState() == 10022) {//开始任务
             try {
-                selectAlarmSqlite(new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME),
-                        new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME));
+                mSqLiteOpenHelperUtils.updateAlarmTask(
+                        new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME)
+                        + "," + new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME),
+                        Content.dbAlarmIsRun, "true");
+                mSqLiteOpenHelperUtils.close();
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -507,6 +512,7 @@ public class SocketServices extends Service {
                 onCheckedChanged(0);
             }
             mSqLiteOpenHelperUtils.updateAllAlarmTask(Content.dbAlarmIsRun, "false");
+            mSqLiteOpenHelperUtils.close();
         } else if (messageEvent.getState() == 10024) {//返回机器人位置
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
             x = (float) robotPosition.getGridPosition().getX();
@@ -705,21 +711,28 @@ public class SocketServices extends Service {
             }
         } else if (messageEvent.getState() == 10051) {//编辑任务
             if (Content.server != null) {
-                String taskMsg = null;
                 try {
                     String mapName = new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME);
                     String taskName = new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME);
-                    taskMsg = SharedPrefUtil.getInstance(mContext).getPositionMsg(mapName, taskName);
 
                     Cursor cursor = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmMapTaskName, mapName + "," + taskName);
                     List<String> list = new ArrayList<>();
+                    List<TaskBean> taskBeans = new ArrayList<>();
                     while (cursor.moveToNext()) {
                         list.add(cursor.getString(cursor.getColumnIndex(Content.dbAlarmCycle)));
                         gsonUtils.setEditTime(cursor.getString(cursor.getColumnIndex(Content.dbAlarmTime)));
                     }
+                    Cursor cursorPoint = mSqLiteOpenHelperUtils.searchPointTask(Content.dbPointTaskName, mapName + "," + taskName);
+                    while (cursorPoint.moveToNext()) {
+                        TaskBean taskBean = new TaskBean(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointName)),
+                                Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbSpinnerTime))),
+                                        Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointX))),
+                                        Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointY))));
+                        taskBeans.add(taskBean);
+                    }
                     mSqLiteOpenHelperUtils.close();
                     gsonUtils.setEditTaskType(list);
-                    gsonUtils.setEditTask(taskMsg);
+                    gsonUtils.setTaskBeans(taskBeans);
                     Content.server.broadcast(gsonUtils.putJsonMessage(Content.EDITTASKQUEUE));
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -753,6 +766,8 @@ public class SocketServices extends Service {
             TaskManager.getInstances(mContext).robot_reset();
             mSqLiteOpenHelperUtils.reset_Db(Content.dbAlarmName);
             mSqLiteOpenHelperUtils.reset_Db(Content.tableName);
+            mSqLiteOpenHelperUtils.reset_Db(Content.dbPointTime);
+            mSqLiteOpenHelperUtils.close();
             SharedPrefUtil.getInstance(mContext).deleteAll();
         } else if (messageEvent.getState() == 10058) {//声呐设备
             TaskManager.getInstances(mContext).getUltrasonicPhit();
@@ -761,6 +776,10 @@ public class SocketServices extends Service {
             if (Content.server != null) {
                 gsonUtils.setUltrasonicPhitBean(ultrasonicPhitBean);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_ULTRASONIC));
+            }
+        } else if (messageEvent.getState() == 10059) {//版本
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.versionCode));
             }
         }
 
@@ -806,17 +825,6 @@ public class SocketServices extends Service {
             assestFile.writeBytesToFile((ByteBuffer) messageEvent.getT());
         }
     }
-
-    private void selectAlarmSqlite(String mapName, String taskName) {
-        Log.d("cursor aTrue1111", mapName + "," + taskName);
-        mSqLiteOpenHelperUtils.updateAlarmTask(mapName + "," + taskName, Content.dbAlarmIsRun, "true");
-
-        Cursor aTrue111 = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");
-        while (aTrue111.moveToNext()) {
-            Log.d("cursor aTrue1111", aTrue111.getString(aTrue111.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue111.getString(aTrue111.getColumnIndex(Content.dbAlarmIsRun)) + ",   " + aTrue111.getString(aTrue111.getColumnIndex(Content.dbAlarmTime)));
-        }
-    }
-
 
     private Runnable runnablePosition = new Runnable() {
         @Override

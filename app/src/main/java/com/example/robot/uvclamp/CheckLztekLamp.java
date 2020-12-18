@@ -118,6 +118,7 @@ public class CheckLztekLamp {
         } else {
             return false;
         }
+//        return false;
     }
 
     public void startCheckSensorAtTime() {
@@ -138,7 +139,6 @@ public class CheckLztekLamp {
 
     public void startUvc1Lamp() {
         if (Content.Working_mode == 2) {
-            //mLztek.setGpioOutputMode(port[5]);
             mLztek.setGpioValue(port[5], 0);
         }
     }
@@ -406,9 +406,6 @@ public class CheckLztekLamp {
                         if (Content.robotState == 4) {
                             Content.robotState = 1;
                             Content.time = 4000;
-                        }
-                        if (Content.taskName != null && data[23] > 80) {
-                            TaskManager.getInstances(mContext).resumeTaskQueue();
                         }
                     }
                     EventBus.getDefault().post(new EventBusMessage(10000, msg));

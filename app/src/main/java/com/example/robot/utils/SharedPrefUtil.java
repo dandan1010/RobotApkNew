@@ -41,20 +41,20 @@ public class SharedPrefUtil {
      * 任务详情
      * @param key
      */
-    public void deleteTaskQueue(String key) {
-        editor.remove(key);
-        editor.commit();
-    }
-
-    public void setPositionMsg(String mapName, String taskName, ArrayList<TaskBean> arrayList) {
-        GsonUtils gsonUtils = new GsonUtils();
-        editor.putString(mapName +","+ taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
-        editor.commit();
-    }
-
-    public String getPositionMsg(String mapName, String taskName) {
-        return sharedPreferences.getString(mapName +","+ taskName, null);
-    }
+//    public void deleteTaskQueue(String key) {
+//        editor.remove(key);
+//        editor.commit();
+//    }
+//
+//    public void setPositionMsg(String mapName, String taskName, ArrayList<TaskBean> arrayList) {
+//        GsonUtils gsonUtils = new GsonUtils();
+//        editor.putString(mapName +","+ taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
+//        editor.commit();
+//    }
+//
+//    public String getPositionMsg(String mapName, String taskName) {
+//        return sharedPreferences.getString(mapName +","+ taskName, null);
+//    }
 
     /**
      * LED亮度

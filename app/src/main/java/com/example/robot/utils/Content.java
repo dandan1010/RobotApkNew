@@ -9,7 +9,7 @@ public final class Content {
      * demo : 1
      * 正式版本：2
      */
-    public static final int Working_mode = 1;
+    public static final int Working_mode = 0;
 
     public static final String ip = "10.7.5.176";//以太网ip
     public static final int port = 8887;//端口
@@ -175,7 +175,7 @@ public final class Content {
     public static final String obstacles = "obstacles";
 
     //db Name
-    public static final String dbName = "dbName";
+    public static final String dbName = "RobotDatabase";//数据库名字
     public static final String tableName = "taskHistory";//历史数据
     public static final String dbTaskName = "taskName";
     public static final String dbTaskMapName = "dbTaskMapName";
@@ -188,6 +188,13 @@ public final class Content {
     public static final String dbAlarmCycle = "dbAlarmCycle";//周期
     public static final String dbAlarmIsRun = "dbAlarmIsRun";//周期任务是否执行
     public static final String TASK_TYPE = "task_type";//是否是定时任务
+
+    public static final String dbPointTime = "dbPointTime";//任务点和时间
+    public static final String dbPointTaskName = "dbPointTaskName";
+    public static final String dbPointName = "dbPointName";
+    public static final String dbSpinnerTime = "dbSpinnerTime";
+    public static final String dbPointX = "dbPointX";
+    public static final String dbPointY = "dbPointY";
 
     //test
     public static final String TEST_UVCSTART_1 = "test_uvcstart_1";

@@ -48,7 +48,6 @@ public class SimpleServer extends WebSocketServer {
                     String host = Content.ip;
                     int port = Content.port;
                     Content.server = new SimpleServer(new InetSocketAddress(host, port), context);
-                    Content.server.run();
                 }
             }
         }
@@ -128,7 +127,7 @@ public class SimpleServer extends WebSocketServer {
     public void stop(int timeout) throws InterruptedException {
         super.stop(timeout);
         System.out.println("server timeout stop successfully :" + timeout);
-        ServerConnoct.getInstance().connect(mContext);
+        //ServerConnoct.getInstance().connect(mContext);
     }
 
     private void differentiateType(String message) throws JSONException {
@@ -308,6 +307,9 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GET_ULTRASONIC://声呐设备
                 EventBus.getDefault().post(new EventBusMessage(10058, message));
+                break;
+            case Content.versionCode://版本号
+                EventBus.getDefault().post(new EventBusMessage(10059, message));
                 break;
 
 

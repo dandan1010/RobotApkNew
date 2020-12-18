@@ -46,13 +46,13 @@ public class SqLiteOpenHelperUtils {
         sqLiteDatabase.execSQL("insert into " + Content.dbAlarmName + "(" + Content.dbAlarmMapTaskName + ", " + Content.dbAlarmTime + ", " + Content.dbAlarmCycle + ", " + Content.dbAlarmIsRun + ") values ('" + mapTaskName + "','" + time + "','" + data + "','" + isRun + "')");
     }
 
-    public Cursor searchAlarmTask(String type, String searchKey) {
+    public Cursor searchAlarmTask(String typeName, String typeString) {
         sqLiteDatabase = taskSqLite.getReadableDatabase();
-        Cursor cursor = sqLiteDatabase.query(Content.dbAlarmName, new String[]{"_id", Content.dbAlarmMapTaskName, Content.dbAlarmTime, Content.dbAlarmCycle, Content.dbAlarmIsRun}, type + "=?", new String[]{searchKey}, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(Content.dbAlarmName, new String[]{"_id", Content.dbAlarmMapTaskName, Content.dbAlarmTime, Content.dbAlarmCycle, Content.dbAlarmIsRun}, typeName + "=?", new String[]{typeString}, null, null, null);
         return cursor;
     }
 
-    public void updateAlarmTask(String mapTaskName,String type, String isRun) {
+    public void updateAlarmTask(String mapTaskName, String type, String isRun) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + type + "='" + isRun + "' where " + Content.dbAlarmMapTaskName + "='" + mapTaskName + "'");
     }
@@ -68,11 +68,41 @@ public class SqLiteOpenHelperUtils {
         close();
     }
 
-    public void close(){
+    //点时间
+    public void savePointTask(String mapTaskName, String pointName, String spinnerTime, String x, String y) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("insert into " + Content.dbPointTime + "(" + Content.dbPointTaskName + ", " + Content.dbPointName + ", " + Content.dbSpinnerTime + ", " + Content.dbPointX + ", " + Content.dbPointY + ") values ('" + mapTaskName + "','" + pointName + "','" + spinnerTime + "','" + x + "','" + y + "')");
+    }
+
+    public Cursor searchPointTask(String typeName, String typeString) {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.dbPointTime, new String[]{"_id", Content.dbPointTaskName, Content.dbPointName, Content.dbSpinnerTime, Content.dbPointX, Content.dbPointY}, typeName + "=?", new String[]{typeString}, null, null, null);
+        return cursor;
+    }
+
+    public Cursor searchAllPointTask() {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.dbPointTime, new String[]{"_id", Content.dbPointTaskName, Content.dbPointName, Content.dbSpinnerTime, Content.dbPointX, Content.dbPointY}, null, null, null, null, null);
+        return cursor;
+    }
+
+    public void deletePointTask(String typeName, String typeString) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.delete(Content.dbPointTime, typeName + "=?", new String[]{typeString});
+        close();
+    }
+
+    public void updatePointTask(String typeName, String oldNameString, String newNameString) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("update " + Content.dbPointTime + " set " + typeName + "='" + newNameString + "' where " + typeName + "='" + oldNameString + "'");
+    }
+
+
+    public void close() {
         sqLiteDatabase.close();
     }
 
-    public void reset_Db(String tab_name){
+    public void reset_Db(String tab_name) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("delete from " + tab_name + "");
     }
