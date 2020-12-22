@@ -86,18 +86,17 @@ public class SharedPrefUtil {
         Log.d("get battery " , ""+sharedPreferences.getInt(key, Content.battery));
         return sharedPreferences.getInt(key, Content.battery);
     }
-
     /**
-     * 速度
+     * 工作模式
      */
-    public void setSharedPrefSpeed(String key, int level){
+    public void setSharedPrefWorkingMode(String key, int level){
         editor.putInt(key, level);
         editor.commit();
     }
 
-    public int getSharedPrefSpeed(String key) {
-        Log.d("get battery " , ""+sharedPreferences.getInt(key, 0));
-        return sharedPreferences.getInt(key, 0);
+    public int getSharedPrefWorkingMode(String key) {
+        Log.d("get battery " , ""+sharedPreferences.getInt(key, Content.Working_mode));
+        return sharedPreferences.getInt(key, Content.Working_mode);
     }
 
     /**

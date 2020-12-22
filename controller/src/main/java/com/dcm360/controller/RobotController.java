@@ -53,5 +53,7 @@ public interface RobotController extends RobotInitialize, RobotMap, RobotNavigat
 
     void updateVirtualObstacleData(UpdataVirtualObstacleBean updataVirtualObstacleBean, String mapName, String obstacle_name, RobotStatus<Status> status);//添加虚拟强
 
-    void setSpeedLevel(String level, RobotStatus<Status> status);//导航速度
+    void setSpeedLevel(String level, RobotStatus<Status> status);//跑线速度
+
+    void setnavigationSpeedLevel(String level, RobotStatus<Status> status);//导航速度
 }

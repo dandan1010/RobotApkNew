@@ -369,9 +369,18 @@ public class TaskManager {
                                 newMap + "," + mapTaskName.split(",")[1]);
                     }
                 }
-                Cursor cursor1 = sqLiteOpenHelperUtils.searchAllPointTask();
-                while (cursor1.moveToNext()) {
-                    String mapTaskName = cursor1.getString(cursor1.getColumnIndex(Content.dbPointTaskName));
+                Cursor searchAllAlarmTask = sqLiteOpenHelperUtils.searchAllAlarmTask();
+                while (searchAllAlarmTask.moveToNext()) {
+                    String mapTaskName = searchAllAlarmTask.getString(searchAllAlarmTask.getColumnIndex(Content.dbAlarmMapTaskName));
+                    Log.d(TAG, "重命名地图成功111 :  " + mapTaskName);
+                    if (mapTaskName.startsWith(oldMap)) {
+                        sqLiteOpenHelperUtils.updateAlarmTask(mapTaskName, Content.dbAlarmMapTaskName,
+                                newMap + "," + mapTaskName.split(",")[1]);
+                    }
+                }
+                Cursor searchAllAlarmTask1 = sqLiteOpenHelperUtils.searchAllAlarmTask();
+                while (searchAllAlarmTask1.moveToNext()) {
+                    String mapTaskName = searchAllAlarmTask1.getString(searchAllAlarmTask1.getColumnIndex(Content.dbAlarmMapTaskName));
                     Log.d(TAG, "重命名地图成功222 :  " + mapTaskName);
                 }
                 sqLiteOpenHelperUtils.close();
@@ -610,6 +619,7 @@ public class TaskManager {
                 Log.d(TAG, "停止任务队列成功");
                 Content.taskState = 0;
                 Content.taskIndex = 0;
+                Content.is_initialize_finished = 2;
                 if (Content.taskName != null) {
                     navigate_Position(mapName, Content.CHARGING_POINT);
                     sqLiteOpenHelperUtils.saveTaskHistory(mapName, Content.taskName,
@@ -617,6 +627,7 @@ public class TaskManager {
                             "" + mAlarmUtils.getTimeYear(System.currentTimeMillis()));
                     sqLiteOpenHelperUtils.close();
                 }
+                NavigationService.disposables.clear();
                 Content.taskName = null;
                 Content.startTime = System.currentTimeMillis();
                 if (Content.Working_mode == 1) {
@@ -849,19 +860,34 @@ public class TaskManager {
             public void error(Throwable error) {
                 Log.d("update_virtual ", "" + error.getMessage());
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_virtual_obstacle) + error.getMessage()));
-
             }
         });
     }
 
-    //导航速度
+    //跑路径速度
     public void setSpeedLevel(int level) {
         RobotManagerController.getInstance().getRobotController().setSpeedLevel(String.valueOf(level), new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "设置导航速度成功");
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + status.getMsg()));
+            }
 
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "设置导航速度失败");
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + error.getMessage()));
+
+            }
+        });
+    }
+    //导航速度
+    public void setnavigationSpeedLevel(int level) {
+        RobotManagerController.getInstance().getRobotController().setnavigationSpeedLevel(String.valueOf(level), new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "设置导航速度成功");
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + status.getMsg()));
             }
 
             @Override

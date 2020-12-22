@@ -9,7 +9,12 @@ public final class Content {
      * demo : 1
      * 正式版本：2
      */
-    public static final int Working_mode = 0;
+    public static int Working_mode = 2;
+    public static final String WORKING_MODE = "working_mode";//工作模式
+    public static final String GET_WORKING_MODE = "get_working_mode";//工作模式
+
+    public static boolean isUpdate = false;
+    public static final String UPDATE = "update";
 
     public static final String ip = "10.7.5.176";//以太网ip
     public static final int port = 8887;//端口
@@ -119,9 +124,14 @@ public final class Content {
     public static final String SET_LOW_BATTERY = "set_low_battery";//设置低电量回充
     public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
+    public static boolean isCharging = false;//充电窗台
     public static final String CHARGING_POINT = "charging";//充电点
-    public static final String GET_SPEED_LEVEL = "get_speed_level";//获取导航速度
-    public static final String SET_SPEED_LEVEL = "set_speed_level";//设置导航速度
+    public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
+    public static final String GET_NAVIGATIONSPEEDLEVEL = "get_navigationSpeedLevel";//任务导航速度
+    public static final String GET_PLAYPATHSPEEDLEVEL = "get_playPathSpeedLevel";//跟线导航速度
+
+    public static final String SET_PLAYPATHSPEEDLEVEL = "set_playPathSpeedLevel";//设置导航速度
+    public static final String SET_NAVIGATIONSPEEDLEVEL = "set_navigationSpeedLevel";//设置导航速度
     public static final String GET_LED_LEVEL = "get_led_level";//获取led亮度
     public static final String SET_LED_LEVEL = "set_led_level";//设置led亮度
     public static int led = 30;//led亮度

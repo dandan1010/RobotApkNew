@@ -16,6 +16,9 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.example.robot.BuildConfig;
+import com.example.robot.R;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -63,6 +66,15 @@ public class AssestFile {
                 Log.d(TAG, "保存进度 ：" + progress);
                 if (progress == 100) {
                     Log.d(TAG, "发广播安装apk");
+                    EventBus.getDefault().post(new EventBusMessage(30002, "准备升级"));
+                    if (Content.server != null) {
+                        try {
+                            Content.server.stop();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
                     Intent intent = new Intent("com.android.robot.update");
                     intent.setPackage("com.example.wireLessApk");
                     mContext.sendBroadcast(intent);

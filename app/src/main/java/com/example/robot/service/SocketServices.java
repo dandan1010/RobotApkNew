@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
@@ -175,10 +176,6 @@ public class SocketServices extends Service {
             Content.time = 4000;
             uvcWarning.stopWarning();
             checkLztekLamp.setUvcMode(1);
-//                checkLztekLamp.stopUvc1Lamp();
-//                checkLztekLamp.stopUvc2Lamp();
-//                checkLztekLamp.stopUvc3Lamp();
-//                checkLztekLamp.stopUvc4Lamp();
             tvText = mTimeUtils.calculateDays(System.currentTimeMillis());
             gsonUtils.setTvTime(tvText);
             Log.d(TAG, "case 2  " + tvText);
@@ -222,6 +219,7 @@ public class SocketServices extends Service {
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
+                        removeMessages(1);
                         toLightControlBtn = false;
                         onCheckedChanged(0);
                         checkLztekLamp.setUvcMode(1);
@@ -500,10 +498,16 @@ public class SocketServices extends Service {
                         new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME)
                         + "," + new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME),
                         Content.dbAlarmIsRun, "true");
-                mSqLiteOpenHelperUtils.close();
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+            Cursor cursor = mSqLiteOpenHelperUtils.searchAllAlarmTask();
+            while (cursor.moveToNext()) {
+                Log.d("starttask ", cursor.getString(cursor.getColumnIndex(Content.dbAlarmMapTaskName)) + "  ,  "
+                + cursor.getString(cursor.getColumnIndex(Content.dbAlarmIsRun)));
+            }
+            mSqLiteOpenHelperUtils.close();
         } else if (messageEvent.getState() == 10023) {//停止任务
             Log.d("stoptask ", "taskName : " + Content.taskName);
             if (Content.taskName != null) {
@@ -671,9 +675,15 @@ public class SocketServices extends Service {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
-        } else if (messageEvent.getState() == 10046) {//设置导航速度
-            int level = (int) messageEvent.getT();
-            TaskManager.getInstances(mContext).setSpeedLevel(level);
+        } else if (messageEvent.getState() == 10046) {//设置跑线速度
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject((String) messageEvent.getT());
+                int playPathSpeedLevel = jsonObject.getInt(Content.SET_PLAYPATHSPEEDLEVEL);
+                TaskManager.getInstances(mContext).setSpeedLevel(playPathSpeedLevel);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (messageEvent.getState() == 10047) {//重命名点
             String message = (String) messageEvent.getT();
             try {
@@ -685,19 +695,20 @@ public class SocketServices extends Service {
                 e.printStackTrace();
             }
         } else if (messageEvent.getState() == 10048) {//获取速度
-            //TaskManager.getInstances(mContext).deviceStatus();
-            int level = SharedPrefUtil.getInstance(mContext).getSharedPrefSpeed(Content.SET_SPEED_LEVEL);
-            Log.d("level get speed", "" + level);
+            TaskManager.getInstances(mContext).deviceStatus();
+//            int level = SharedPrefUtil.getInstance(mContext).getSharedPrefSpeed(Content.SET_SPEED_LEVEL);
+//            Log.d("level get speed", "" + level);
+//            if (Content.server != null) {
+//                gsonUtils.setSpeed_level(level);
+//                Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_SPEED_LEVEL));
+//            }
+        } else if (messageEvent.getState() == 10049) {//返回设备信息
+            RobotDeviceStatus robotDeviceStatus = (RobotDeviceStatus) messageEvent.getT();
             if (Content.server != null) {
-                gsonUtils.setSpeed_level(level);
+                gsonUtils.setPlayPathSpeedLevel(robotDeviceStatus.getData().getPlayPathSpeedLevel());
+                gsonUtils.setNavigationSpeedLevel(robotDeviceStatus.getData().getNavigationSpeedLevel());
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_SPEED_LEVEL));
             }
-        } else if (messageEvent.getState() == 10049) {//返回设备信息
-//            RobotDeviceStatus robotDeviceStatus = (RobotDeviceStatus) messageEvent.getT();
-//            if (Content.server != null) {
-//                gsonUtils.setSpeed_level(robotDeviceStatus.getData().getSpeed());
-//                Content.server.broadcast(gsonUtils.putVirtualObstacle(Content.GET_SPEED_LEVEL));
-//            }
         } else if (messageEvent.getState() == 10050) {//添加充电点
             if (Content.robotState == 4) {
                 PositionListBean positionListBean = new PositionListBean();
@@ -777,9 +788,25 @@ public class SocketServices extends Service {
                 gsonUtils.setUltrasonicPhitBean(ultrasonicPhitBean);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_ULTRASONIC));
             }
-        } else if (messageEvent.getState() == 10059) {//版本
+        } else if (messageEvent.getState() == 10060) {//版本
             if (Content.server != null) {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.versionCode));
+            }
+        } else if (messageEvent.getState() == 10061){//获取工作模式
+            int workingMode = SharedPrefUtil.getInstance(mContext).getSharedPrefWorkingMode(Content.WORKING_MODE);
+            Log.d("WORKING_MODE get ", "" + workingMode);
+            if (Content.server != null) {
+                gsonUtils.setWorkingMode(workingMode);
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_WORKING_MODE));
+            }
+        } else if (messageEvent.getState() == 10062) {//设置导航速度
+            JSONObject jsonObject = null;
+            try {
+                jsonObject = new JSONObject((String) messageEvent.getT());
+                int navigationSpeedLevel = jsonObject.getInt(Content.SET_NAVIGATIONSPEEDLEVEL);
+                TaskManager.getInstances(mContext).setnavigationSpeedLevel(navigationSpeedLevel);
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
 
@@ -820,9 +847,17 @@ public class SocketServices extends Service {
             uvcWarning.startWarning();
         } else if (messageEvent.getState() == 20015) {
             uvcWarning.stopWarning();
+
+
+
         } else if (messageEvent.getState() == 30001) {
+            Content.isUpdate = true;
             AssestFile assestFile = new AssestFile(mContext);
             assestFile.writeBytesToFile((ByteBuffer) messageEvent.getT());
+        } else if (messageEvent.getState() == 30002) {
+            if (Content.server != null) {
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.UPDATE));
+            }
         }
     }
 

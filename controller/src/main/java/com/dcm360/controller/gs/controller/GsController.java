@@ -632,6 +632,12 @@ public enum GsController implements IGsRobotController {
     }
 
     @Override
+    public void setnavigationSpeedLevel(String level, RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.setnavigationLevel(level).enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
     public void reset_robot(RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.reset_robot().enqueue(new ResponseCallback<Status>().call(status));

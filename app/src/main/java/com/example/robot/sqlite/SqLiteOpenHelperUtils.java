@@ -59,7 +59,13 @@ public class SqLiteOpenHelperUtils {
 
     public void updateAllAlarmTask(String type, String isRun) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + type + "='" + isRun + "' where " + type + "='false'");
+        sqLiteDatabase.execSQL("update " + Content.dbAlarmName + " set " + type + "='" + isRun + "' where " + type + "='true'");
+    }
+
+    public Cursor searchAllAlarmTask() {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.dbAlarmName, new String[]{"_id", Content.dbAlarmMapTaskName, Content.dbAlarmTime, Content.dbAlarmCycle, Content.dbAlarmIsRun}, null, null, null, null, null);
+        return cursor;
     }
 
     public void deleteAlarmTask(String mapTaskName) {

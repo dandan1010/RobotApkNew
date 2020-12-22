@@ -42,7 +42,6 @@ public class ServerConnoct {
                 super.run();
                 Log.d("zdzd --- ", "thread run");
                 Content.server = SimpleServer.getInstance(mContext);
-                Content.server.run();
             }
         };
         thread.start();

@@ -45,9 +45,11 @@ public class SimpleServer extends WebSocketServer {
         if (Content.server == null) {
             synchronized (SimpleServer.class) {
                 if (Content.server == null) {
+                    Log.d("zdzd ---:", "instance thread run");
                     String host = Content.ip;
                     int port = Content.port;
                     Content.server = new SimpleServer(new InetSocketAddress(host, port), context);
+                    Content.server.start();
                 }
             }
         }
@@ -61,10 +63,10 @@ public class SimpleServer extends WebSocketServer {
         address = remoteSocketAddress.getHostName();
         Log.d("zdzd_server", address);
 //        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
-            broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
-            System.out.println("new connection to " + conn.getRemoteSocketAddress());
-            Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
-            Log.d("zdzd_server", "连接的地址open：" + Content.CONNECT_ADDRESS);
+        broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
+        System.out.println("new connection to " + conn.getRemoteSocketAddress());
+        Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
+        Log.d("zdzd_server", "连接的地址open：" + Content.CONNECT_ADDRESS);
 //        } else {
 //            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
 //            conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
@@ -107,7 +109,6 @@ public class SimpleServer extends WebSocketServer {
             System.err.println("an error occured on connection " + ex.getMessage());
             ex.printStackTrace();
         }
-        ServerConnoct.getInstance().connect(mContext);
     }
 
     @Override
@@ -120,19 +121,25 @@ public class SimpleServer extends WebSocketServer {
     public void stop() throws IOException, InterruptedException {
         super.stop();
         System.out.println("server stop successfully");
-        ServerConnoct.getInstance().connect(mContext);
+        if (Content.server != null) {
+            Content.server = null;
+        }
+        if (!Content.isUpdate) {
+            ServerConnoct.getInstance().connect(mContext);
+        }
+
     }
 
     @Override
     public void stop(int timeout) throws InterruptedException {
         super.stop(timeout);
         System.out.println("server timeout stop successfully :" + timeout);
-        //ServerConnoct.getInstance().connect(mContext);
     }
 
     private void differentiateType(String message) throws JSONException {
         String mapName;
         String taskName;
+        Log.d("differentiateType : ", "differentiateType ： " + gsonUtils.getType(message));
         switch (gsonUtils.getType(message)) {
             case Content.STARTDOWN:
                 EventBus.getDefault().post(new EventBusMessage(10001, message));
@@ -243,11 +250,8 @@ public class SimpleServer extends WebSocketServer {
             case Content.RENAME_MAP://重命名地图
                 EventBus.getDefault().post(new EventBusMessage(10045, message));
                 break;
-            case Content.SET_SPEED_LEVEL://设置导航速度
-                jsonObject = new JSONObject(message);
-                int level = jsonObject.getInt(Content.SET_SPEED_LEVEL);
-                EventBus.getDefault().post(new EventBusMessage(10046, level));
-                SharedPrefUtil.getInstance(mContext).setSharedPrefSpeed(Content.SET_SPEED_LEVEL, level);
+            case Content.SET_PLAYPATHSPEEDLEVEL://设置跑线速度
+                EventBus.getDefault().post(new EventBusMessage(10046, message));
                 break;
             case Content.RENAME_POSITION://点重命名
                 EventBus.getDefault().post(new EventBusMessage(10047, message));
@@ -270,7 +274,7 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.SET_LED_LEVEL://设置led亮度
                 int led_level = new JSONObject(message).getInt(Content.SET_LED_LEVEL);
-                Log.d("level ", ""+led_level);
+                Log.d("level ", "" + led_level);
                 SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_LED_LEVEL, led_level);
                 break;
             case Content.GET_LED_LEVEL://获取led亮度
@@ -279,7 +283,7 @@ public class SimpleServer extends WebSocketServer {
             case Content.SET_LOW_BATTERY://设置低电量回充
                 jsonObject = new JSONObject(message);
                 Content.battery = jsonObject.getInt(Content.SET_LOW_BATTERY);
-                Log.d("battery " , ""+Content.battery);
+                Log.d("battery ", "" + Content.battery);
                 SharedPrefUtil.getInstance(mContext).setSharedPrefBattery(Content.SET_LOW_BATTERY, Content.battery);
                 break;
             case Content.GET_LOW_BATTERY://获取低电量回冲
@@ -287,8 +291,8 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GET_VOICE_LEVEL://获取音量
                 AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
-                int max = mAudioManager.getStreamMaxVolume( AudioManager.STREAM_MUSIC );
-                int current = mAudioManager.getStreamVolume( AudioManager.STREAM_MUSIC );
+                int max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+                int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
                 Log.d("SYSTEM", "max : " + max + " current : " + current);
                 gsonUtils.setVoice(current);
                 broadcast(gsonUtils.putJsonMessage(Content.GET_VOICE_LEVEL));
@@ -296,7 +300,7 @@ public class SimpleServer extends WebSocketServer {
             case Content.SET_VOICE_LEVEL://设置音量
                 jsonObject = new JSONObject(message);
                 int voice = jsonObject.getInt(Content.SET_VOICE_LEVEL);
-                Log.d("voice " , ""+voice);
+                Log.d("voice ", "" + voice);
                 AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
                 mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
                         voice,
@@ -309,7 +313,20 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10058, message));
                 break;
             case Content.versionCode://版本号
-                EventBus.getDefault().post(new EventBusMessage(10059, message));
+                EventBus.getDefault().post(new EventBusMessage(10060, message));
+                break;
+            case Content.WORKING_MODE://工作模式
+                JSONObject jsonObject = new JSONObject(message);
+                Log.d("Working_mode : ", "工作模式" + jsonObject.toString());
+                Content.Working_mode = new JSONObject(message).getInt(Content.WORKING_MODE);
+                Log.d("Working_mode : ", "工作模式" + Content.Working_mode);
+                SharedPrefUtil.getInstance(mContext).setSharedPrefWorkingMode(Content.WORKING_MODE, Content.Working_mode);
+                break;
+            case Content.GET_WORKING_MODE://获取工作模式
+                EventBus.getDefault().post(new EventBusMessage(10061, message));
+                break;
+            case Content.SET_NAVIGATIONSPEEDLEVEL://设置导航速度
+                EventBus.getDefault().post(new EventBusMessage(10062, message));
                 break;
 
 

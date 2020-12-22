@@ -365,7 +365,7 @@ public class CheckLztekLamp {
                     }
                 }
             }
-            handler.postDelayed(this::run, 5 * 1000);
+            handler.postDelayed(this::run, 1 * 1000);
         }
     };
 
@@ -401,7 +401,9 @@ public class CheckLztekLamp {
                         Content.robotState = 4;
                         Content.time = 1000;
                         msg = "充电";
+                        Content.isCharging = true;
                     } else {
+                        Content.isCharging = false;
                         msg = "放电";
                         if (Content.robotState == 4) {
                             Content.robotState = 1;

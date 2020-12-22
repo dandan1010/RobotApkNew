@@ -770,10 +770,16 @@ public interface GsControllerService {
     Call<Status> updateVirtualObstacleData(@Body UpdataVirtualObstacleBean updataVirtualObstacleBean, @Query("map_name") String paramString, @Query("obstacle_name") String obstacle_name);
 
     /**
-     * 导航速度
+     * 跑线速度
      * */
     @GET("/gs-robot/cmd/set_speed_level")
     Call<Status> setSpeedLevel(@Query("level") String paramString);
+
+    /**
+     * 导航速度
+     * */
+    @GET("/gs-robot/cmd/set_navigation_speed_level")
+    Call<Status> setnavigationLevel(@Query("level") String paramString);
 
     /**
      * 恢复出厂设置

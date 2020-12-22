@@ -49,7 +49,9 @@ public class GsonUtils {
     private String healthyMsg = null;
     private PointStateBean taskState = null;
     private VirtualObstacleBean virtualObstacleBean;
-    private int speed_level;
+    private int navigationSpeedLevel;
+    private int playPathSpeedLevel;
+
     private int led_level;
     private int low_battery;
     private int voice;
@@ -58,6 +60,19 @@ public class GsonUtils {
     private String task_state;
     private UltrasonicPhitBean ultrasonicPhitBean;
     private List<TaskBean> taskBeans;
+    private int workingMode;
+
+    public void setNavigationSpeedLevel(int navigationSpeedLevel) {
+        this.navigationSpeedLevel = navigationSpeedLevel;
+    }
+
+    public void setPlayPathSpeedLevel(int playPathSpeedLevel) {
+        this.playPathSpeedLevel = playPathSpeedLevel;
+    }
+
+    public void setWorkingMode(int workingMode) {
+        this.workingMode = workingMode;
+    }
 
     public void setTaskBeans(List<TaskBean> taskBeans) {
         this.taskBeans = taskBeans;
@@ -77,10 +92,6 @@ public class GsonUtils {
 
     public void setLow_battery(int low_battery) {
         this.low_battery = low_battery;
-    }
-
-    public void setSpeed_level(int speed_level) {
-        this.speed_level = speed_level;
     }
 
     public void setLed_level(int led_level) {
@@ -274,9 +285,11 @@ public class GsonUtils {
                 jsonArray.put(js);
             }
             jsonObject.put(Content.ROBOT_TASK_HISTORY, jsonArray);
+            sqLiteOpenHelperUtils.close();
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("zdzdgson : ", jsonObject.toString());
         return jsonObject.toString();
     }
 
@@ -373,10 +386,12 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.GET_SPEED_LEVEL, speed_level);
+            jsonObject.put(Content.GET_NAVIGATIONSPEEDLEVEL, navigationSpeedLevel);
+            jsonObject.put(Content.GET_PLAYPATHSPEEDLEVEL, playPathSpeedLevel);
             jsonObject.put(Content.GET_LED_LEVEL, led_level);
             jsonObject.put(Content.GET_LOW_BATTERY, low_battery);
             jsonObject.put(Content.GET_VOICE_LEVEL, voice);
+            jsonObject.put(Content.GET_WORKING_MODE, workingMode);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.GET_TASK_STATE, task_state);
             jsonObject.put(Content.versionCode, BuildConfig.VERSION_CODE);
