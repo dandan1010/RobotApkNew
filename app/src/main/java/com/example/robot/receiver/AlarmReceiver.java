@@ -118,6 +118,9 @@ public class AlarmReceiver extends BroadcastReceiver {
                 }
             } else if (Content.is_initialize_finished != 2){
                 handler.postDelayed(runnable, 1000);
+            } else if (Content.is_initialize_finished == 2){
+                Content.mapName = null;
+                Content.taskName = null;
             }
         }
     };

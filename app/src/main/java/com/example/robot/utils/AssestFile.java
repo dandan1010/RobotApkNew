@@ -54,7 +54,7 @@ public class AssestFile {
         try {
             out = new FileOutputStream(getCrashFilePath(mContext));
             InputStream is = new ByteArrayInputStream(byteBuffer.array());
-            Log.d("zdzd 文件： " , "" + is.available() + ",    " + byteBuffer.array().length);
+            Log.d(TAG,"file length： "  + is.available() + ",    " + byteBuffer.array().length);
             fileLength = is.available();
             byte[] buff = new byte[1024];
             int len = 0;
@@ -63,9 +63,9 @@ public class AssestFile {
                 out.write(buff, 0, len);
                 count += len;
                 int progress = (int) ((float) count / (float) fileLength * 100);
-                Log.d(TAG, "保存进度 ：" + progress);
+                Log.d(TAG, "save progress ：" + progress);
                 if (progress == 100) {
-                    Log.d(TAG, "发广播安装apk");
+                    Log.d(TAG, "broadcast install apk");
                     EventBus.getDefault().post(new EventBusMessage(30002, "准备升级"));
                     if (Content.server != null) {
                         try {
@@ -84,10 +84,10 @@ public class AssestFile {
             is.close();
             out.close();
         } catch (FileNotFoundException e) {
-            Log.d("zdzd111 ", e.getMessage());
+            Log.d(TAG, e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            Log.d("zdzd222 ", e.getMessage());
+            Log.d(TAG, e.getMessage());
             e.printStackTrace();
         }
     }
@@ -110,7 +110,7 @@ public class AssestFile {
                 e.printStackTrace();
             }
         }
-        Log.e("TAG", "getCrashFilePath: " + path);
+        Log.e(TAG, "getCrashFilePath: " + path);
         return path;
     }
 }

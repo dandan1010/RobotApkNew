@@ -112,7 +112,7 @@ public class CheckLztekLamp {
         boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 1 ? true : false;
 
-        Log.d("zdzd : ", "zdzd : " + k1 + ",  " + k2 + ", " + k3);
+        Log.d(TAG, "getGpioSensorState : " + k1 + ",  " + k2 + ", " + k3);
         if (k1 || k2 || k3) {
             return true;
         } else {
@@ -211,7 +211,7 @@ public class CheckLztekLamp {
             return;
         }
 
-        Log.d("ZDZD :", "robotstate : " + Content.robotState + "  thread = " + threadFlag);
+        Log.d(TAG, "robotstate : " + Content.robotState + "  thread = " + threadFlag);
         if (moreSerialPortThread == null) {
             Log.d(TAG, "myThread is null");
             moreSerialPortThread = new MoreSerialPortThread();
@@ -230,7 +230,7 @@ public class CheckLztekLamp {
         @Override
         public void run() {
             super.run();
-            Log.d("zdzd : ", "thread = " + threadFlag);
+            Log.d(TAG, "thread = " + threadFlag);
             while (threadFlag) {
                 outputStream = serialPort.getOutputStream();
                 try {
@@ -395,9 +395,9 @@ public class CheckLztekLamp {
                     Log.d(TAG, "读取数据 ： " + editText.getText().toString());
                     EventBus.getDefault().post(new EventBusMessage(1004, data));
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
-                    Log.d("zdzd ", "充点电：" + editText.getText().toString().substring(12, 14));
+                    Log.d(TAG, "充点电：" + editText.getText().toString().substring(12, 14));
                     String msg = "";
-                    if (!"FF".equals(editText.getText().toString().substring(12, 14))) {
+                    if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.robotState = 4;
                         Content.time = 1000;
                         msg = "充电";

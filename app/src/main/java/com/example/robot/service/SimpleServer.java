@@ -27,7 +27,10 @@ import java.io.PipedReader;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+import retrofit2.http.PUT;
+
 public class SimpleServer extends WebSocketServer {
+    public static final String TAG = "SimpleServer";
     private GsonUtils gsonUtils;
     private JSONObject jsonObject;
     private String address = "";
@@ -45,7 +48,7 @@ public class SimpleServer extends WebSocketServer {
         if (Content.server == null) {
             synchronized (SimpleServer.class) {
                 if (Content.server == null) {
-                    Log.d("zdzd ---:", "instance thread run");
+                    Log.d(TAG, "instance thread run");
                     String host = Content.ip;
                     int port = Content.port;
                     Content.server = new SimpleServer(new InetSocketAddress(host, port), context);
@@ -61,12 +64,12 @@ public class SimpleServer extends WebSocketServer {
 //        conn.send("OK conn");
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
         address = remoteSocketAddress.getHostName();
-        Log.d("zdzd_server", address);
+        Log.d(TAG, "server address :" + address);
 //        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
         broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
         System.out.println("new connection to " + conn.getRemoteSocketAddress());
         Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
-        Log.d("zdzd_server", "连接的地址open：" + Content.CONNECT_ADDRESS);
+        Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
 //        } else {
 //            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
 //            conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
@@ -77,17 +80,17 @@ public class SimpleServer extends WebSocketServer {
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
-        Log.d("zdzd_server", "close : " + remoteSocketAddress.getHostName());
+        Log.d(TAG, "close : " + remoteSocketAddress.getHostName());
         if (Content.CONNECT_ADDRESS.equals(remoteSocketAddress.getHostName())) {
             Content.CONNECT_ADDRESS = null;
-            Log.d("zdzd_server", "连接的地址close：" + Content.CONNECT_ADDRESS);
+            Log.d(TAG, "connect close：" + Content.CONNECT_ADDRESS);
         }
     }
 
     @Override
     public void onMessage(WebSocket conn, String message) {
         System.out.println("received message from " + conn.getRemoteSocketAddress());
-        Log.d("zdzd : ", "收到信息 ： " + message);
+        Log.d(TAG , "received message ： " + message);
         try {
             differentiateType(message);
         } catch (JSONException e) {
@@ -324,9 +327,6 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GET_WORKING_MODE://获取工作模式
                 EventBus.getDefault().post(new EventBusMessage(10061, message));
-                break;
-            case Content.SET_NAVIGATIONSPEEDLEVEL://设置导航速度
-                EventBus.getDefault().post(new EventBusMessage(10062, message));
                 break;
 
 

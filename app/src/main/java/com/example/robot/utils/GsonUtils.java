@@ -9,7 +9,6 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.example.robot.BuildConfig;
-import com.example.robot.MyApplication;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.TaskBean;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
@@ -254,6 +253,8 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
+            jsonObject.put(Content.TASK_NAME, taskName);
+            jsonObject.put(Content.MAP_NAME, mapName);
             JSONArray jsonArray = new JSONArray();
             for (int i = 0; i < taskState.getList().size(); i++) {
                 JSONObject js = new JSONObject();
@@ -289,7 +290,7 @@ public class GsonUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.d("zdzdgson : ", jsonObject.toString());
+        Log.d("history gson : ", jsonObject.toString());
         return jsonObject.toString();
     }
 

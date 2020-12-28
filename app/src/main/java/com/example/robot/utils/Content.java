@@ -35,6 +35,8 @@ public final class Content {
     public static long startTime = System.currentTimeMillis();
     public static long endTime = System.currentTimeMillis();
 
+    public static boolean taskIsFinish = false;
+
     /**
      * robotState：
      * 0:关机
@@ -51,7 +53,6 @@ public final class Content {
      * 0：任务结束
      * 1：执行任务，恢复任务
      * 2: 暂停任务
-     * 3: 没电暂停
     */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = 0;
@@ -124,6 +125,7 @@ public final class Content {
     public static final String SET_LOW_BATTERY = "set_low_battery";//设置低电量回充
     public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
+    public static int maxBattery = 80;//最高电量
     public static boolean isCharging = false;//充电窗台
     public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
@@ -138,6 +140,7 @@ public final class Content {
     public static final String GET_VOICE_LEVEL = "get_voice_level";//获取voice亮度
     public static final String SET_VOICE_LEVEL = "set_voice_level";//设置voice亮度
     public static final String RESET_ROBOT = "reset_robot";//重置设备
+    public static boolean is_reset_robot = false;//重置设备
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 

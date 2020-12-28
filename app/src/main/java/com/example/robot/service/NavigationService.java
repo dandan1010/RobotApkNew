@@ -80,13 +80,13 @@ public class NavigationService extends Service {
         RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.CHARGING_POINT, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
-                Log.d(TAG, "不转圈初始化成功" + status.getMsg());
+                Log.d(TAG, "initialize_directly" + status.getMsg());
                 EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
-                Log.d(TAG, "不转圈初始化成功" + error.getMessage());
+                Log.d(TAG, "initialize_directly" + error.getMessage());
                 EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
 
             }
@@ -100,12 +100,12 @@ public class NavigationService extends Service {
             @Override
             public void success(Status status) {
                 EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
-                Log.d(TAG, "转圈地初始化成功" + status.getMsg());
+                Log.d(TAG, "initialize" + status.getMsg());
             }
 
             @Override
             public void error(Throwable error) {
-                Log.d(TAG, "转圈地初始化失败：" + error.getMessage());
+                Log.d(TAG, "initialize：" + error.getMessage());
                 EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
             }
         });
@@ -115,12 +115,13 @@ public class NavigationService extends Service {
         RobotManagerController.getInstance().getRobotController().is_initialize_finished(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
-                Log.d("zdzd :", "初始化：" + status.toString());
+                Log.d(TAG, "is_initialize_finished：" + status.toString());
                 EventBus.getDefault().post(new EventBusMessage(10034, status.getData()));
             }
 
             @Override
             public void error(Throwable error) {
+                Log.d(TAG, "is_initialize_finished：" + error.getMessage());
                 EventBus.getDefault().post(new EventBusMessage(10035, error.getMessage()));
             }
         });
@@ -161,7 +162,6 @@ public class NavigationService extends Service {
         RobotManagerController.getInstance().getRobotController().connect_robot(Content.ROBOROT_INF);
         TaskManager.getInstances(mContext).robotStatus();
         ping();
-
     }
 
     private void ping() {
@@ -182,7 +182,7 @@ public class NavigationService extends Service {
     }
 
     private void connectStatus(boolean connect) {
-        Log.d(TAG, "底盘连接状态：" + connect);
+        Log.d(TAG, "底盘连接状态：" + connect + "      , WorkingMode : " + Content.Working_mode);
         if (isStartNavigationService != connect) {
             Log.d(TAG, "底盘连接状态：" + connect);
             isStartNavigationService = connect;

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.example.robot.R;
 import com.example.robot.utils.Content;
 
 import java.util.ArrayList;
@@ -34,10 +35,9 @@ public class SqLiteOpenHelperUtils {
         return cursor;
     }
 
-    public void deleteTaskHistory(String taskName) {
+    public void updateHistory(String mapName, String taskName, String type, String typeString) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.delete(Content.tableName, Content.dbTaskName + "=?", new String[]{taskName});
-        close();
+        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbTaskMapName + "='" + mapName + "' and " + Content.dbTaskName + " = '" + taskName + "' and " + Content.dbTime + " = '-1' + " + mContext.getResources().getString(R.string.minutes) + "");
     }
 
     //定时任务

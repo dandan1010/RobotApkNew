@@ -32,7 +32,7 @@ public class ServerConnoct {
     }
 
     public void connect(Context mContext) {
-        Log.d("zdzd --- ", "serverConnect connect");
+        Log.d("ServerConnoct", "serverConnect connect");
         if (thread != null) {
             thread.interrupt();
         }
@@ -40,7 +40,7 @@ public class ServerConnoct {
             @Override
             public void run() {
                 super.run();
-                Log.d("zdzd --- ", "thread run");
+                Log.d("ServerConnoct", "thread run");
                 Content.server = SimpleServer.getInstance(mContext);
             }
         };

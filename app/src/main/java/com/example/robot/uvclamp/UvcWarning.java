@@ -21,11 +21,14 @@ public class UvcWarning {
      * */
     public void startWarning() {
         Log.v(TAG, "start warning");
-        mediaPlayer.reset();
-        mediaPlayer = MediaPlayer.create(mContext, R.raw.uvcalarm);
-        mediaPlayer.setLooping(true);
-        mediaPlayer.start();
-        isWarning = true;
+        if (!isWarning) {
+            mediaPlayer.reset();
+            mediaPlayer = MediaPlayer.create(mContext, R.raw.uvcalarm);
+            mediaPlayer.setLooping(true);
+            mediaPlayer.start();
+            isWarning = true;
+        }
+
     }
     /**
      * 停止警告
