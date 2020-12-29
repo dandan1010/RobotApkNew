@@ -667,7 +667,10 @@ public class TaskManager {
         Content.taskState = 0;
         Content.taskIndex = 0;
         Content.is_initialize_finished = 2;
-        Log.d(TAG, "stopTaskQueue taskName : " + Content.taskName + " , charging : " + Content.isCharging);
+        Content.taskIsFinish = false;
+        handler.removeMessages(1001);
+        Log.d(TAG, "stopTaskQueue taskName : " + Content.taskName + " , charging : " + Content.isCharging
+        + "time：" + (System.currentTimeMillis() - Content.startTime) / 1000 / 60 + ",  mapName : " + mapName);
         if (!Content.isCharging) {
             navigate_Position(mapName, Content.CHARGING_POINT);
         }
@@ -679,8 +682,6 @@ public class TaskManager {
         }
         Content.taskName = null;
         mTaskArrayList.clear();
-        Content.taskIsFinish = false;
-        handler.removeMessages(1001);
         Content.startTime = System.currentTimeMillis();
         if (Content.Working_mode == 1) {
             EventBus.getDefault().post(new EventBusMessage(10006, -1));

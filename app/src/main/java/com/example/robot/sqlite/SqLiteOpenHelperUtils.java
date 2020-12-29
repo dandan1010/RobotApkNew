@@ -27,6 +27,7 @@ public class SqLiteOpenHelperUtils {
     public void saveTaskHistory(String mapName, String taskName, String time, String data) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "')");
+        Log.d("save history : ", "insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "')");
     }
 
     public Cursor searchTaskHistory() {
@@ -37,7 +38,7 @@ public class SqLiteOpenHelperUtils {
 
     public void updateHistory(String mapName, String taskName, String type, String typeString) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbTaskMapName + "='" + mapName + "' and " + Content.dbTaskName + " = '" + taskName + "' and " + Content.dbTime + " = '-1' + " + mContext.getResources().getString(R.string.minutes) + "");
+        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbTaskMapName + "='" + mapName + "' and " + Content.dbTaskName + " = '" + taskName + "' and " + Content.dbTime + " = '-1" + mContext.getResources().getString(R.string.minutes) + "'");
     }
 
     //定时任务
@@ -82,13 +83,25 @@ public class SqLiteOpenHelperUtils {
 
     public Cursor searchPointTask(String typeName, String typeString) {
         sqLiteDatabase = taskSqLite.getReadableDatabase();
-        Cursor cursor = sqLiteDatabase.query(Content.dbPointTime, new String[]{"_id", Content.dbPointTaskName, Content.dbPointName, Content.dbSpinnerTime, Content.dbPointX, Content.dbPointY}, typeName + "=?", new String[]{typeString}, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(Content.dbPointTime,
+                new String[]{"_id", Content.dbPointTaskName, Content.dbPointName, Content.dbSpinnerTime, Content.dbPointX, Content.dbPointY},
+                typeName + "=?",
+                new String[]{typeString},
+                null,
+                null,
+                null);
         return cursor;
     }
 
     public Cursor searchAllPointTask() {
         sqLiteDatabase = taskSqLite.getReadableDatabase();
-        Cursor cursor = sqLiteDatabase.query(Content.dbPointTime, new String[]{"_id", Content.dbPointTaskName, Content.dbPointName, Content.dbSpinnerTime, Content.dbPointX, Content.dbPointY}, null, null, null, null, null);
+        Cursor cursor = sqLiteDatabase.query(Content.dbPointTime,
+                new String[]{"_id", Content.dbPointTaskName, Content.dbPointName, Content.dbSpinnerTime, Content.dbPointX, Content.dbPointY},
+                null,
+                null,
+                null,
+                null,
+                null);
         return cursor;
     }
 

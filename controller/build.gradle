@@ -25,6 +25,7 @@ android {
 
         main {
                 manifest.srcFile 'src/main/AndroidManifest.xml'
+            java.srcDirs('src/main/debug/java', 'src/main/java')
         }
     }
 }
@@ -45,6 +46,9 @@ dependencies {
     implementation 'com.jakewharton.rxbinding3:rxbinding:3.1.0'
 
 //    implementation 'com.jakewharton.rxbinding4:rxbinding:4.0.0'
+
+    implementation 'com.squareup.okhttp3:okhttp:4.2.1'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.2.1'
 
     implementation "com.squareup.retrofit2:retrofit:2.5.0"
     implementation 'com.squareup.retrofit2:adapter-rxjava2:2.5.0'

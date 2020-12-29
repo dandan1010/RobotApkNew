@@ -296,28 +296,28 @@ public class SocketServices extends Service {
      * 10秒的sensor检查
      */
     private void startLoopDetection() {
-        Log.d(TAG, "startLoopDetection: " + (10 - ledtime) + "秒");
-        tvText = (10 - ledtime) + "秒";
+        Log.d(TAG, "startLoopDetection: " + (10 * 1000 - ledtime * Content.delayTime) + "秒");
+        tvText = (float)((10 * 1000 - ledtime * Content.delayTime)/1000) + "秒";
         gsonUtils.setTvTime(tvText);
         if (Content.server != null) {
             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
         }
         if (battery <= Content.battery) {//是否到达回冲电量
-            myHandler.sendEmptyMessageDelayed(4, 1000);
+            myHandler.sendEmptyMessageDelayed(4, Content.delayTime);
         } else {
             ledtime++;
             Log.d(TAG, "toLightControlBtn : " + toLightControlBtn);
             if (!toLightControlBtn) {
                 ledtime = 0;
                 return;
-            } else if (ledtime <= 10) {
+            } else if (ledtime * Content.delayTime <= 10 * 1000) {
                 if (checkLztekLamp.getGpioSensorState()) {
                     //有人靠近
                     Log.v(TAG, "10秒重置");
-                    workTime = workTime + ledtime * 1000;
+                    workTime = workTime + ledtime * Content.delayTime;
                     ledtime = 0;
                 }
-                myHandler.sendEmptyMessageDelayed(1, 1000);
+                myHandler.sendEmptyMessageDelayed(1, Content.delayTime);
             } else {
                 Log.d(TAG, "警告结束，关闭警告和led，开启uvc灯");
                 myHandler.removeMessages(1);
@@ -341,7 +341,7 @@ public class SocketServices extends Service {
             return;
         }
         if (battery <= Content.battery) {//是否到达回冲电量
-            myHandler.sendEmptyMessageDelayed(4, 1000);
+            myHandler.sendEmptyMessageDelayed(4, Content.delayTime);
         } else if (!checkLztekLamp.getGpioSensorState() && !isTaskFlag) {
             Log.d(TAG, "startUvcDetection" + "关led灯,开uvc灯");
             if (pauseTime != 0) {
@@ -352,7 +352,7 @@ public class SocketServices extends Service {
             }
             Content.robotState = 5;
             Content.time = 1000;
-            myHandler.sendEmptyMessageDelayed(2, 1000);
+            myHandler.sendEmptyMessageDelayed(2, Content.delayTime);
         } else {
             if (pauseTime == 0) {
                 pauseTime = System.currentTimeMillis();
@@ -362,7 +362,7 @@ public class SocketServices extends Service {
             Content.robotState = 5;
             Content.time = 1000;
             checkLztekLamp.setUvcMode(1);
-            myHandler.sendEmptyMessageDelayed(3, 1000);
+            myHandler.sendEmptyMessageDelayed(3, Content.delayTime);
         }
     }
 

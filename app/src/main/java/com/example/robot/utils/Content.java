@@ -4,6 +4,8 @@ import com.example.robot.service.SimpleServer;
 
 public final class Content {
 
+    public static int delayTime = 200;
+
     /**
      * //测试版本不亮灯 ：0
      * demo : 1

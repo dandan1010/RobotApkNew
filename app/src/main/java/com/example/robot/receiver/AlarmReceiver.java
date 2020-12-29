@@ -116,11 +116,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                 } else {
                     Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
                 }
-            } else if (Content.is_initialize_finished != 2){
+            } else if (Content.is_initialize_finished == 0){
                 handler.postDelayed(runnable, 1000);
             } else if (Content.is_initialize_finished == 2){
                 Content.mapName = null;
                 Content.taskName = null;
+            } else if (Content.is_initialize_finished == -1) {
+                handler.removeCallbacks(this::run);
             }
         }
     };

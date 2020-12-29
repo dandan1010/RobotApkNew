@@ -36,7 +36,7 @@ public class ServerReceiver extends BroadcastReceiver {
                 String substring = cursor.getString(cursor.getColumnIndex(Content.dbTime)).substring(0, 2);
                 if (!Content.isCharging && "-1".equals(substring)) {
                     TaskManager.getInstances(context).navigate_Position(
-                            cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)).split(",")[0],
+                            cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)),
                             Content.CHARGING_POINT
                     );
                 }
