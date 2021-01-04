@@ -143,6 +143,9 @@ public final class Content {
     public static final String SET_VOICE_LEVEL = "set_voice_level";//设置voice亮度
     public static final String RESET_ROBOT = "reset_robot";//重置设备
     public static boolean is_reset_robot = false;//重置设备
+    public static final String DEVICES_STATUS = "devices_status";//设备信息
+    public static boolean EMERGENCY = false;//急停
+    public static boolean IS_STOP_TASK = false;//停止任务
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 

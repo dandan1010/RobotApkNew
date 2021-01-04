@@ -211,7 +211,6 @@ public class CheckLztekLamp {
             return;
         }
 
-        Log.d(TAG, "robotstate : " + Content.robotState + "  thread = " + threadFlag);
         if (moreSerialPortThread == null) {
             Log.d(TAG, "myThread is null");
             moreSerialPortThread = new MoreSerialPortThread();
@@ -230,7 +229,6 @@ public class CheckLztekLamp {
         @Override
         public void run() {
             super.run();
-            Log.d(TAG, "thread = " + threadFlag);
             while (threadFlag) {
                 outputStream = serialPort.getOutputStream();
                 try {
@@ -267,7 +265,6 @@ public class CheckLztekLamp {
                     byte[] colorLight = hexBytes(lightArray[index]);
                     if (null != colorLight) {
                         outputStream.write(colorLight);
-                        Log.d(TAG, "serialPort write success index = " + index + "  , state = " + Content.robotState);
                     }
                     if (index < lightArray.length - 1) {
                         index++;
@@ -351,7 +348,6 @@ public class CheckLztekLamp {
                 if (null != battery) {
                     outputStream = batterySerialPort.getOutputStream();
                     outputStream.write(battery);
-                    Log.d(TAG, "batteryPort write success");
                 }
                 handler.postDelayed(batteryRunnable, 0);
             } catch (IOException e) {
@@ -382,7 +378,6 @@ public class CheckLztekLamp {
             try {
                 byte[] buffer = new byte[1024];
                 int len = input.read(buffer);
-                Log.d(TAG, "读取数据len ： " + len);
                 if (len > 0) {
                     byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
                     EditText editText = new EditText(mContext);
@@ -395,7 +390,6 @@ public class CheckLztekLamp {
                     Log.d(TAG, "读取数据 ： " + editText.getText().toString());
                     EventBus.getDefault().post(new EventBusMessage(1004, data));
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
-                    Log.d(TAG, "充点电：" + editText.getText().toString().substring(12, 14));
                     String msg = "";
                     if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.robotState = 4;

@@ -107,7 +107,6 @@ public class AlarmReceiver extends BroadcastReceiver {
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
-                        Content.mapName = null;
                         Content.taskName = null;
                     } else {
                         Log.d("ALARM starttask :",  Content.mapName + " , " + Content.taskName);
@@ -119,7 +118,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             } else if (Content.is_initialize_finished == 0){
                 handler.postDelayed(runnable, 1000);
             } else if (Content.is_initialize_finished == 2){
-                Content.mapName = null;
                 Content.taskName = null;
             } else if (Content.is_initialize_finished == -1) {
                 handler.removeCallbacks(this::run);

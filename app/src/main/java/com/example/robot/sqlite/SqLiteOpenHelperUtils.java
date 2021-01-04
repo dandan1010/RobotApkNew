@@ -36,9 +36,10 @@ public class SqLiteOpenHelperUtils {
         return cursor;
     }
 
-    public void updateHistory(String mapName, String taskName, String type, String typeString) {
+    public void updateHistory(String type, String typeString, String date) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbTaskMapName + "='" + mapName + "' and " + Content.dbTaskName + " = '" + taskName + "' and " + Content.dbTime + " = '-1" + mContext.getResources().getString(R.string.minutes) + "'");
+        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbData + "='" + date + "'");
+
     }
 
     //定时任务

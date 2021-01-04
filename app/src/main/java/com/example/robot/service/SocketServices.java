@@ -95,11 +95,11 @@ public class SocketServices extends Service {
         EventBus.getDefault().register(this);
         mContext = this;
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
+        initView();
         handler.sendEmptyMessage(1);
 
         robot_Position = new ImageView(mContext);
 
-        initView();
     }
 
     Handler handler = new Handler() {
@@ -112,6 +112,7 @@ public class SocketServices extends Service {
                     navigationService = new NavigationService();
                     intentService = new Intent(getApplicationContext(), NavigationService.class);
                     startService(intentService);
+                    myHandler.sendEmptyMessage(7);
                     threadDestory = true;
                 } else {
                     handler.sendEmptyMessageDelayed(1, 1000);
@@ -143,7 +144,6 @@ public class SocketServices extends Service {
         checkLztekLamp.openEth();
         checkLztekLamp.setEthAddress();
         checkLztekLamp.initUvcMode();
-
     }
 
     @Override
@@ -285,6 +285,20 @@ public class SocketServices extends Service {
                     } else {
                         myHandler.sendEmptyMessageDelayed(6, 5000);
                     }
+                    break;
+                case 7:
+                    Log.d(TAG, "case 7  " + "设备信息");
+                    TaskManager.getInstances(mContext).deviceStatus();
+                    myHandler.sendEmptyMessageDelayed(7, 3000);
+                    break;
+                case 8:
+                    Log.d(TAG, "case 8  " + "回到充电点");
+                    if (!Content.isCharging) {
+                        TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                    } else {
+                        Content.IS_STOP_TASK = false;
+                    }
+                    break;
                 default:
                     break;
             }
@@ -509,6 +523,7 @@ public class SocketServices extends Service {
             }
         } else if (messageEvent.getState() == 10022) {//开始任务
             Log.d(TAG, "start task taskName : " + Content.taskName);
+//            Content.IS_STOP_TASK = false;
             try {
                 mSqLiteOpenHelperUtils.updateAlarmTask(
                         new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME)
@@ -725,7 +740,22 @@ public class SocketServices extends Service {
             if (Content.server != null) {
                 gsonUtils.setPlayPathSpeedLevel(robotDeviceStatus.getData().getPlayPathSpeedLevel());
                 gsonUtils.setNavigationSpeedLevel(robotDeviceStatus.getData().getNavigationSpeedLevel());
-                Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_SPEED_LEVEL));
+                Log.d(TAG, "紧急急停 : "+robotDeviceStatus.getData().isEmergency() +",   " + robotDeviceStatus.getData().isEmergencyStop());
+                if (robotDeviceStatus.getData().isEmergency() || robotDeviceStatus.getData().isEmergencyStop()) {
+                    gsonUtils.setEmergency(true);
+                    Log.d(TAG, "紧急急停");
+                    Content.EMERGENCY = true;
+                    Content.taskIsFinish = false;
+                    toLightControlBtn = false;
+                    onCheckedChanged(0);
+                } else {
+                    if (Content.IS_STOP_TASK && Content.EMERGENCY) {
+                        myHandler.sendEmptyMessage(8);
+                    }
+                    gsonUtils.setEmergency(false);
+                    Content.EMERGENCY = false;
+                }
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.DEVICES_STATUS));
             }
         } else if (messageEvent.getState() == 10050) {//添加充电点
             Log.d(TAG , "Add charging : "+Content.isCharging);
@@ -859,9 +889,6 @@ public class SocketServices extends Service {
             uvcWarning.startWarning();
         } else if (messageEvent.getState() == 20015) {
             uvcWarning.stopWarning();
-
-
-
         } else if (messageEvent.getState() == 30001) {
             Content.isUpdate = true;
             AssestFile assestFile = new AssestFile(mContext);

@@ -60,6 +60,11 @@ public class GsonUtils {
     private UltrasonicPhitBean ultrasonicPhitBean;
     private List<TaskBean> taskBeans;
     private int workingMode;
+    private boolean emergency;
+
+    public void setEmergency(boolean emergency) {
+        this.emergency = emergency;
+    }
 
     public void setNavigationSpeedLevel(int navigationSpeedLevel) {
         this.navigationSpeedLevel = navigationSpeedLevel;
@@ -387,6 +392,7 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
+            jsonObject.put(Content.DEVICES_STATUS, emergency);
             jsonObject.put(Content.GET_NAVIGATIONSPEEDLEVEL, navigationSpeedLevel);
             jsonObject.put(Content.GET_PLAYPATHSPEEDLEVEL, playPathSpeedLevel);
             jsonObject.put(Content.GET_LED_LEVEL, led_level);

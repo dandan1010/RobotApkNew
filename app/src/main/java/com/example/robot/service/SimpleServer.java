@@ -89,8 +89,6 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
-        System.out.println("received message from " + conn.getRemoteSocketAddress());
-        Log.d(TAG , "received message ： " + message);
         try {
             differentiateType(message);
         } catch (JSONException e) {
@@ -142,7 +140,6 @@ public class SimpleServer extends WebSocketServer {
     private void differentiateType(String message) throws JSONException {
         String mapName;
         String taskName;
-        Log.d("differentiateType : ", "differentiateType ： " + gsonUtils.getType(message));
         switch (gsonUtils.getType(message)) {
             case Content.STARTDOWN:
                 EventBus.getDefault().post(new EventBusMessage(10001, message));
@@ -277,7 +274,6 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.SET_LED_LEVEL://设置led亮度
                 int led_level = new JSONObject(message).getInt(Content.SET_LED_LEVEL);
-                Log.d("level ", "" + led_level);
                 SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_LED_LEVEL, led_level);
                 break;
             case Content.GET_LED_LEVEL://获取led亮度
@@ -286,7 +282,6 @@ public class SimpleServer extends WebSocketServer {
             case Content.SET_LOW_BATTERY://设置低电量回充
                 jsonObject = new JSONObject(message);
                 Content.battery = jsonObject.getInt(Content.SET_LOW_BATTERY);
-                Log.d("battery ", "" + Content.battery);
                 SharedPrefUtil.getInstance(mContext).setSharedPrefBattery(Content.SET_LOW_BATTERY, Content.battery);
                 break;
             case Content.GET_LOW_BATTERY://获取低电量回冲
@@ -296,14 +291,12 @@ public class SimpleServer extends WebSocketServer {
                 AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
                 int max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
                 int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                Log.d("SYSTEM", "max : " + max + " current : " + current);
                 gsonUtils.setVoice(current);
                 broadcast(gsonUtils.putJsonMessage(Content.GET_VOICE_LEVEL));
                 break;
             case Content.SET_VOICE_LEVEL://设置音量
                 jsonObject = new JSONObject(message);
                 int voice = jsonObject.getInt(Content.SET_VOICE_LEVEL);
-                Log.d("voice ", "" + voice);
                 AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
                 mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
                         voice,
@@ -320,9 +313,7 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.WORKING_MODE://工作模式
                 JSONObject jsonObject = new JSONObject(message);
-                Log.d("Working_mode : ", "工作模式" + jsonObject.toString());
                 Content.Working_mode = new JSONObject(message).getInt(Content.WORKING_MODE);
-                Log.d("Working_mode : ", "工作模式" + Content.Working_mode);
                 SharedPrefUtil.getInstance(mContext).setSharedPrefWorkingMode(Content.WORKING_MODE, Content.Working_mode);
                 break;
             case Content.GET_WORKING_MODE://获取工作模式

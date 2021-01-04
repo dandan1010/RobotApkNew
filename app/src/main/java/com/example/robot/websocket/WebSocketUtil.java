@@ -1,6 +1,7 @@
 package com.example.robot.websocket;
 
 import android.os.SystemClock;
+import android.util.Log;
 
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -90,7 +91,7 @@ public class WebSocketUtil {
                 @Override
                 public void onOpen(WebSocket webSocket, Response response) {
                     super.onOpen(webSocket, response);
-//                    Log.d(TAG, "onOpen" + url);
+                    Log.d(TAG, "onOpen" + mUrl);
                     webSocketMap.put(mUrl, webSocket);
                 }
 
@@ -116,14 +117,14 @@ public class WebSocketUtil {
                 @Override
                 public void onClosed(WebSocket webSocket, int code, String reason) {
                     super.onClosed(webSocket, code, reason);
-//                    Log.d(TAG, "onClosed" + url);
+                    Log.d(TAG, "onClosed" + mUrl);
                     webSocketMap.remove(mUrl);
                 }
 
                 @Override
                 public void onFailure(WebSocket webSocket, Throwable t, Response response) {
                     super.onFailure(webSocket, t, response);
-//                    Log.d(TAG, "onFailure" + url);
+                    Log.d(TAG, "onFailure" + mUrl);
                     webSocketMap.remove(mUrl);
                     if (!emitter.isDisposed()) {
                         emitter.onError(t);
@@ -134,7 +135,7 @@ public class WebSocketUtil {
             emitter.setDisposable(new MainThreadDisposable() {
                 @Override
                 protected void onDispose() {
-//                    Log.d(TAG, "MainThreadDisposable" + url);
+                    Log.d(TAG, "MainThreadDisposable" + mUrl);
                     mWebSocket.close(3000, null);
                 }
             });
