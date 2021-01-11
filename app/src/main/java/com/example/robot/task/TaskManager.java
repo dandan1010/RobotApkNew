@@ -1102,10 +1102,8 @@ public class TaskManager {
     public void navigationStatus(String type) {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);
         if (Content.taskIndex < mTaskArrayList.size() - 1
-                && !type.equals("HEADING")
                 && Content.robotState != 6
-                && !TextUtils.isEmpty(type)
-                && !type.equals("TOO_CLOSE_TO_OBSTACLES") ) {
+                && !TextUtils.isEmpty(type)) {
             pointStateBean.getList().get(Content.taskIndex).setPointState(type);
             EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
         }
