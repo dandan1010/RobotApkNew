@@ -42,9 +42,12 @@ import com.example.robot.utils.GsonUtils;
 import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -70,6 +73,8 @@ public class TaskManager {
     private PointStateBean pointStateBean;
     private AlarmUtils mAlarmUtils;
     private static WebSocket webSocket;
+    private int timerCount = 0;
+    private boolean isSendType = false;
 
 
     private TaskManager(Context mContext) {
@@ -487,7 +492,7 @@ public class TaskManager {
      * 开始执行任务队列
      */
     public void startTaskQueue(String mapName, String taskName) {
-        robotStatus();
+        //robotStatus();
         Content.isLastTask = false;
         Content.taskIndex = 0;
         getTaskPositionMsg(mapName, taskName);
@@ -549,6 +554,7 @@ public class TaskManager {
                 Log.d(TAG, "start task  taskIsFinish： " + Content.taskIsFinish + ",  taskIndex: " + Content.taskIndex + " , mTaskArrayList " + mTaskArrayList.size()
                         + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY);
                 if (!Content.taskIsFinish && !Content.EMERGENCY) {
+                    isSendType = false;
                     if (Content.taskIndex < mTaskArrayList.size()) {
                         if (Content.Working_mode == 1) {
                             EventBus.getDefault().post(new EventBusMessage(10005, -1));
@@ -559,20 +565,22 @@ public class TaskManager {
                                 Content.taskState = 1;
                                 navigate_Position(Content.mapName, Content.CHARGING_POINT);
                             }
-//                            sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
-//                                    "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60)
-//                                            + mContext.getResources().getString(R.string.minutes), mAlarmUtils.getTimeYear(Content.startTime));
-//                            sqLiteOpenHelperUtils.close();
                         } else {
                             EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
                             navigate_Position(Content.mapName, mTaskArrayList.get(Content.taskIndex).getName());
                             Content.taskIsFinish = true;
                             Content.taskState = 1;
                         }
+                        handler.removeMessages(1001);
+                        handler.removeMessages(1002);
+                        handler.removeMessages(1003);
+                        handler.sendEmptyMessageDelayed(1002, 1000);
                         handler.sendEmptyMessageDelayed(1001, 1000);
                     } else {
-                        Log.d(TAG,"remove message ");
+                        Log.d(TAG, "remove message ");
                         handler.removeMessages(1001);
+                        handler.removeMessages(1002);
+                        handler.removeMessages(1003);
                         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
                                 "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60)
                                         + mContext.getResources().getString(R.string.minutes), mAlarmUtils.getTimeYear(Content.startTime));
@@ -590,6 +598,39 @@ public class TaskManager {
                     }
                 } else {
                     handler.sendEmptyMessageDelayed(1001, 1000);
+                }
+            } else if (msg.what == 1002) {
+                Log.d(TAG, "timer-1002 速度 : " + Content.speed);
+                if (Content.speed == 0) {
+                    handler.sendEmptyMessageDelayed(1003, 5 * 60 * 1000);
+                } else {
+                    handler.removeMessages(1003);
+                }
+                handler.removeMessages(1002);
+                handler.sendEmptyMessageDelayed(1002, 1000);
+            } else if (msg.what == 1003) {
+                Log.d(TAG, "timer-1003 速度 : " + Content.speed + ",   mapName : " + Content.mapName);
+                if (Content.taskIndex < mTaskArrayList.size() - 1) {
+                    pointStateBean.getList().get(Content.taskIndex).setPointState("UNREACHED");
+                    EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+                    isSendType = true;
+                    Content.is_initialize_finished = 0;
+                    NavigationService.initialize(Content.mapName);
+                    handler.removeMessages(1004);
+                    handler.sendEmptyMessageDelayed(1004, 1000);
+                } else if (!Content.isCharging) {
+                    Content.taskIsFinish = false;
+                    navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                }
+                handler.removeMessages(1003);
+            } else if (msg.what == 1004) {
+                Log.d(TAG, "timer-1004 速度 : " + Content.is_initialize_finished);
+                if (Content.is_initialize_finished == 0) {
+                    handler.sendEmptyMessageDelayed(1004, 1000);
+                } else {
+                    Content.taskIsFinish = true;
+                    Content.taskIndex++;
+                    handler.removeMessages(1004);
                 }
             }
         }
@@ -670,7 +711,10 @@ public class TaskManager {
         Content.taskIndex = 0;
         Content.is_initialize_finished = 2;
         Content.taskIsFinish = false;
+        isSendType = false;
         handler.removeMessages(1001);
+        handler.removeMessages(1002);
+        handler.removeMessages(1003);
         Log.d(TAG, "stopTaskQueue taskName : " + Content.taskName + " , charging : " + Content.isCharging
                 + "time：" + (System.currentTimeMillis() - Content.startTime) / 1000 / 60 + ",  mapName : " + mapName);
         if (!Content.isCharging) {
@@ -975,8 +1019,7 @@ public class TaskManager {
     }
 
 
-    @SuppressLint("CheckResult")
-    public void robotStatus() {
+    public void getRobotHealthy() {
         NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/system_health_status")
                 .subscribe(data -> {
 
@@ -987,6 +1030,22 @@ public class TaskManager {
                 }, throwable -> {
                     Log.d(TAG, "system_health_status ：" + throwable.getMessage());
                 }));
+        NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status")
+                .subscribe(data -> {
+                    Log.d("zdzd : ", "NavigationStatus : " + data);
+                    if (TextUtils.isEmpty(data)) {
+                        return;
+                    }
+                    JSONObject jsonObject = new JSONObject(data);
+                    String noticeType = jsonObject.getString("noticeType");
+                    navigationStatus(noticeType);
+                }, throwable -> {
+                    Log.d(TAG, "NavigationStatus throw ：" + throwable.getMessage());
+                }));
+    }
+
+    @SuppressLint("CheckResult")
+    public void robotStatus() {
 
         RobotManagerController.getInstance()
                 .getRobotController()
@@ -997,117 +1056,115 @@ public class TaskManager {
                                 if (!type.equals("HEADING")) {
                                     Log.d(TAG, "statustype：" + type + ",  taskIndex : " + Content.taskIndex);
                                 }
-                                String msg = "";
-//                                if (Content.taskIndex < mTaskArrayList.size() && !type.equals("HEADING") && Content.robotState != 6) {
-//                                    Log.d("zdzdxxx", "statustype33：" + type + ",  taskIndex : " + Content.taskIndex);
-//                                    pointStateBean.getList().get(Content.taskIndex).setPointState(type);
-//                                    EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-//                                }
-                                if ("REACHED".equals(type) && Content.robotState != 6) {//已经到达目的地
-//                                    Log.d("zdzdContent.taskIndex", "" + Content.taskIndex + " ,   " + mTaskArrayList.size());
-//                                    if (Content.taskIndex < mTaskArrayList.size()) {
-//                                        EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
-//                                        Log.d(TAG, "暂停任务");
-//                                        Content.robotState = 5;
-//                                        Content.time = 1000;
-//                                    }
-//                                    Content.taskIndex++;
-                                    msg = "到达目的地";
-                                } else if (type.equals("UNREACHABLE") && Content.robotState != 6) {//目的地无法到达
-                                    msg = "目的地无法到达";
-//                                    Content.taskIsFinish = false;
-//                                    Content.taskIndex++;
-                                } else if (type.equals("LOCALIZATION_FAILED") && Content.robotState != 6) {
-                                    msg = "定位失败";
-//                                    Content.taskIsFinish = false;
-//                                    Content.taskIndex++;
-                                } else if (type.equals("GOAL_NOT_SAFE") && Content.robotState != 6) {
-                                    msg = "目的地有障碍物";
-//                                    Content.taskIsFinish = false;
-//                                    Content.taskIndex++;
-                                } else if (type.equals("TOO_CLOSE_TO_OBSTACLES") && Content.robotState != 6) {
-                                    msg = "离障碍物太近";
-//                                    Content.taskIsFinish = false;
-//                                    Content.taskIndex++;
-                                } else if (type.equals("UNREACHED") && Content.robotState != 6) {
-                                    msg = "到达目的地附近，目的地有障碍物";
-//                                    Content.taskIsFinish = false;
-//                                    Content.taskIndex++;
-                                } else if (type.equals("HEADING") && Content.robotState != 6) {
-                                    msg = "正在前往目的地";
-                                } else if (type.equals("PLANNING") && Content.robotState != 6) {
-                                    msg = "正在规划路径";
-                                }
+                                navigationStatus(type);
                             }
 
                             @Override
                             public void statusCode(int code, String msg) {
-                                if (code != 405) {
-                                    Log.d(TAG, "statusCode：" + code + "  , robotState : " + Content.robotState + "  Content.taskIndex : " + Content.taskIndex);
+                                String type = "";
+                                Log.d(TAG, "statusCode ： " + code);
+                                switch (code) {
+                                    case 401:
+                                        type = "LOCALIZATION_FAILED";
+                                        break;
+                                    case 407:
+                                        type = "REACHED";
+                                        break;
+                                    case 305:
+                                        type = "GOAL_NOT_SAFE";
+                                        break;
+                                    case 402:
+                                        type = "GOAL_NOT_SAFE";
+                                        break;
+                                    case 404:
+                                        type = "UNREACHABLE";
+                                        break;
+                                    case 408:
+                                        type = "UNREACHED";
+                                        break;
+                                    case 406:
+                                        type = "PLANNING";
+                                        break;
+                                    case 405:
+                                        type = "HEADING";
+                                        break;
+                                    default:
+                                        EventBus.getDefault().post(new EventBusMessage(10000, "" + code));
+                                        break;
                                 }
-                                if (Content.robotState == 6) {
-                                    return;
-                                } else {
-                                    switch (code) {
-                                        case 407:
-                                            Log.d(TAG, "Content.taskIndex" + Content.taskIndex + " ,   " + mTaskArrayList.size());
-                                            if (Content.taskIndex < mTaskArrayList.size() - 1) {
-                                                EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
-                                                Content.robotState = 5;
-                                                Content.time = 1000;
-                                                pointStateBean.getList().get(Content.taskIndex).setPointState("reached");
-                                                EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                                            } else {
-                                                Content.taskIsFinish = false;
-                                            }
-                                            Content.taskIndex++;
-                                            break;
-                                        case 305:
-                                            if (Content.taskIndex < mTaskArrayList.size() - 1) {
-                                                pointStateBean.getList().get(Content.taskIndex).setPointState("path is not safe");
-                                                EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                                            }
-                                            Content.taskIndex++;
-                                            Content.taskIsFinish = false;
-                                            break;
-                                        case 402:
-                                            if (Content.taskIndex < mTaskArrayList.size() - 1) {
-                                                pointStateBean.getList().get(Content.taskIndex).setPointState("goal point not safe");
-                                                EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                                            }
-                                            Content.taskIndex++;
-                                            Content.taskIsFinish = false;
-                                            break;
-                                        case 404:
-                                            if (Content.taskIndex < mTaskArrayList.size() - 1) {
-                                                pointStateBean.getList().get(Content.taskIndex).setPointState("goal point unreachable");
-                                                EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                                            }
-                                            Content.taskIndex++;
-                                            Content.taskIsFinish = false;
-                                            break;
-                                        case 408:
-                                            if (Content.taskIndex < mTaskArrayList.size() - 1) {
-                                                pointStateBean.getList().get(Content.taskIndex).setPointState("unreached");
-                                                EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                                            }
-                                            Content.taskIndex++;
-                                            Content.taskIsFinish = false;
-                                            break;
-                                        case 406:
-                                            if (Content.taskIndex < mTaskArrayList.size() - 1) {
-                                                pointStateBean.getList().get(Content.taskIndex).setPointState("navigating");
-                                                EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                                            }
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
+                                navigationStatus(type);
                             }
                         },
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",
                         Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
+    }
+
+    public void navigationStatus(String type) {
+        Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);
+        if (Content.taskIndex < mTaskArrayList.size() - 1
+                && !type.equals("HEADING")
+                && Content.robotState != 6
+                && !TextUtils.isEmpty(type)
+                && !type.equals("TOO_CLOSE_TO_OBSTACLES") ) {
+            pointStateBean.getList().get(Content.taskIndex).setPointState(type);
+            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+        }
+        if ("REACHED".equals(type) && Content.robotState != 6 && !isSendType) {//已经到达目的地
+            Log.d(TAG, "REACHED");
+            isSendType = true;
+            handler.removeMessages(1002);
+            handler.removeMessages(1003);
+            Log.d(TAG, "Content.taskIndex" + Content.taskIndex + " ,   " + mTaskArrayList.size());
+            if (Content.taskIndex < mTaskArrayList.size() - 1) {
+                EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
+                Content.robotState = 5;
+                Content.time = 1000;
+            } else {
+                Content.taskIsFinish = false;
+            }
+            Content.taskIndex++;
+        } else if (type.equals("UNREACHABLE") && Content.robotState != 6 && !isSendType) {
+            isSendType = true;
+            handler.removeMessages(1002);
+            handler.removeMessages(1003);
+            Content.taskIndex++;
+            Content.taskIsFinish = false;
+            Log.d(TAG, "UNREACHABLE");
+
+        } else if (type.equals("LOCALIZATION_FAILED") && Content.robotState != 6 && !isSendType) {
+            isSendType = true;
+            handler.removeMessages(1002);
+            handler.removeMessages(1003);
+            Content.taskIndex++;
+            Content.taskIsFinish = false;
+            Log.d(TAG, "LOCALIZATION_FAILED");
+
+        } else if (type.equals("GOAL_NOT_SAFE") && Content.robotState != 6 && !isSendType) {
+            isSendType = true;
+            handler.removeMessages(1002);
+            handler.removeMessages(1003);
+            Content.taskIndex++;
+            Content.taskIsFinish = false;
+            Log.d(TAG, "GOAL_NOT_SAFE");
+
+//        } else if (type.equals("TOO_CLOSE_TO_OBSTACLES") && Content.robotState != 6 && !isSendType) {
+//            isSendType = true;
+//            handler.removeMessages(1002);
+//            handler.removeMessages(1003);
+//            Content.taskIsFinish = false;
+//            Content.taskIndex++;
+//            Log.d(TAG, "TOO_CLOSE_TO_OBSTACLES");
+        } else if (type.equals("UNREACHED") && Content.robotState != 6 && !isSendType) {
+            isSendType = true;
+            handler.removeMessages(1002);
+            handler.removeMessages(1003);
+            Content.taskIsFinish = false;
+            Content.taskIndex++;
+            Log.d(TAG, "UNREACHED");
+        } else if (type.equals("HEADING") || type.equals("PLANNING")) {
+//            handler.removeMessages(1002);
+//            handler.sendEmptyMessageDelayed(1002, 2 * 60 * 1000);
+        }
     }
 
     public void robot_reset() {

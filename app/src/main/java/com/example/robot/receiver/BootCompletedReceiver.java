@@ -22,7 +22,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         Intent intentServer = new Intent(context, SocketServices.class);
         context.startService(intentServer);
         mAlarmUtils = new AlarmUtils(context);
-        mAlarmUtils.setAlarmTime(System.currentTimeMillis(), 60 * 1000);
+        mAlarmUtils.setAlarmTime(System.currentTimeMillis(), 60 * 1000, Content.AlarmAction);
         Content.battery = SharedPrefUtil.getInstance(context).getSharedPrefBattery(Content.SET_LOW_BATTERY);
         Content.led = SharedPrefUtil.getInstance(context).getSharedPrefLed(Content.SET_LED_LEVEL);
     }

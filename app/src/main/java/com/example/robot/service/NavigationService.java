@@ -88,7 +88,6 @@ public class NavigationService extends Service {
             public void error(Throwable error) {
                 Log.d(TAG, "initialize_directly" + error.getMessage());
                 EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
-
             }
         });
 
@@ -96,7 +95,7 @@ public class NavigationService extends Service {
 
     public static void initialize(String mapName) {//转圈初始化
 
-        RobotManagerController.getInstance().getRobotController().initialize(mapName, "Current", new RobotStatus<Status>() {
+        RobotManagerController.getInstance().getRobotController().initialize(mapName, "Origin", new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
@@ -116,7 +115,7 @@ public class NavigationService extends Service {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "is_initialize_finished：" + status.toString());
-                EventBus.getDefault().post(new EventBusMessage(10034, status.getData()));
+                EventBus.getDefault().post(new EventBusMessage(10034, status));
             }
 
             @Override
@@ -160,6 +159,8 @@ public class NavigationService extends Service {
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
         RobotManagerController.getInstance().getRobotController().connect_robot(Content.ROBOROT_INF);
+        TaskManager.getInstances(mContext).getRobotHealthy();
+        TaskManager.getInstances(mContext).robotStatus();
         ping();
     }
 

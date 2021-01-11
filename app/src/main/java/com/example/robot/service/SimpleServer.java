@@ -89,6 +89,7 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onMessage(WebSocket conn, String message) {
+        System.out.println("received message: " + message);
         try {
             differentiateType(message);
         } catch (JSONException e) {

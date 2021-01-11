@@ -85,7 +85,7 @@ public class RobotDeviceStatus {
         private Object mileage;
         private int navigationSpeedLevel;
         private int playPathSpeedLevel;
-        private int speed;
+        private double speed;
         private int statusUpdatedAt;
         private String totalMileage;
         private int uptime;
@@ -194,11 +194,11 @@ public class RobotDeviceStatus {
             this.playPathSpeedLevel = playPathSpeedLevel;
         }
 
-        public int getSpeed() {
+        public double getSpeed() {
             return speed;
         }
 
-        public void setSpeed(int speed) {
+        public void setSpeed(double speed) {
             this.speed = speed;
         }
 

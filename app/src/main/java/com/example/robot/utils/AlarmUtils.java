@@ -27,10 +27,10 @@ public class AlarmUtils {
         this.mContext = mContext;
     }
 
-    public void setAlarmTime(long time, long interval) {
+    public void setAlarmTime(long time, long interval, String action) {
         Log.d("AlarmReceiver", "开启定时任务 ：" + time);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent("android.alarm.task.action");
+        Intent intent = new Intent(action);
         intent.setClass(mContext, AlarmReceiver.class);
         intent.putExtra("week", getWeek(System.currentTimeMillis()));
         PendingIntent mPendingIntent = PendingIntent.getBroadcast(
@@ -43,36 +43,37 @@ public class AlarmUtils {
     /**
      * 获取指定时间对应的星期
      */
-    public String getWeek(long time){
+    public int getWeek(long time){
         Date date = new Date(time);
-        String week = "";
+        //int week = "";
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         int wek = calendar.get(Calendar.DAY_OF_WEEK);
-        switch (wek){
-            case 1:
-                week = "星期日";
-                break;
-            case 2:
-                week = "星期一";
-                break;
-            case 3:
-                week = "星期二";
-                break;
-            case 4:
-                week = "星期三";
-                break;
-            case 5:
-                week = "星期四";
-                break;
-            case 6:
-                week = "星期五";
-                break;
-            case 7:
-                week = "星期六";
-                break;
-        }
-        return week;
+//        switch (wek){
+//            case 1:
+//                week = "星期日";
+//                break;
+//            case 2:
+//                week = "星期一";
+//                break;
+//            case 3:
+//                week = "星期二";
+//                break;
+//            case 4:
+//                week = "星期三";
+//                break;
+//            case 5:
+//                week = "星期四";
+//                break;
+//            case 6:
+//                week = "星期五";
+//                break;
+//            case 7:
+//                week = "星期六";
+//                break;
+//        }
+//        return week;
+        return wek;
     }
 
     /**

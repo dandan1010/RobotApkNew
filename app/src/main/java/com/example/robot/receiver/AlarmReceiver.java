@@ -35,11 +35,11 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         this.mContext = context;
-        if ("android.alarm.task.action".equals(intent.getAction())) {
+        if (Content.AlarmAction.equals(intent.getAction())) {
             // 第1步中设置的闹铃时间到，这里可以弹出闹铃提示并播放响铃
             mSqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
             mAlarmUtils = new AlarmUtils(context);
-            String week = intent.getStringExtra("week");
+            int week = intent.getIntExtra("week", -1);
             long time = System.currentTimeMillis();
             Cursor aTrue = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");
             Log.d("AlarmReceiver", "开启定时任务week ：" + week + ",   " + mAlarmUtils.getTimeMillis(time));
@@ -49,12 +49,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                 Log.d("AlarmReceiver", "开启定时任务taskname ：" + Content.taskName);
                 Log.d("AlarmReceiver", "开启定时任务dbAlarmCycle ：" + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)));
                 Log.d("AlarmReceiver", "开启定时任务dbAlarmTime ：" + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)));
-                Log.d("AlarmReceiver ", week.equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))) + ",  "
-                        + mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime))) + ", "
+                Log.d("AlarmReceiver ", mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime))) + ", "
                         + TextUtils.isEmpty(Content.taskName) + ", "
                         + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
                 Log.d("AlarmReceiver", "size : " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)).length());
-                if (week.equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                if (!TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                        && week == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
@@ -93,8 +93,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         @Override
         public void run() {
             Log.d("ALARMreceiver :", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
-            Log.d("alarm path", Environment.getExternalStorageDirectory().getPath()
-                    + "/com.example.robot" +"/update.apk");
             if (Content.is_initialize_finished == 1) {
                 handler.removeCallbacks(this::run);
                 if (Content.taskName != null && Content.mapName != null) {
@@ -109,15 +107,15 @@ public class AlarmReceiver extends BroadcastReceiver {
                         }
                         Content.taskName = null;
                     } else {
-                        Log.d("ALARM starttask :",  Content.mapName + " , " + Content.taskName);
+                        Log.d("ALARM starttask :", Content.mapName + " , " + Content.taskName);
                         TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
                     }
                 } else {
                     Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
                 }
-            } else if (Content.is_initialize_finished == 0){
+            } else if (Content.is_initialize_finished == 0) {
                 handler.postDelayed(runnable, 1000);
-            } else if (Content.is_initialize_finished == 2){
+            } else if (Content.is_initialize_finished == 2) {
                 Content.taskName = null;
             } else if (Content.is_initialize_finished == -1) {
                 handler.removeCallbacks(this::run);

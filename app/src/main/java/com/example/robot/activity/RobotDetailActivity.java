@@ -167,8 +167,8 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
         mContext = RobotDetailActivity.this;
         robot_Position = new ImageView(mContext);
 
-        //Intent intentServer = new Intent(this, SocketServices.class);
-        //startService(intentServer);
+        Intent intentServer = new Intent(this, SocketServices.class);
+        startService(intentServer);
 
         initView();
         initListener();

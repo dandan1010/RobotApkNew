@@ -360,6 +360,7 @@ public class GsonUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("putRobotPosition " , jsonObject.toString());
         return jsonObject.toString();
     }
 

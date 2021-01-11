@@ -8,10 +8,12 @@ import android.database.Cursor;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -24,6 +26,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueueList;
 import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
+import com.dcm360.controller.robot_interface.bean.Status;
 import com.example.robot.R;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
@@ -82,6 +85,7 @@ public class SocketServices extends Service {
     private VirtualBeanUtils mVirtualBeanUtils;
     private SqLiteOpenHelperUtils mSqLiteOpenHelperUtils;
     private AlarmUtils mAlarmUtils;
+    private int spinnerIndex;
 
     @Nullable
     @Override
@@ -164,10 +168,7 @@ public class SocketServices extends Service {
             uvcWarning.startWarning();
             Content.robotState = 5;
             Content.time = 1000;
-            String spinnerItem = (String) spinner[index];
-            workTime = System.currentTimeMillis() +
-                    Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60 * 1000 + 10 * 1000;
-            Log.d(TAG, "onCheckedChanged：workTime : " + workTime);
+            spinnerIndex = index;
             myHandler.sendEmptyMessageDelayed(1, 0);
         } else {
             ledtime = 0;
@@ -224,24 +225,6 @@ public class SocketServices extends Service {
                         Content.robotState = 1;
                         Content.time = 4000;
                         Content.completeFlag = false;
-//                        if (Content.taskState == 2) {
-//                            TaskManager.getInstances(mContext).resumeTaskQueue();
-//                        }
-//                        if (Content.isLastTask) {
-//                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
-//                            Log.d(TAG, "任务完成");
-//                            mSqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName, "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + "分钟", mAlarmUtils.getTimeYear(System.currentTimeMillis()));
-//                            mSqLiteOpenHelperUtils.close();
-//                            Content.startTime = System.currentTimeMillis();
-//                            Content.taskState = 0;
-//                            Content.robotState = 1;
-//                            Content.time = 4000;
-//                            Content.taskName = null;
-//                            checkLztekLamp.setUvcMode(1);
-//                            if (Content.Working_mode == 1) {
-//                                stopDemoMode();
-//                            }
-//                        }
                     }
                     break;
                 case 3:
@@ -289,7 +272,7 @@ public class SocketServices extends Service {
                 case 7:
                     Log.d(TAG, "case 7  " + "设备信息");
                     TaskManager.getInstances(mContext).deviceStatus();
-                    myHandler.sendEmptyMessageDelayed(7, 3000);
+                    myHandler.sendEmptyMessageDelayed(7, 1000);
                     break;
                 case 8:
                     Log.d(TAG, "case 8  " + "回到充电点");
@@ -328,7 +311,6 @@ public class SocketServices extends Service {
                 if (checkLztekLamp.getGpioSensorState()) {
                     //有人靠近
                     Log.v(TAG, "10秒重置");
-                    workTime = workTime + ledtime * Content.delayTime;
                     ledtime = 0;
                 }
                 myHandler.sendEmptyMessageDelayed(1, Content.delayTime);
@@ -339,6 +321,10 @@ public class SocketServices extends Service {
                 uvcWarning.stopWarning();
                 Content.robotState = 5;
                 Content.time = 1000;
+                String spinnerItem = (String) spinner[spinnerIndex];
+                workTime = System.currentTimeMillis() +
+                        Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60 * 1000 + 10 * 1000;
+                Log.d(TAG, "onCheckedChanged：workTime : " + workTime);
                 checkLztekLamp.setUvcMode(0);
                 startUvcDetection();
                 return;
@@ -446,6 +432,7 @@ public class SocketServices extends Service {
             }
             if (Content.is_reset_robot) {
                 for (int i =0 ;i < robotMap.getData().size(); i++) {
+                    Log.d(TAG, "reset mapName : " + robotMap.getData().get(i).getName());
                     TaskManager.getInstances(mContext).deleteMap(robotMap.getData().get(i).getName());
                 }
                 Content.is_reset_robot = false;
@@ -549,7 +536,6 @@ public class SocketServices extends Service {
             mSqLiteOpenHelperUtils.updateAllAlarmTask(Content.dbAlarmIsRun, "false");
             mSqLiteOpenHelperUtils.close();
             Content.is_initialize_finished = -1;
-            handlerInitialize.postDelayed(runnableInitialize, 1000);
         } else if (messageEvent.getState() == 10024) {//返回机器人位置
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
             x = (float) robotPosition.getGridPosition().getX();
@@ -575,6 +561,7 @@ public class SocketServices extends Service {
         } else if (messageEvent.getState() == 10027) {//转圈初始化结果
             Log.d(TAG, "Initialize result ： " + (String) messageEvent.getT() + ",     isDevelop :" + isDevelop);
             if ("successed".equals((String) messageEvent.getT())) {
+                handlerInitialize.removeCallbacks(runnableInitialize);
                 handlerInitialize.postDelayed(runnableInitialize, 1000);
             }
         } else if (messageEvent.getState() == 10028) {//请求地图点列表
@@ -603,8 +590,9 @@ public class SocketServices extends Service {
                 Content.server.broadcast(gsonUtils.putBattery(Content.BATTERY_DATA));
             }
         } else if (messageEvent.getState() == 10034) {
-            Log.d(TAG, "是否完成初始化" + (String) messageEvent.getT());
-            if ("true".equals((String) messageEvent.getT())) {
+            Log.d(TAG, "是否完成初始化" + (Status) messageEvent.getT());
+            Status status = (Status) messageEvent.getT();
+            if ("true".equals(status.getData())) {
                 handlerInitialize.removeCallbacks(runnableInitialize);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.finish_initialize)));
                 if (isDevelop) {
@@ -612,10 +600,14 @@ public class SocketServices extends Service {
                 }
                 Content.is_initialize_finished = 1;
                 Log.d(TAG, "是否完成初始化" + Content.is_initialize_finished);
-            } else if ("failed".equals((String) messageEvent.getT())){
+            } else if ("failed".equals(status.getData())){
                 Content.is_initialize_finished = 2;
                 handlerInitialize.removeCallbacks(runnableInitialize);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.fail_initialize)));
+            } else if (TextUtils.isEmpty(status.getData())){
+                Content.is_initialize_finished = 2;
+                handlerInitialize.removeCallbacks(runnableInitialize);
+                EventBus.getDefault().post(new EventBusMessage(10000, status.getErrorCode()));
             } else if (Content.is_initialize_finished == 0){
                 Content.is_initialize_finished = 0;
                 handlerInitialize.postDelayed(runnableInitialize, 1000);
@@ -737,6 +729,8 @@ public class SocketServices extends Service {
             TaskManager.getInstances(mContext).deviceStatus();
         } else if (messageEvent.getState() == 10049) {//返回设备信息
             RobotDeviceStatus robotDeviceStatus = (RobotDeviceStatus) messageEvent.getT();
+            Content.speed = robotDeviceStatus.getData().getSpeed();
+            Log.d(TAG, "devices speed : " + Content.speed);
             if (Content.server != null) {
                 gsonUtils.setPlayPathSpeedLevel(robotDeviceStatus.getData().getPlayPathSpeedLevel());
                 gsonUtils.setNavigationSpeedLevel(robotDeviceStatus.getData().getNavigationSpeedLevel());

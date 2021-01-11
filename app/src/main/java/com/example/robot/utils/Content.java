@@ -3,6 +3,7 @@ package com.example.robot.utils;
 import com.example.robot.service.SimpleServer;
 
 public final class Content {
+    public static final String AlarmAction = "android.alarm.task.action";
 
     public static int delayTime = 200;
 
@@ -146,6 +147,7 @@ public final class Content {
     public static final String DEVICES_STATUS = "devices_status";//设备信息
     public static boolean EMERGENCY = false;//急停
     public static boolean IS_STOP_TASK = false;//停止任务
+    public static double speed = 0;//停止任务
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 
