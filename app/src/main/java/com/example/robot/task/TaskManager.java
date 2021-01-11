@@ -1044,60 +1044,60 @@ public class TaskManager {
                 }));
     }
 
-    @SuppressLint("CheckResult")
-    public void robotStatus() {
-
-        RobotManagerController.getInstance()
-                .getRobotController()
-                .RobotStatus(
-                        new NavigationStatus() {
-                            @Override
-                            public void noticeType(String type, String destination) {
-                                if (!type.equals("HEADING")) {
-                                    Log.d(TAG, "statustype：" + type + ",  taskIndex : " + Content.taskIndex);
-                                }
-                                navigationStatus(type);
-                            }
-
-                            @Override
-                            public void statusCode(int code, String msg) {
-                                String type = "";
-                                Log.d(TAG, "statusCode ： " + code);
-                                switch (code) {
-                                    case 401:
-                                        type = "LOCALIZATION_FAILED";
-                                        break;
-                                    case 407:
-                                        type = "REACHED";
-                                        break;
-                                    case 305:
-                                        type = "GOAL_NOT_SAFE";
-                                        break;
-                                    case 402:
-                                        type = "GOAL_NOT_SAFE";
-                                        break;
-                                    case 404:
-                                        type = "UNREACHABLE";
-                                        break;
-                                    case 408:
-                                        type = "UNREACHED";
-                                        break;
-                                    case 406:
-                                        type = "PLANNING";
-                                        break;
-                                    case 405:
-                                        type = "HEADING";
-                                        break;
-                                    default:
-                                        EventBus.getDefault().post(new EventBusMessage(10000, "" + code));
-                                        break;
-                                }
-                                navigationStatus(type);
-                            }
-                        },
-                        Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",
-                        Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
-    }
+//    @SuppressLint("CheckResult")
+//    public void robotStatus() {
+//
+//        RobotManagerController.getInstance()
+//                .getRobotController()
+//                .RobotStatus(
+//                        new NavigationStatus() {
+//                            @Override
+//                            public void noticeType(String type, String destination) {
+//                                if (!type.equals("HEADING")) {
+//                                    Log.d(TAG, "statustype：" + type + ",  taskIndex : " + Content.taskIndex);
+//                                }
+//                                navigationStatus(type);
+//                            }
+//
+//                            @Override
+//                            public void statusCode(int code, String msg) {
+//                                String type = "";
+//                                Log.d(TAG, "statusCode ： " + code);
+//                                switch (code) {
+//                                    case 401:
+//                                        type = "LOCALIZATION_FAILED";
+//                                        break;
+//                                    case 407:
+//                                        type = "REACHED";
+//                                        break;
+//                                    case 305:
+//                                        type = "GOAL_NOT_SAFE";
+//                                        break;
+//                                    case 402:
+//                                        type = "GOAL_NOT_SAFE";
+//                                        break;
+//                                    case 404:
+//                                        type = "UNREACHABLE";
+//                                        break;
+//                                    case 408:
+//                                        type = "UNREACHED";
+//                                        break;
+//                                    case 406:
+//                                        type = "PLANNING";
+//                                        break;
+//                                    case 405:
+//                                        type = "HEADING";
+//                                        break;
+//                                    default:
+//                                        EventBus.getDefault().post(new EventBusMessage(10000, "" + code));
+//                                        break;
+//                                }
+//                                navigationStatus(type);
+//                            }
+//                        },
+//                        Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",
+//                        Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
+//    }
 
     public void navigationStatus(String type) {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);

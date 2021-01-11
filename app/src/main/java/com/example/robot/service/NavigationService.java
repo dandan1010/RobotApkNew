@@ -160,7 +160,7 @@ public class NavigationService extends Service {
         Log.d(TAG, "   导航服务启动");
         RobotManagerController.getInstance().getRobotController().connect_robot(Content.ROBOROT_INF);
         TaskManager.getInstances(mContext).getRobotHealthy();
-        TaskManager.getInstances(mContext).robotStatus();
+        //TaskManager.getInstances(mContext).robotStatus();
         ping();
     }
 
