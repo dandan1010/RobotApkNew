@@ -16,6 +16,7 @@ import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.RobotTaskQueue;
@@ -1013,6 +1014,25 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "deviceStatus failed :  " + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.device_status) + error.getMessage()));
+            }
+        });
+    }
+
+    /**
+     * 获取版本信息
+     */
+    public void deviceRobotVersion() {
+        GsController.INSTANCE.deviceRobotVersion(new RobotStatus<VersionBean>() {
+            @Override
+            public void success(VersionBean versionBean) {
+                Log.d(TAG, "VersionBean： ： " + versionBean.getData().getVersion());
+                EventBus.getDefault().post(new EventBusMessage(10062, versionBean.getData().getVersion()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "VersionBean failed :  " + error.getMessage());
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.device_status) + error.getMessage()));
             }
         });

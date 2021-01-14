@@ -10,6 +10,7 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotNonMapData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotMapGPS;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotSyncGpsData;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
@@ -163,6 +164,12 @@ public enum GsController implements IGsRobotController {
     public void deviceStatus(RobotStatus<RobotDeviceStatus> status) {
         if (gsControllerService != null)
             gsControllerService.deviceStatus().enqueue(new ResponseCallback<RobotDeviceStatus>().call(status));
+    }
+
+    @Override
+    public void deviceRobotVersion(RobotStatus<VersionBean> status) {
+        if (gsControllerService != null)
+            gsControllerService.deviceRobotVersion().enqueue(new ResponseCallback<VersionBean>().call(status));
     }
 
     @Override

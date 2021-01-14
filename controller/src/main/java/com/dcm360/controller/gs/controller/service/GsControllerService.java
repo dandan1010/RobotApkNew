@@ -8,6 +8,7 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotNonMapData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotMapGPS;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotSyncGpsData;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
@@ -136,6 +137,14 @@ public interface GsControllerService {
      */
     @GET("/gs-robot/data/device_status")
     Call<RobotDeviceStatus> deviceStatus();
+
+    /**
+     * 设备版本数据
+     *
+     * @return the call
+     */
+    @GET("/gs-robot/info")
+    Call<VersionBean> deviceRobotVersion();
 
     /**
      * 机器人外观形状数据

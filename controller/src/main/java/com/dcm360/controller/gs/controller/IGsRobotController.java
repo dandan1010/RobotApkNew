@@ -9,6 +9,7 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotNonMapData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotMapGPS;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotSyncGpsData;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
@@ -207,4 +208,6 @@ public interface IGsRobotController {
     void reset_robot(RobotStatus<Status> status);//恢复出厂设置
 
     void getUltrasonicPhit(RobotStatus<UltrasonicPhitBean> status);//声呐数据
+
+    void deviceRobotVersion(RobotStatus<VersionBean> status);//设备版本信息
 }

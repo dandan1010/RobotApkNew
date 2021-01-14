@@ -32,7 +32,8 @@ public final class Content {
     public static final String ROBOROT_INF_TWO = "ws://10.7.6.88:8089";//机器人底盘 webdocket
     public static final String ROBOROT_INF = "http://10.7.6.88:8080"; //机器人底盘
     public static final String SYSTEM_DATE = "system_date";//系统时间
-    public static final String versionCode = "versionCode";//系统版本
+    public static final String VERSIONCODE = "versionCode";//系统版本
+    public static final String ROBOTVERSIONCODE = "robotVersionCode";//下位机版本
 
     public static boolean isLastTask = false;
     public static long startTime = System.currentTimeMillis();

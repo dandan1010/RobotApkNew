@@ -61,6 +61,11 @@ public class GsonUtils {
     private List<TaskBean> taskBeans;
     private int workingMode;
     private boolean emergency;
+    private String robotVersion;
+
+    public void setRobotVersion(String robotVersion) {
+        this.robotVersion = robotVersion;
+    }
 
     public void setEmergency(boolean emergency) {
         this.emergency = emergency;
@@ -305,7 +310,7 @@ public class GsonUtils {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.TASK_NAME, taskName);
-            jsonObject.put(Content.versionCode, BuildConfig.VERSION_CODE);
+            jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -402,7 +407,8 @@ public class GsonUtils {
             jsonObject.put(Content.GET_WORKING_MODE, workingMode);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.GET_TASK_STATE, task_state);
-            jsonObject.put(Content.versionCode, BuildConfig.VERSION_CODE);
+            jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
+            jsonObject.put(Content.ROBOTVERSIONCODE, robotVersion);
             JSONArray edPointArray = new JSONArray();
             if (taskBeans != null) {
                 for (int i = 0; i < taskBeans.size(); i++) {

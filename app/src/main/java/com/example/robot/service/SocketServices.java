@@ -749,6 +749,7 @@ public class SocketServices extends Service {
                     gsonUtils.setEmergency(false);
                     Content.EMERGENCY = false;
                 }
+
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.DEVICES_STATUS));
             }
         } else if (messageEvent.getState() == 10050) {//添加充电点
@@ -834,8 +835,9 @@ public class SocketServices extends Service {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_ULTRASONIC));
             }
         } else if (messageEvent.getState() == 10060) {//版本
+            TaskManager.getInstances(mContext).deviceRobotVersion();
             if (Content.server != null) {
-                Content.server.broadcast(gsonUtils.putJsonMessage(Content.versionCode));
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.VERSIONCODE));
             }
         } else if (messageEvent.getState() == 10061){//获取工作模式
             int workingMode = SharedPrefUtil.getInstance(mContext).getSharedPrefWorkingMode(Content.WORKING_MODE);
@@ -843,6 +845,11 @@ public class SocketServices extends Service {
             if (Content.server != null) {
                 gsonUtils.setWorkingMode(workingMode);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_WORKING_MODE));
+            }
+        } else if (messageEvent.getState() == 10062) {//获取下位机版本信息
+            if (Content.server != null) {
+                gsonUtils.setRobotVersion((String) messageEvent.getT());
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.ROBOTVERSIONCODE));
             }
         }
 

@@ -309,7 +309,7 @@ public class SimpleServer extends WebSocketServer {
             case Content.GET_ULTRASONIC://声呐设备
                 EventBus.getDefault().post(new EventBusMessage(10058, message));
                 break;
-            case Content.versionCode://版本号
+            case Content.VERSIONCODE://版本号
                 EventBus.getDefault().post(new EventBusMessage(10060, message));
                 break;
             case Content.WORKING_MODE://工作模式
