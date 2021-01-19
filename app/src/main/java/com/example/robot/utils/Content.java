@@ -8,10 +8,8 @@ public final class Content {
     public static final String AlarmAction = "android.alarm.task.action";
 
     public static int delayTime = 200;
-    public static float robotX = 0.0f;
-    public static float robotY = 0.0f;
-    public static double robotAngle = 0.0;
-    public static String InitializePositionName = "Origin";//初始化的点
+    public static String InitializePositionName = "Initialize";//初始化的点
+    public static int countTime = 0;
 
     /**
      * //测试版本不亮灯 ：0

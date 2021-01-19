@@ -205,11 +205,15 @@ public class SocketServices extends Service {
                     startLoopDetection();
                     break;
                 case 2:
-                    Log.d(TAG, "case 2  " + Content.completeFlag);
-
+                    Log.d(TAG, "case 2  " + Content.completeFlag + ", worktime : " + workTime + ",  countTime : " + Content.countTime );
+                    int time = (int) ((workTime * 1000 - Content.countTime * Content.delayTime)/1000);
+                    if (time <= 0) {
+                        Content.completeFlag = true;
+                    }
                     if (!Content.completeFlag) {
                         startUvcDetection();
-                        tvText = mTimeUtils.calculateDays(workTime);
+                        //tvText = mTimeUtils.calculateDays(workTime);
+                        tvText = time + "秒";
                         Log.d(TAG, "case 2  " + tvText + " , WORKTIME :" + workTime);
                         gsonUtils.setTvTime(tvText);
                         if (Content.server != null) {
@@ -326,9 +330,10 @@ public class SocketServices extends Service {
                 Content.time = 1000;
                 String spinnerItem = (String) spinner[spinnerIndex];
                 checkLztekLamp.setUvcMode(0);
-                Date d2 = new Date(System.currentTimeMillis());
-                long diff = d2.getTime();
-                workTime = diff + Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60 * 1000;
+//                Date d2 = new Date(System.currentTimeMillis());
+//                long diff = d2.getTime();
+                workTime = Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60;
+                Content.countTime = 0;
                 Log.d(TAG, "onCheckedChanged：workTime : " + System.currentTimeMillis() + ",    " + workTime + ",    " + Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)));
                 startUvcDetection();
                 return;
@@ -351,11 +356,12 @@ public class SocketServices extends Service {
             if (pauseTime != 0) {
                 uvcWarning.stopWarning();
                 checkLztekLamp.setUvcMode(0);
-                workTime = workTime + System.currentTimeMillis() - pauseTime;
+                //workTime = workTime + System.currentTimeMillis() - pauseTime;
                 pauseTime = 0;
             }
             Content.robotState = 5;
             Content.time = 1000;
+            Content.countTime ++;
             myHandler.sendEmptyMessageDelayed(2, Content.delayTime);
         } else {
             if (pauseTime == 0) {
@@ -554,6 +560,7 @@ public class SocketServices extends Service {
             RobotPosition robotPosition = (RobotPosition) messageEvent.getT();
             x = (float) robotPosition.getGridPosition().getX();
             y = (float) robotPosition.getGridPosition().getY();
+            angle = (double) robotPosition.getAngle();
             gsonUtils.setX((double) robotPosition.getGridPosition().getX());
             gsonUtils.setY((double) robotPosition.getGridPosition().getY());
             gsonUtils.setGridHeight((int) robotPosition.getMapInfo().getGridHeight());
@@ -767,7 +774,7 @@ public class SocketServices extends Service {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.DEVICES_STATUS));
             }
         } else if (messageEvent.getState() == 10050) {//添加充电点
-            Log.d(TAG , "Add charging : "+Content.isCharging);
+            Log.d(TAG , "Add charging : "+Content.isCharging + ",   " + angle);
             if (Content.isCharging) {
                 PositionListBean positionListBean = new PositionListBean();
                 positionListBean.setName(Content.CHARGING_POINT);

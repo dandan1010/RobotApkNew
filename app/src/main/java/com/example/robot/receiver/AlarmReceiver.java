@@ -64,8 +64,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     Log.d("Cursor 111 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    handler.sendEmptyMessageDelayed(1001, 0);
-                    handler.sendEmptyMessageDelayed(1002, 1000);
+                    if (Content.isCharging) {
+                        handler.sendEmptyMessageDelayed(1001, 0);
+                        handler.sendEmptyMessageDelayed(1002, 1000);
+                    } else {
+                        handler.sendEmptyMessageDelayed(1002, 0);
+                    }
 //                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
 //                    handler.post(runnable);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
@@ -75,8 +79,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     Log.d("Cursor 222 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    handler.sendEmptyMessageDelayed(1001, 0);
-                    handler.sendEmptyMessageDelayed(1002, 1000);
+                    if (Content.isCharging) {
+                        handler.sendEmptyMessageDelayed(1001, 0);
+                        handler.sendEmptyMessageDelayed(1002, 1000);
+                    } else {
+                        handler.sendEmptyMessageDelayed(1002, 0);
+                    }
 //                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
 //                    handler.post(runnable);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
@@ -86,8 +94,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     Log.d("Cursor 333 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    handler.sendEmptyMessageDelayed(1001, 0);
-                    handler.sendEmptyMessageDelayed(1002, 1000);
+                    if (Content.isCharging) {
+                        handler.sendEmptyMessageDelayed(1001, 0);
+                        handler.sendEmptyMessageDelayed(1002, 1000);
+                    } else {
+                        handler.sendEmptyMessageDelayed(1002, 0);
+                    }
+
 //                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
 //                    handler.post(runnable);
                 }

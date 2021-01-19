@@ -185,7 +185,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
-
+        checkLztekLamp.test_uvc_stopAll();
         gsonUtils = new GsonUtils();
         spinner.setSelection(3);
         myHandler = new MyHandler(this);

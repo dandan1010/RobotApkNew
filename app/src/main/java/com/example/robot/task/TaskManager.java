@@ -77,6 +77,7 @@ public class TaskManager {
     private static WebSocket webSocket;
     private int timerCount = 0;
     private boolean isSendType = false;
+    private boolean isAddInitialize = false;
 
 
     private TaskManager(Context mContext) {
@@ -139,9 +140,7 @@ public class TaskManager {
             public void success(RobotPosition robotPosition) {
                 if (robotPosition != null) {
                     mRobotPosition = robotPosition;
-                    if (null == robotPosition.getGridPosition()) {
-                        EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.position_fail)));
-                    } else {
+                    if (null != robotPosition.getGridPosition()) {
                         EventBus.getDefault().post(new EventBusMessage(1003, robotPosition));
                         EventBus.getDefault().post(new EventBusMessage(10024, robotPosition));
                     }
@@ -293,6 +292,8 @@ public class TaskManager {
      * 取消扫描地图——保存
      */
     public void stopScanMap() {
+        Content.InitializePositionName = "End";
+        isAddInitialize = false;
         GsController.INSTANCE.stopScanMap(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
@@ -637,6 +638,21 @@ public class TaskManager {
                     Content.taskIndex++;
                     handler.removeMessages(1004);
                 }
+            } else if (msg.what == 1005) {
+                NavigationService.move(0.2f, 0.0f);
+                handler.sendEmptyMessageDelayed(1005, 10);
+            } else if (msg.what == 1006) {
+                Log.d(TAG, "初始点位置： " + Content.InitializePositionName);
+                handler.removeMessages(1005);
+                handler.removeMessages(1006);
+                PositionListBean positionListBean = new PositionListBean();
+                positionListBean.setName(Content.InitializePositionName);
+                positionListBean.setGridX((int) mRobotPosition.getGridPosition().getX());
+                positionListBean.setGridY((int) mRobotPosition.getGridPosition().getY());
+                positionListBean.setAngle(mRobotPosition.getAngle());
+                positionListBean.setType(0);
+                positionListBean.setMapName(Content.mapName);
+                add_Position(positionListBean);
             }
         }
     };
@@ -791,8 +807,13 @@ public class TaskManager {
         GsController.INSTANCE.add_Position(positionListBean, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
-                Log.d(TAG, "addPosition success");
+                Log.d(TAG, "addPosition success : " + positionListBean.getName() + ",    " + Content.isCharging);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_position) + status.getMsg()));
+                if (Content.isCharging && !isAddInitialize) {
+                    isAddInitialize = true;
+                    handler.sendEmptyMessageDelayed(1005, 0);
+                    handler.sendEmptyMessageDelayed(1006, 2000);
+                }
                 getPosition(Content.mapName);
             }
 
@@ -907,6 +928,7 @@ public class TaskManager {
                     NavigationService.initialize(Content.mapName, Content.InitializePositionName);
                 }
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.use_map) + status.getMsg()));
+                Content.InitializePositionName = "Initialize";
             }
 
             @Override
@@ -1073,7 +1095,7 @@ public class TaskManager {
                 && !type.equals("HEADING")
                 && Content.robotState != 6
                 && !TextUtils.isEmpty(type)
-                && !type.equals("TOO_CLOSE_TO_OBSTACLES") ) {
+                && !type.equals("TOO_CLOSE_TO_OBSTACLES")) {
             pointStateBean.getList().get(Content.taskIndex).setPointState(type);
             EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
         }
