@@ -5,9 +5,11 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
@@ -54,6 +56,7 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class SocketServices extends Service {
@@ -322,10 +325,11 @@ public class SocketServices extends Service {
                 Content.robotState = 5;
                 Content.time = 1000;
                 String spinnerItem = (String) spinner[spinnerIndex];
-                workTime = System.currentTimeMillis() +
-                        Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60 * 1000 + 10 * 1000;
-                Log.d(TAG, "onCheckedChanged：workTime : " + workTime);
                 checkLztekLamp.setUvcMode(0);
+                Date d2 = new Date(System.currentTimeMillis());
+                long diff = d2.getTime();
+                workTime = diff + Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60 * 1000;
+                Log.d(TAG, "onCheckedChanged：workTime : " + System.currentTimeMillis() + ",    " + workTime + ",    " + Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)));
                 startUvcDetection();
                 return;
             }
@@ -431,11 +435,21 @@ public class SocketServices extends Service {
                 }
             }
             if (Content.is_reset_robot) {
-                for (int i =0 ;i < robotMap.getData().size(); i++) {
-                    Log.d(TAG, "reset mapName : " + robotMap.getData().get(i).getName());
-                    TaskManager.getInstances(mContext).deleteMap(robotMap.getData().get(i).getName());
-                }
-                Content.is_reset_robot = false;
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        for (int i =0 ;i < robotMap.getData().size(); i++) {
+                            Log.d(TAG, "reset mapName : " + robotMap.getData().get(i).getName());
+                            TaskManager.getInstances(mContext).deleteMap(robotMap.getData().get(i).getName());
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        Content.is_reset_robot = false;
+                    }
+                }.run();
             }
         } else if (messageEvent.getState() == 10013) {//存储任务队列
             String messageEventT = (String) messageEvent.getT();
@@ -604,14 +618,14 @@ public class SocketServices extends Service {
                 Content.is_initialize_finished = 2;
                 handlerInitialize.removeCallbacks(runnableInitialize);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.fail_initialize)));
-            } else if (TextUtils.isEmpty(status.getData())){
-                Content.is_initialize_finished = 2;
-                handlerInitialize.removeCallbacks(runnableInitialize);
-                EventBus.getDefault().post(new EventBusMessage(10000, status.getErrorCode()));
-            } else if (Content.is_initialize_finished == 0){
+            } else if ("false".equals(status.getData()) && Content.is_initialize_finished == 0){
                 Content.is_initialize_finished = 0;
                 handlerInitialize.postDelayed(runnableInitialize, 1000);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.is_initialize)));
+            } else {
+                Content.is_initialize_finished = 2;
+                handlerInitialize.removeCallbacks(runnableInitialize);
+                EventBus.getDefault().post(new EventBusMessage(10000, status.getErrorCode()));
             }
         } else if (messageEvent.getState() == 10035) {
             Log.d(TAG, "是否完成初始化error: " + (String) messageEvent.getT());
@@ -818,13 +832,22 @@ public class SocketServices extends Service {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_LOW_BATTERY));
             }
         } else if (messageEvent.getState() == 10057) {//重置设备
-            TaskManager.getInstances(mContext).robot_reset();
+            //TaskManager.getInstances(mContext).robot_reset();
             mSqLiteOpenHelperUtils.reset_Db(Content.dbAlarmName);
             mSqLiteOpenHelperUtils.reset_Db(Content.tableName);
             mSqLiteOpenHelperUtils.reset_Db(Content.dbPointTime);
             SharedPrefUtil.getInstance(mContext).deleteAll();
             mSqLiteOpenHelperUtils.close();
             Content.is_reset_robot = true;
+            Content.battery = 30;
+            Content.led = 2;
+            Content.Working_mode = 2;
+            TaskManager.getInstances(mContext).setSpeedLevel(2);
+            TaskManager.getInstances(mContext).setnavigationSpeedLevel(2);
+            AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
+            mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
+                    5,
+                    AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
             TaskManager.getInstances(mContext).loadMapList();
         } else if (messageEvent.getState() == 10058) {//声呐设备
             TaskManager.getInstances(mContext).getUltrasonicPhit();
@@ -857,7 +880,7 @@ public class SocketServices extends Service {
         else if (messageEvent.getState() == 20001) {
             checkLztekLamp.test_uvc_start1();
         } else if (messageEvent.getState() == 20002) {
-            checkLztekLamp.test_uvc_start1();
+            checkLztekLamp.test_uvc_start2();
         } else if (messageEvent.getState() == 20003) {
             checkLztekLamp.test_uvc_start3();
         } else if (messageEvent.getState() == 20004) {

@@ -290,7 +290,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
             case R.id.start_initialize:
                 if (NavigationService.isStartNavigationService) {
                     Log.d(TAG, "初始化转圈");
-                    NavigationService.initialize(Content.mapName);
+                    //NavigationService.initialize(Content.mapName);
                 } else {
                     Toast.makeText(mContext, "底盘还没有链接成功，请稍后重试", Toast.LENGTH_SHORT).show();
                 }
@@ -331,7 +331,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 break;
             case R.id.develop_map:
                 isDevelop = true;
-                NavigationService.initialize(Content.mapName);
+                //NavigationService.initialize(Content.mapName);
                 break;
             case R.id.pause_task_queue:
                 isTaskFlag = true;

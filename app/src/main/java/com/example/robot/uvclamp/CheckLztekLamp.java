@@ -430,34 +430,40 @@ public class CheckLztekLamp {
     }
 
     public void test_uvc_start1() {
-        startUvc1Lamp();
+        mLztek.setGpioValue(port[5], 0);
     }
 
     public void test_uvc_start2() {
-        startUvc2Lamp();
+        mLztek.setGpioValue(port[6], 0);
     }
 
     public void test_uvc_start3() {
-        startUvc3Lamp();
+        mLztek.setGpioValue(port[4], 0);
     }
 
     public void test_uvc_start4() {
-        startUvc4Lamp();
+        mLztek.setGpioValue(port[3], 0);
     }
 
     public void test_uvc_startAll() {
-        setUvcMode(0);
-//        startUvc1Lamp();
-//        startUvc2Lamp();
-//        startUvc3Lamp();
-//        startUvc4Lamp();
+        test_uvc(0);
     }
 
     public void test_uvc_stopAll() {
-        stopUvc1Lamp();
-        stopUvc2Lamp();
-        stopUvc3Lamp();
-        stopUvc4Lamp();
+        test_uvc(1);
+    }
+
+    private void test_uvc(int flag) {
+        for (int i = 3; i < 7; i++) {
+            mLztek.setGpioValue(port[i], flag);
+            try {
+                if (flag == 0) {
+                    Thread.sleep(2000);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void test_uvc_stop1() {

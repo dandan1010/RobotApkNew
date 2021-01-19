@@ -1,11 +1,17 @@
 package com.example.robot.utils;
 
+import android.os.SystemClock;
+
 import com.example.robot.service.SimpleServer;
 
 public final class Content {
     public static final String AlarmAction = "android.alarm.task.action";
 
     public static int delayTime = 200;
+    public static float robotX = 0.0f;
+    public static float robotY = 0.0f;
+    public static double robotAngle = 0.0;
+    public static String InitializePositionName = "Origin";//初始化的点
 
     /**
      * //测试版本不亮灯 ：0
@@ -129,7 +135,7 @@ public final class Content {
     public static final String SET_LOW_BATTERY = "set_low_battery";//设置低电量回充
     public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
-    public static int maxBattery = 80;//最高电量
+    public static int maxBattery = 70;//最高电量
     public static boolean isCharging = false;//充电窗台
     public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
@@ -140,7 +146,7 @@ public final class Content {
     public static final String SET_NAVIGATIONSPEEDLEVEL = "set_navigationSpeedLevel";//设置导航速度
     public static final String GET_LED_LEVEL = "get_led_level";//获取led亮度
     public static final String SET_LED_LEVEL = "set_led_level";//设置led亮度
-    public static int led = 30;//led亮度
+    public static int led = 0;//led亮度
     public static final String GET_VOICE_LEVEL = "get_voice_level";//获取voice亮度
     public static final String SET_VOICE_LEVEL = "set_voice_level";//设置voice亮度
     public static final String RESET_ROBOT = "reset_robot";//重置设备
@@ -149,6 +155,7 @@ public final class Content {
     public static boolean EMERGENCY = false;//急停
     public static boolean IS_STOP_TASK = false;//停止任务
     public static double speed = 0;//停止任务
+    public static int robotSpeed = 2;//机器人速度
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
 

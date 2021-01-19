@@ -93,9 +93,9 @@ public class NavigationService extends Service {
 
     }
 
-    public static void initialize(String mapName) {//转圈初始化
+    public static void initialize(String mapName, String initializePositionName) {//转圈初始化
 
-        RobotManagerController.getInstance().getRobotController().initialize(mapName, "Origin", new RobotStatus<Status>() {
+        RobotManagerController.getInstance().getRobotController().initialize(mapName, initializePositionName, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));

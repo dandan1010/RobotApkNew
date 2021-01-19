@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
@@ -219,6 +220,7 @@ public class TaskManager {
      * 开始扫描地图
      */
     public void start_scan_map(String map_name) {
+
         GsController.INSTANCE.startScanMap(map_name, 0, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
@@ -495,6 +497,7 @@ public class TaskManager {
     public void startTaskQueue(String mapName, String taskName) {
         //robotStatus();
         Content.isLastTask = false;
+        Content.taskIsFinish = false;
         Content.taskIndex = 0;
         getTaskPositionMsg(mapName, taskName);
         robotTaskQueue = exeTaskPoi(mapName, taskName, mTaskArrayList);
@@ -589,6 +592,7 @@ public class TaskManager {
                         Content.taskState = 0;
                         Content.robotState = 1;
                         Content.taskIndex = 0;
+                        Content.taskIsFinish = false;
                         Content.time = 4000;
                         Content.taskName = null;
                         mTaskArrayList.clear();
@@ -616,7 +620,7 @@ public class TaskManager {
                     EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
                     isSendType = true;
                     Content.is_initialize_finished = 0;
-                    NavigationService.initialize(Content.mapName);
+                    NavigationService.initialize(Content.mapName, Content.InitializePositionName);
                     handler.removeMessages(1004);
                     handler.sendEmptyMessageDelayed(1004, 1000);
                 } else if (!Content.isCharging) {
@@ -735,7 +739,6 @@ public class TaskManager {
             EventBus.getDefault().post(new EventBusMessage(10006, -1));
         }
         EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_task) + "successed"));
-
     }
 
     /**
@@ -901,7 +904,7 @@ public class TaskManager {
                 if (Content.robotState == 4) {
                     NavigationService.initialize_directly(Content.mapName);
                 } else {
-                    NavigationService.initialize(Content.mapName);
+                    NavigationService.initialize(Content.mapName, Content.InitializePositionName);
                 }
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.use_map) + status.getMsg()));
             }
@@ -1063,61 +1066,6 @@ public class TaskManager {
                     Log.d(TAG, "NavigationStatus throw ：" + throwable.getMessage());
                 }));
     }
-
-//    @SuppressLint("CheckResult")
-//    public void robotStatus() {
-//
-//        RobotManagerController.getInstance()
-//                .getRobotController()
-//                .RobotStatus(
-//                        new NavigationStatus() {
-//                            @Override
-//                            public void noticeType(String type, String destination) {
-//                                if (!type.equals("HEADING")) {
-//                                    Log.d(TAG, "statustype：" + type + ",  taskIndex : " + Content.taskIndex);
-//                                }
-//                                navigationStatus(type);
-//                            }
-//
-//                            @Override
-//                            public void statusCode(int code, String msg) {
-//                                String type = "";
-//                                Log.d(TAG, "statusCode ： " + code);
-//                                switch (code) {
-//                                    case 401:
-//                                        type = "LOCALIZATION_FAILED";
-//                                        break;
-//                                    case 407:
-//                                        type = "REACHED";
-//                                        break;
-//                                    case 305:
-//                                        type = "GOAL_NOT_SAFE";
-//                                        break;
-//                                    case 402:
-//                                        type = "GOAL_NOT_SAFE";
-//                                        break;
-//                                    case 404:
-//                                        type = "UNREACHABLE";
-//                                        break;
-//                                    case 408:
-//                                        type = "UNREACHED";
-//                                        break;
-//                                    case 406:
-//                                        type = "PLANNING";
-//                                        break;
-//                                    case 405:
-//                                        type = "HEADING";
-//                                        break;
-//                                    default:
-//                                        EventBus.getDefault().post(new EventBusMessage(10000, "" + code));
-//                                        break;
-//                                }
-//                                navigationStatus(type);
-//                            }
-//                        },
-//                        Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status",
-//                        Content.ROBOROT_INF_TWO + "/gs-robot/notice/status");
-//    }
 
     public void navigationStatus(String type) {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);

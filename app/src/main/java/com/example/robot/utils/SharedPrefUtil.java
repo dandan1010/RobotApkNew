@@ -67,8 +67,8 @@ public class SharedPrefUtil {
     }
 
     public int getSharedPrefLed(String key) {
-        Log.d("get battery " , ""+sharedPreferences.getInt(key, 0));
-        return sharedPreferences.getInt(key, 0);
+        Log.d("get battery " , ""+sharedPreferences.getInt(key, Content.led));
+        return sharedPreferences.getInt(key, Content.led);
     }
 
 

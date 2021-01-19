@@ -6,10 +6,14 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
 
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
@@ -60,8 +64,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     Log.d("Cursor 111 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
-                    handler.post(runnable);
+                    handler.sendEmptyMessageDelayed(1001, 0);
+                    handler.sendEmptyMessageDelayed(1002, 1000);
+//                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
+//                    handler.post(runnable);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
@@ -69,8 +75,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     Log.d("Cursor 222 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
-                    handler.post(runnable);
+                    handler.sendEmptyMessageDelayed(1001, 0);
+                    handler.sendEmptyMessageDelayed(1002, 1000);
+//                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
+//                    handler.post(runnable);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
@@ -78,8 +86,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     Log.d("Cursor 333 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
-                    handler.post(runnable);
+                    handler.sendEmptyMessageDelayed(1001, 0);
+                    handler.sendEmptyMessageDelayed(1002, 1000);
+//                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
+//                    handler.post(runnable);
                 }
             }
             mSqLiteOpenHelperUtils.close();
@@ -88,7 +98,21 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     }
 
-    Handler handler = new Handler();
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 1001) {
+                NavigationService.move(0.2f, 0.0f);
+                handler.sendEmptyMessageDelayed(1001, 10);
+            } else if (msg.what == 1002) {
+                handler.removeMessages(1001);
+                handler.removeMessages(1002);
+                TaskManager.getInstances(mContext).use_map(Content.mapName);
+                handler.post(runnable);
+            }
+        }
+    };
     Runnable runnable = new Runnable() {
         @Override
         public void run() {

@@ -1,6 +1,7 @@
 package com.example.robot.utils;
 
 import android.content.Context;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.text.DateFormat;
@@ -27,8 +28,8 @@ public class TimeUtils {
         Date d1 = null;
         try {
             d1 = df.parse(str);
-            Date d2 = new Date(System.currentTimeMillis());//你也可以获取当前时间
-            long diff = d1.getTime() - d2.getTime();//这样得到的差值是微秒级别
+            Date d2 = new Date(System.currentTimeMillis());
+            long diff = d1.getTime() - d2.getTime();
             days = diff / (1000 * 60 * 60 * 24);
             hours = (diff - days * (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
             minutes = (diff - days * (1000 * 60 * 60 * 24) - hours * (1000 * 60 * 60)) / (1000 * 60);

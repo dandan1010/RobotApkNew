@@ -274,8 +274,8 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10053, message));
                 break;
             case Content.SET_LED_LEVEL://设置led亮度
-                int led_level = new JSONObject(message).getInt(Content.SET_LED_LEVEL);
-                SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_LED_LEVEL, led_level);
+                Content.led = new JSONObject(message).getInt(Content.SET_LED_LEVEL);
+                SharedPrefUtil.getInstance(mContext).setSharedPrefLed(Content.SET_LED_LEVEL, Content.led);
                 break;
             case Content.GET_LED_LEVEL://获取led亮度
                 EventBus.getDefault().post(new EventBusMessage(10055, message));
@@ -290,7 +290,6 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GET_VOICE_LEVEL://获取音量
                 AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
-                int max = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
                 int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
                 gsonUtils.setVoice(current);
                 broadcast(gsonUtils.putJsonMessage(Content.GET_VOICE_LEVEL));
