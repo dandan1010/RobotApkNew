@@ -90,6 +90,29 @@ public class RobotDeviceStatus {
         private String totalMileage;
         private int uptime;
 
+        @Override
+        public String toString() {
+            return "DataBean{" +
+                    "battery=" + battery +
+                    ", batteryVoltage=" + batteryVoltage +
+                    ", charge=" + charge +
+                    ", charger=" + charger +
+                    ", chargerCurrent=" + chargerCurrent +
+                    ", chargerStatus=" + chargerStatus +
+                    ", chargerVoltage=" + chargerVoltage +
+                    ", emergency=" + emergency +
+                    ", emergencyStop=" + emergencyStop +
+                    ", indexUpdatedAt=" + indexUpdatedAt +
+                    ", mileage=" + mileage +
+                    ", navigationSpeedLevel=" + navigationSpeedLevel +
+                    ", playPathSpeedLevel=" + playPathSpeedLevel +
+                    ", speed=" + speed +
+                    ", statusUpdatedAt=" + statusUpdatedAt +
+                    ", totalMileage='" + totalMileage + '\'' +
+                    ", uptime=" + uptime +
+                    '}';
+        }
+
         public double getBattery() {
             return battery;
         }
@@ -225,5 +248,15 @@ public class RobotDeviceStatus {
         public void setUptime(int uptime) {
             this.uptime = uptime;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "RobotDeviceStatus{" +
+                "data=" + data.toString() +
+                ", errorCode='" + errorCode + '\'' +
+                ", msg='" + msg + '\'' +
+                ", successed=" + successed +
+                '}';
     }
 }

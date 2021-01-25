@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.nfc.Tag;
 import android.util.Log;
 
 import com.example.robot.R;
@@ -39,7 +40,6 @@ public class SqLiteOpenHelperUtils {
     public void updateHistory(String type, String typeString, String date) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbData + "='" + date + "'");
-
     }
 
     //定时任务
@@ -115,6 +115,31 @@ public class SqLiteOpenHelperUtils {
     public void updatePointTask(String typeName, String oldNameString, String newNameString) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("update " + Content.dbPointTime + " set " + typeName + "='" + newNameString + "' where " + typeName + "='" + oldNameString + "'");
+    }
+
+    //任务点状态
+    public void saveTaskState(String mapName, String taskName, String pointState, String date) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("insert into " + Content.dbTaskState + "(" + Content.dbTaskStateMapName + ", " + Content.dbTaskStateTaskName + ", " + Content.dbTaskStatePointState + " ," + Content.dbData + ") values ('" + mapName + "','" + taskName + "','" + pointState + "','" + date + "')");
+    }
+
+    public Cursor searchTaskState() {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.dbTaskState, new String[]{"_id", Content.dbTaskStateMapName, Content.dbTaskStateTaskName, Content.dbTaskStatePointState}, null, null, null, null, null);
+        return cursor;
+    }
+
+    public void updateState(String state, String mapName, String taskName) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName +"'");
+    Log.d("ZDZD : " , "update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName +"'");
+        //        ContentValues values1 = new ContentValues();
+//        values1.put(Content.dbTaskStatePointState, state);
+//        String[] whereArgs1 = {"#100", b.getStorage_id()};
+//        String whereClause1 = DatabaseSchema.TABLE_TALKS.COLUMN_TID + "=? AND " + DatabaseSchema.TABLE_TALKS.COLUMN_STORAGEID + "=?";
+//        db.update(DatabaseSchema.TABLE_TALKS.NAME, values1, whereClause1, whereArgs1);
+//        db.close();
+
     }
 
 

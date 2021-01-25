@@ -41,5 +41,21 @@ public class PointStateBean {
         public void setPointState(String pointState) {
             this.pointState = pointState;
         }
+
+        @Override
+        public String toString() {
+            return "PointState{" +
+                    "pointName='" + pointName + '\'' +
+                    ", pointState='" + pointState + '\'' +
+                    '}';
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "PointStateBean{" +
+                "taskName='" + taskName + '\'' +
+                ", list=" + list +
+                '}';
     }
 }

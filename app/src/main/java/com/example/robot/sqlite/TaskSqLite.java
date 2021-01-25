@@ -22,6 +22,7 @@ public class TaskSqLite extends SQLiteOpenHelper {
         db.execSQL("create table " + Content.tableName + "(_id integer primary key autoincrement, " + Content.dbTaskMapName + " varchar(50), " + Content.dbTaskName + " varchar(50), " + Content.dbTime + " varchar(50)," + Content.dbData + " varchar(50))");
         db.execSQL("create table " + Content.dbAlarmName + "(_id integer primary key autoincrement, " + Content.dbAlarmMapTaskName + " varchar(50), " + Content.dbAlarmTime + " varchar(100)," + Content.dbAlarmCycle + " varchar(200) ," + Content.dbAlarmIsRun + " varchar(50))");
         db.execSQL("create table " + Content.dbPointTime + "(_id integer primary key autoincrement, " + Content.dbPointTaskName + " varchar(50), " + Content.dbPointName + " varchar(50), " + Content.dbSpinnerTime + " varchar(50)," + Content.dbPointX + " varchar(50)," + Content.dbPointY + " varchar(50))");
+        db.execSQL("create table " + Content.dbTaskState + "(_id integer primary key autoincrement, " + Content.dbTaskStateMapName + " varchar(50), " + Content.dbTaskStateTaskName + " varchar(50), " + Content.dbTaskStatePointState + " varchar(50)," + Content.dbData + " varchar(50))");
     }
 
     @Override

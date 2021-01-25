@@ -164,7 +164,7 @@ public class SocketServices extends Service {
     }
 
     public void onCheckedChanged(int index) {
-        Log.d(TAG,"onCheckedChanged : "+toLightControlBtn + ", spinner index: " + index);
+        Log.d(TAG, "onCheckedChanged : " + toLightControlBtn + ", spinner index: " + index);
         if (toLightControlBtn) {
             Content.completeFlag = false;
             ledtime = 0;
@@ -205,8 +205,8 @@ public class SocketServices extends Service {
                     startLoopDetection();
                     break;
                 case 2:
-                    Log.d(TAG, "case 2  " + Content.completeFlag + ", worktime : " + workTime + ",  countTime : " + Content.countTime );
-                    int time = (int) ((workTime * 1000 - Content.countTime * Content.delayTime)/1000);
+                    Log.d(TAG, "case 2  " + Content.completeFlag + ", worktime : " + workTime + ",  countTime : " + Content.countTime);
+                    int time = (int) ((workTime * 1000 - Content.countTime * Content.delayTime) / 1000);
                     if (time <= 0) {
                         Content.completeFlag = true;
                     }
@@ -265,12 +265,12 @@ public class SocketServices extends Service {
                     myHandler.sendEmptyMessageDelayed(5, 1000);
                     break;
                 case 6:
-                    Log.d(TAG , "case 6 : "+"检测充电状态恢复任务battery : " + battery + ",  taskName: " + Content.taskName +",   taskState: "+ Content.taskState);
+                    Log.d(TAG, "case 6 : " + "检测充电状态恢复任务battery : " + battery + ",  taskName: " + Content.taskName + ",   taskState: " + Content.taskState);
                     if (battery > Content.maxBattery && Content.taskName != null) {
                         //TaskManager.getInstances(mContext).resumeTaskQueue();
                         Content.taskIsFinish = false;
                         myHandler.removeMessages(6);
-                    } else if (Content.taskName == null){
+                    } else if (Content.taskName == null) {
                         myHandler.removeMessages(6);
                     } else {
                         myHandler.sendEmptyMessageDelayed(6, 5000);
@@ -301,7 +301,7 @@ public class SocketServices extends Service {
      */
     private void startLoopDetection() {
         Log.d(TAG, "startLoopDetection: " + (10 * 1000 - ledtime * Content.delayTime) + "秒");
-        tvText = (float)((10 * 1000 - ledtime * Content.delayTime)/1000) + "秒";
+        tvText = (float) ((10 * 1000 - ledtime * Content.delayTime) / 1000) + "秒";
         gsonUtils.setTvTime(tvText);
         if (Content.server != null) {
             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
@@ -361,7 +361,7 @@ public class SocketServices extends Service {
             }
             Content.robotState = 5;
             Content.time = 1000;
-            Content.countTime ++;
+            Content.countTime++;
             myHandler.sendEmptyMessageDelayed(2, Content.delayTime);
         } else {
             if (pauseTime == 0) {
@@ -444,7 +444,7 @@ public class SocketServices extends Service {
                 new Runnable() {
                     @Override
                     public void run() {
-                        for (int i =0 ;i < robotMap.getData().size(); i++) {
+                        for (int i = 0; i < robotMap.getData().size(); i++) {
                             Log.d(TAG, "reset mapName : " + robotMap.getData().get(i).getName());
                             TaskManager.getInstances(mContext).deleteMap(robotMap.getData().get(i).getName());
                             try {
@@ -534,7 +534,7 @@ public class SocketServices extends Service {
             try {
                 mSqLiteOpenHelperUtils.updateAlarmTask(
                         new JSONObject((String) messageEvent.getT()).getString(Content.MAP_NAME)
-                        + "," + new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME),
+                                + "," + new JSONObject((String) messageEvent.getT()).getString(Content.TASK_NAME),
                         Content.dbAlarmIsRun, "true");
 
             } catch (JSONException e) {
@@ -542,12 +542,12 @@ public class SocketServices extends Service {
             }
             Cursor cursor = mSqLiteOpenHelperUtils.searchAllAlarmTask();
             while (cursor.moveToNext()) {
-                Log.d(TAG, "starttask: "+cursor.getString(cursor.getColumnIndex(Content.dbAlarmMapTaskName)) + "  ,  "
-                + cursor.getString(cursor.getColumnIndex(Content.dbAlarmIsRun)));
+                Log.d(TAG, "starttask: " + cursor.getString(cursor.getColumnIndex(Content.dbAlarmMapTaskName)) + "  ,  "
+                        + cursor.getString(cursor.getColumnIndex(Content.dbAlarmIsRun)));
             }
             mSqLiteOpenHelperUtils.close();
         } else if (messageEvent.getState() == 10023) {//停止任务
-            Log.d(TAG,"stoptask taskName : " + Content.taskName);
+            Log.d(TAG, "stoptask taskName : " + Content.taskName);
             if (Content.taskName != null) {
                 TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
                 toLightControlBtn = false;
@@ -610,6 +610,23 @@ public class SocketServices extends Service {
                 gsonUtils.setBattery(battery + "%");
                 Content.server.broadcast(gsonUtils.putBattery(Content.BATTERY_DATA));
             }
+            StringBuffer stringBuffer = new StringBuffer();
+            for (int i = 0; i < bytes.length; i++) {
+                stringBuffer.append(bytes[i]);
+            }
+            Log.d("zdzd : ", "电量： " + stringBuffer.toString());
+            //充电状态，电量>95,电压>0
+//            if (Content.battery > Content.fullBattery || Content.chargerVoltage < 0) {
+//                //关闭gpio口
+//                if (Content.isCharging) {
+//                    Log.d(TAG, "关闭gpio口");
+//                    Content.robotState = 1;
+//                    Content.time = 4000;
+//                }
+//                Content.isCharging = false;
+//                EventBus.getDefault().post(new EventBusMessage(10000, "放电"));
+//            }
+
         } else if (messageEvent.getState() == 10034) {
             Log.d(TAG, "是否完成初始化" + (Status) messageEvent.getT());
             Status status = (Status) messageEvent.getT();
@@ -621,11 +638,11 @@ public class SocketServices extends Service {
                 }
                 Content.is_initialize_finished = 1;
                 Log.d(TAG, "是否完成初始化" + Content.is_initialize_finished);
-            } else if ("failed".equals(status.getData())){
+            } else if ("failed".equals(status.getData())) {
                 Content.is_initialize_finished = 2;
                 handlerInitialize.removeCallbacks(runnableInitialize);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.fail_initialize)));
-            } else if ("false".equals(status.getData()) && Content.is_initialize_finished == 0){
+            } else if ("false".equals(status.getData()) && Content.is_initialize_finished == 0) {
                 Content.is_initialize_finished = 0;
                 handlerInitialize.postDelayed(runnableInitialize, 1000);
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.is_initialize)));
@@ -755,7 +772,7 @@ public class SocketServices extends Service {
             if (Content.server != null) {
                 gsonUtils.setPlayPathSpeedLevel(robotDeviceStatus.getData().getPlayPathSpeedLevel());
                 gsonUtils.setNavigationSpeedLevel(robotDeviceStatus.getData().getNavigationSpeedLevel());
-                Log.d(TAG, "紧急急停 : "+robotDeviceStatus.getData().isEmergency() +",   " + robotDeviceStatus.getData().isEmergencyStop());
+                Log.d(TAG, "紧急急停 : " + robotDeviceStatus.getData().isEmergency() + ",   " + robotDeviceStatus.getData().isEmergencyStop());
                 if (robotDeviceStatus.getData().isEmergency() || robotDeviceStatus.getData().isEmergencyStop()) {
                     gsonUtils.setEmergency(true);
                     Log.d(TAG, "紧急急停");
@@ -773,8 +790,19 @@ public class SocketServices extends Service {
 
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.DEVICES_STATUS));
             }
+            //电压>0，电量<95，放电状态
+            int chargerVoltage = (int) robotDeviceStatus.getData().getChargerVoltage();
+//            if (chargerVoltage > 0 && Content.battery <= Content.fullBattery) {
+//                if (!Content.isCharging) {
+//                    Log.d(TAG, "打开gpio口");
+//                }
+//                Content.isCharging = true;
+//                Content.robotState = 4;
+//                Content.time = 1000;
+//                EventBus.getDefault().post(new EventBusMessage(10000, "充电"));
+//            }
         } else if (messageEvent.getState() == 10050) {//添加充电点
-            Log.d(TAG , "Add charging : "+Content.isCharging + ",   " + angle);
+            Log.d(TAG, "Add charging : " + Content.isCharging + ",   " + angle);
             if (Content.isCharging) {
                 PositionListBean positionListBean = new PositionListBean();
                 positionListBean.setName(Content.CHARGING_POINT);
@@ -802,8 +830,8 @@ public class SocketServices extends Service {
                     while (cursorPoint.moveToNext()) {
                         TaskBean taskBean = new TaskBean(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointName)),
                                 Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbSpinnerTime))),
-                                        Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointX))),
-                                        Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointY))));
+                                Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointX))),
+                                Integer.parseInt(cursorPoint.getString(cursorPoint.getColumnIndex(Content.dbPointY))));
                         taskBeans.add(taskBean);
                     }
                     mSqLiteOpenHelperUtils.close();
@@ -826,14 +854,14 @@ public class SocketServices extends Service {
 
         } else if (messageEvent.getState() == 10055) {//获取led亮度
             int level = SharedPrefUtil.getInstance(mContext).getSharedPrefLed(Content.SET_LED_LEVEL);
-            Log.d(TAG,"level get led" + level);
+            Log.d(TAG, "level get led" + level);
             if (Content.server != null) {
                 gsonUtils.setLed_level(level);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_LED_LEVEL));
             }
         } else if (messageEvent.getState() == 10056) {//获取低电量回充
             int sharedPrefBattery = SharedPrefUtil.getInstance(mContext).getSharedPrefBattery(Content.SET_LOW_BATTERY);
-            Log.d(TAG,"level get battery " + sharedPrefBattery);
+            Log.d(TAG, "level get battery " + sharedPrefBattery);
             if (Content.server != null) {
                 gsonUtils.setLow_battery(sharedPrefBattery);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_LOW_BATTERY));
@@ -869,9 +897,9 @@ public class SocketServices extends Service {
             if (Content.server != null) {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.VERSIONCODE));
             }
-        } else if (messageEvent.getState() == 10061){//获取工作模式
+        } else if (messageEvent.getState() == 10061) {//获取工作模式
             int workingMode = SharedPrefUtil.getInstance(mContext).getSharedPrefWorkingMode(Content.WORKING_MODE);
-            Log.d(TAG,"working_mode get " + workingMode);
+            Log.d(TAG, "working_mode get " + workingMode);
             if (Content.server != null) {
                 gsonUtils.setWorkingMode(workingMode);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_WORKING_MODE));
@@ -881,6 +909,13 @@ public class SocketServices extends Service {
                 gsonUtils.setRobotVersion((String) messageEvent.getT());
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.ROBOTVERSIONCODE));
             }
+        } else if (messageEvent.getState() == 10063) {//获取电池的电压
+//            if (Content.server != null) {
+//                gsonUtils.setRobotVersion((String) messageEvent.getT());
+//                Content.server.broadcast(gsonUtils.putJsonMessage(Content.ROBOTVERSIONCODE));
+//            }
+
+
         }
 
 //test request

@@ -134,7 +134,9 @@ public final class Content {
     public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
     public static int maxBattery = 70;//最高电量
+    public static int fullBattery = 99;//充满电
     public static boolean isCharging = false;//充电窗台
+    public static int chargerVoltage = 0;//充满电
     public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
     public static final String GET_NAVIGATIONSPEEDLEVEL = "get_navigationSpeedLevel";//任务导航速度
@@ -221,6 +223,12 @@ public final class Content {
     public static final String dbSpinnerTime = "dbSpinnerTime";
     public static final String dbPointX = "dbPointX";
     public static final String dbPointY = "dbPointY";
+
+    public static final String dbTaskState = "dbTaskState";//点任务状态
+    public static final String dbTaskStateMapName = "dbMapName";
+    public static final String dbTaskStateTaskName = "dbTaskStateTaskName";
+//    public static final String dbTaskStatePointName = "dbTaskStatePointName";
+    public static final String dbTaskStatePointState = "dbTaskStatePointState";
 
     //test
     public static final String TEST_UVCSTART_1 = "test_uvcstart_1";

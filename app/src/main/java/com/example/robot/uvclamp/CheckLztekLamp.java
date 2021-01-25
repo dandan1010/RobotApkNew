@@ -332,12 +332,13 @@ public class CheckLztekLamp {
             return;
         }
         handler.postDelayed(runnable, 0);
+//        handler.postDelayed(runnableVoltage, 0);
     }
 
     Handler handler = new Handler();
 
     /**
-     * 间隔5秒写入请求一次电池数据
+     * 间隔1秒写入请求一次电池数据
      */
     Runnable runnable = new Runnable() {
         @Override
@@ -387,8 +388,9 @@ public class CheckLztekLamp {
                         editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
                         editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
                     }
-                    Log.d(TAG, "读取数据 ： " + editText.getText().toString());
-                    EventBus.getDefault().post(new EventBusMessage(1004, data));
+                    String two = editText.getText().toString().substring(8, 12);
+                    Content.chargerVoltage = Integer.parseInt(two, 16) / 1000;
+                    Log.d(TAG, "读取数据 ： " + editText.getText().toString() + " ,two : " + two + ", chargerVoltage : " + Content.chargerVoltage);
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
                     String msg = "";
                     if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
@@ -396,6 +398,7 @@ public class CheckLztekLamp {
                         Content.time = 1000;
                         msg = "充电";
                         Content.isCharging = true;
+                        EventBus.getDefault().post(new EventBusMessage(10000, msg));
                     } else {
                         Content.isCharging = false;
                         msg = "放电";
@@ -403,8 +406,10 @@ public class CheckLztekLamp {
                             Content.robotState = 1;
                             Content.time = 4000;
                         }
+                        //关闭gpio口
+                        Log.d(TAG,"关闭gpio口");
+                        EventBus.getDefault().post(new EventBusMessage(10000, msg));
                     }
-                    EventBus.getDefault().post(new EventBusMessage(10000, msg));
                 }
             } catch (Exception e) {
                 android.util.Log.d(TAG, "[COM]Read Faild: " + e.getMessage(), e);
@@ -419,6 +424,77 @@ public class CheckLztekLamp {
             }
         }
     };
+
+//    /**
+//     * 间隔5秒写入请求一次电池数据
+//     */
+//    Runnable runnableVoltage = new Runnable() {
+//        @Override
+//        public void run() {
+//            OutputStream outputStream = null;
+//            byte[] battery = hexBytes("DDA50400FFFC77");
+//            try {
+//                if (null != battery) {
+//                    outputStream = batterySerialPort.getOutputStream();
+//                    outputStream.write(battery);
+//                }
+//                handler.postDelayed(voltageRunnable, 0);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            } finally {
+//                if (outputStream != null) {
+//                    try {
+//                        outputStream.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//            handler.postDelayed(this::run, 1 * 1000);
+//        }
+//    };
+//
+//    /**
+//     * 读取voltageRunnable数据
+//     */
+//    Runnable voltageRunnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            if (null == batterySerialPort) {
+//                return;
+//            }
+//            java.io.InputStream input = batterySerialPort.getInputStream();
+//            try {
+//                byte[] buffer = new byte[1024];
+//                int len = input.read(buffer);
+//                if (len > 0) {
+//                    byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
+//                    EditText editText = new EditText(mContext);
+//                    for (byte b : data) {
+//                        byte h = (byte) (0x0F & (b >> 4));
+//                        byte l = (byte) (0x0F & b);
+//                        editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
+//                        editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
+//                    }
+//                    String two = editText.getText().toString().substring(8, 12);
+//                    Content.chargerVoltage = Integer.parseInt(two, 16) / 1000;
+//                    Log.d(TAG, "读取数据Voltage ： " + editText.getText().toString() + " ,two : " + two + ", chargerVoltage : " + Content.chargerVoltage);
+//                    //EventBus.getDefault().post(new EventBusMessage(10033, data));
+//                    String msg = "";
+//                }
+//            } catch (Exception e) {
+//                android.util.Log.d(TAG, "[COM]Read Faild: " + e.getMessage(), e);
+//            } finally {
+//                if (null != input) {
+//                    try {
+//                        input.close();
+//                    } catch (IOException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }
+//    };
 
 
     //TEST

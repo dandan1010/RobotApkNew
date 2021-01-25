@@ -544,13 +544,14 @@ public class TaskManager {
         Content.startTime = System.currentTimeMillis();
         sqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName,
                 "-1" + mContext.getResources().getString(R.string.minutes),
-                "" + mAlarmUtils.getTimeYear(System.currentTimeMillis()));
+                "" + mAlarmUtils.getTimeYear(Content.startTime));
         sqLiteOpenHelperUtils.close();
 
         handler.sendEmptyMessageDelayed(1001, 0);
 
     }
 
+    @SuppressLint("HandlerLeak")
     Handler handler = new Handler() {
         @Override
         public void handleMessage(@NonNull Message msg) {
@@ -564,18 +565,18 @@ public class TaskManager {
                         if (Content.Working_mode == 1) {
                             EventBus.getDefault().post(new EventBusMessage(10005, -1));
                         }
-                        if (Content.taskIndex == mTaskArrayList.size() - 1) {
-                            if (!Content.isCharging) {
-                                Content.taskIsFinish = true;
-                                Content.taskState = 1;
-                                navigate_Position(Content.mapName, Content.CHARGING_POINT);
-                            }
-                        } else {
-                            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                            navigate_Position(Content.mapName, mTaskArrayList.get(Content.taskIndex).getName());
-                            Content.taskIsFinish = true;
-                            Content.taskState = 1;
-                        }
+//                        if (Content.taskIndex == mTaskArrayList.size()) {
+//                            if (!Content.isCharging) {
+//                                Content.taskIsFinish = true;
+//                                Content.taskState = 1;
+//                                navigate_Position(Content.mapName, Content.CHARGING_POINT);
+//                            }
+//                        } else {
+                        //EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+                        navigate_Position(Content.mapName, mTaskArrayList.get(Content.taskIndex).getName());
+                        Content.taskIsFinish = true;
+                        Content.taskState = 1;
+//                        }
                         handler.removeMessages(1001);
                         handler.removeMessages(1002);
                         handler.removeMessages(1003);
@@ -587,8 +588,12 @@ public class TaskManager {
                         handler.removeMessages(1002);
                         handler.removeMessages(1003);
                         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
-                                "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60)
-                                        + mContext.getResources().getString(R.string.minutes), mAlarmUtils.getTimeYear(Content.startTime));
+                                "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60),
+                                mAlarmUtils.getTimeYear(Content.startTime));
+                        sqLiteOpenHelperUtils.saveTaskState(Content.mapName,
+                                Content.taskName,
+                                pointStateBean.toString().replace("'", ""),
+                                mAlarmUtils.getTimeYear(Content.startTime));
                         sqLiteOpenHelperUtils.close();
                         Content.taskState = 0;
                         Content.robotState = 1;
@@ -616,14 +621,24 @@ public class TaskManager {
                 handler.sendEmptyMessageDelayed(1002, 1000);
             } else if (msg.what == 1003) {
                 Log.d(TAG, "timer-1003 速度 : " + Content.speed + ",   mapName : " + Content.mapName);
-                if (Content.taskIndex < mTaskArrayList.size() - 1) {
+                if (Content.taskIndex < mTaskArrayList.size()) {
                     pointStateBean.getList().get(Content.taskIndex).setPointState("UNREACHED");
                     EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-                    isSendType = true;
-                    Content.is_initialize_finished = 0;
-                    NavigationService.initialize(Content.mapName, Content.InitializePositionName);
-                    handler.removeMessages(1004);
-                    handler.sendEmptyMessageDelayed(1004, 1000);
+                    if (Content.taskIndex == mTaskArrayList.size() - 1 && Content.isCharging) {
+                        Content.taskIsFinish = true;
+                        Content.taskIndex++;
+                    } else {
+                        isSendType = true;
+                        Content.is_initialize_finished = 0;
+                        if (Content.isCharging) {
+                            NavigationService.initialize_directly(Content.mapName);
+                        } else {
+                            NavigationService.initialize(Content.mapName, Content.InitializePositionName);
+                        }
+                        handler.removeMessages(1004);
+                        handler.sendEmptyMessageDelayed(1004, 1000);
+                    }
+
                 } else if (!Content.isCharging) {
                     Content.taskIsFinish = false;
                     navigate_Position(Content.mapName, Content.CHARGING_POINT);
@@ -679,9 +694,14 @@ public class TaskManager {
                 0,
                 0,
                 0);
+        PointStateBean.PointState pointState = new PointStateBean.PointState();
+        pointState.setPointName(Content.CHARGING_POINT);
+        pointState.setPointState(mContext.getResources().getString(R.string.not_work));
+        pointStates.add(pointState);
         mTaskArrayList.add(taskBean);
-        sqLiteOpenHelperUtils.close();
         pointStateBean.setList(pointStates);
+        Log.d("zdzd : ", "" + pointStateBean.toString());
+        sqLiteOpenHelperUtils.close();
         return mTaskArrayList;
     }
 
@@ -742,12 +762,14 @@ public class TaskManager {
             Content.IS_STOP_TASK = true;
             navigate_Position(mapName, Content.CHARGING_POINT);
         }
-        if (Content.taskName != null) {
-            sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
-                    "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + mContext.getResources().getString(R.string.minutes),
-                    mAlarmUtils.getTimeYear(Content.startTime));
-            sqLiteOpenHelperUtils.close();
-        }
+        sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
+                "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + mContext.getResources().getString(R.string.minutes),
+                mAlarmUtils.getTimeYear(Content.startTime));
+        sqLiteOpenHelperUtils.saveTaskState(Content.mapName,
+                Content.taskName,
+                pointStateBean.toString().replace("'", ""),
+                mAlarmUtils.getTimeYear(Content.startTime));
+        sqLiteOpenHelperUtils.close();
         Content.taskName = null;
         mTaskArrayList.clear();
         Content.startTime = System.currentTimeMillis();
@@ -857,6 +879,7 @@ public class TaskManager {
                 Log.d(TAG, "renamePosition success");
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.rename_position) + status.getMsg()));
                 sqLiteOpenHelperUtils.updatePointTask(Content.dbPointName, originName, newName);
+                sqLiteOpenHelperUtils.close();
                 getPosition(Content.mapName);
             }
 
@@ -1032,7 +1055,7 @@ public class TaskManager {
         GsController.INSTANCE.deviceStatus(new RobotStatus<RobotDeviceStatus>() {
             @Override
             public void success(RobotDeviceStatus robotDeviceStatus) {
-                Log.d(TAG, "deviceStatus： ： " + robotDeviceStatus.getData().toString());
+                Log.d(TAG, "deviceStatus： ： " + robotDeviceStatus.getData());
                 EventBus.getDefault().post(new EventBusMessage(10049, robotDeviceStatus));
             }
 
@@ -1077,7 +1100,7 @@ public class TaskManager {
                 }));
         NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status")
                 .subscribe(data -> {
-                    Log.d("zdzd : ", "NavigationStatus : " + data);
+                    Log.d("zdzd111 : ", "NavigationStatus : " + data);
                     if (TextUtils.isEmpty(data)) {
                         return;
                     }
@@ -1087,11 +1110,23 @@ public class TaskManager {
                 }, throwable -> {
                     Log.d(TAG, "NavigationStatus throw ：" + throwable.getMessage());
                 }));
+        NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/status")
+                .subscribe(data -> {
+                    Log.d("zdzd222 : ", "Navigationnotice : " + data);
+                    if (TextUtils.isEmpty(data)) {
+                        return;
+                    }
+//                    JSONObject jsonObject = new JSONObject(data);
+//                    String noticeType = jsonObject.getString("noticeType");
+//                    navigationStatus(noticeType);
+                }, throwable -> {
+                    Log.d(TAG, "Navigationnotice throw ：" + throwable.getMessage());
+                }));
     }
 
     public void navigationStatus(String type) {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);
-        if (Content.taskIndex < mTaskArrayList.size() - 1
+        if (Content.taskIndex < mTaskArrayList.size()
                 && !type.equals("HEADING")
                 && Content.robotState != 6
                 && !TextUtils.isEmpty(type)
