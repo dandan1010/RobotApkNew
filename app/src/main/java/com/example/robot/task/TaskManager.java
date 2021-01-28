@@ -546,7 +546,7 @@ public class TaskManager {
                 "-1" + mContext.getResources().getString(R.string.minutes),
                 "" + mAlarmUtils.getTimeYear(Content.startTime));
         sqLiteOpenHelperUtils.close();
-
+        EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
         handler.sendEmptyMessageDelayed(1001, 0);
 
     }
@@ -756,6 +756,7 @@ public class TaskManager {
         handler.removeMessages(1001);
         handler.removeMessages(1002);
         handler.removeMessages(1003);
+        NavigationService.stopInitialize();
         Log.d(TAG, "stopTaskQueue taskName : " + Content.taskName + " , charging : " + Content.isCharging
                 + "time：" + (System.currentTimeMillis() - Content.startTime) / 1000 / 60 + ",  mapName : " + mapName);
         if (!Content.isCharging) {
@@ -763,7 +764,7 @@ public class TaskManager {
             navigate_Position(mapName, Content.CHARGING_POINT);
         }
         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
-                "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60) + mContext.getResources().getString(R.string.minutes),
+                "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60),
                 mAlarmUtils.getTimeYear(Content.startTime));
         sqLiteOpenHelperUtils.saveTaskState(Content.mapName,
                 Content.taskName,
@@ -945,7 +946,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "use_map success");
-                if (Content.robotState == 4) {
+                if (Content.isCharging) {
                     NavigationService.initialize_directly(Content.mapName);
                 } else {
                     NavigationService.initialize(Content.mapName, Content.InitializePositionName);

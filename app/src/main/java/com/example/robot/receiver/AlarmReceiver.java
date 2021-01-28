@@ -66,7 +66,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Log.d("Cursor 111 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
                     if (Content.isCharging) {
                         handler.sendEmptyMessageDelayed(1001, 0);
-                        handler.sendEmptyMessageDelayed(1002, 1000);
+                        handler.sendEmptyMessageDelayed(1002, 2000);
                     } else {
                         handler.sendEmptyMessageDelayed(1002, 0);
                     }
@@ -81,7 +81,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Log.d("Cursor 222 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
                     if (Content.isCharging) {
                         handler.sendEmptyMessageDelayed(1001, 0);
-                        handler.sendEmptyMessageDelayed(1002, 1000);
+                        handler.sendEmptyMessageDelayed(1002, 2000);
                     } else {
                         handler.sendEmptyMessageDelayed(1002, 0);
                     }
@@ -96,7 +96,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                     Log.d("Cursor 333 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
                     if (Content.isCharging) {
                         handler.sendEmptyMessageDelayed(1001, 0);
-                        handler.sendEmptyMessageDelayed(1002, 1000);
+                        handler.sendEmptyMessageDelayed(1002, 2000);
                     } else {
                         handler.sendEmptyMessageDelayed(1002, 0);
                     }
@@ -108,7 +108,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             mSqLiteOpenHelperUtils.close();
             // 可以继续设置下一次闹铃时间;
         }
-
     }
 
     Handler handler = new Handler() {
@@ -117,7 +116,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             super.handleMessage(msg);
             if (msg.what == 1001) {
                 NavigationService.move(0.2f, 0.0f);
-                handler.sendEmptyMessageDelayed(1001, 10);
+                handler.sendEmptyMessageDelayed(1001, 20);
             } else if (msg.what == 1002) {
                 handler.removeMessages(1001);
                 handler.removeMessages(1002);
