@@ -100,6 +100,19 @@ public class SharedPrefUtil {
     }
 
     /**
+     * 工作模式
+     */
+    public void setSharedPrefChargingMode(String key, boolean level){
+        editor.putBoolean(key, level);
+        editor.commit();
+    }
+
+    public boolean getSharedPrefChargingMode(String key) {
+        Log.d("get battery " , ""+sharedPreferences.getBoolean(key, Content.have_charging_mode));
+        return sharedPreferences.getBoolean(key,Content.have_charging_mode);
+    }
+
+    /**
      * 清除所有数据
      */
     public void deleteAll(){

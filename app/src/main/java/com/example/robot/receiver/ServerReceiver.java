@@ -31,17 +31,19 @@ public class ServerReceiver extends BroadcastReceiver {
             mAlarmUtils.setAlarmTime(System.currentTimeMillis(), 60 * 1000, Content.AlarmAction);
             Content.battery = SharedPrefUtil.getInstance(context).getSharedPrefBattery(Content.SET_LOW_BATTERY);
             Content.led = SharedPrefUtil.getInstance(context).getSharedPrefLed(Content.SET_LED_LEVEL);
-            SqLiteOpenHelperUtils sqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
-            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
-            while (cursor.moveToLast()) {
-                String substring = cursor.getString(cursor.getColumnIndex(Content.dbTime)).substring(0, 2);
-                if (!Content.isCharging && "-1".equals(substring)) {
-                    TaskManager.getInstances(context).navigate_Position(
-                            cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)),
-                            Content.CHARGING_POINT
-                    );
-                }
-            }
+            Content.Working_mode = SharedPrefUtil.getInstance(context).getSharedPrefWorkingMode(Content.WORKING_MODE);
+            Content.have_charging_mode = SharedPrefUtil.getInstance(context).getSharedPrefChargingMode(Content.GET_CHARGING_MODE);
+//            SqLiteOpenHelperUtils sqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
+//            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
+//            while (cursor.moveToLast()) {
+//                String substring = cursor.getString(cursor.getColumnIndex(Content.dbTime)).substring(0, 2);
+//                if (!Content.isCharging && "-1".equals(substring)) {
+//                    TaskManager.getInstances(context).navigate_Position(
+//                            cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)),
+//                            Content.CHARGING_POINT
+//                    );
+//                }
+//            }
         } else if ("com.android.robot.server.stop".equals(intent.getAction())){
             Intent intentServer = new Intent(context, SocketServices.class);
             context.stopService(intentServer);

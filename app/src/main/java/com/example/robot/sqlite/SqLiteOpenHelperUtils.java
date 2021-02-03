@@ -21,13 +21,13 @@ public class SqLiteOpenHelperUtils {
 
     public SqLiteOpenHelperUtils(Context mContext) {
         this.mContext = mContext;
-        taskSqLite = new TaskSqLite(mContext);
+        taskSqLite = new TaskSqLite(mContext,1);
     }
 
     //历史任务
-    public void saveTaskHistory(String mapName, String taskName, String time, String data) {
+    public void saveTaskHistory(String mapName, String taskName, String time, String data, String startBattery, String endBattery) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "')");
+        sqLiteDatabase.execSQL("insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ", " + Content.dbStartBattery + ", " + Content.dbEndBattery + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "','"+ startBattery + "','"+ endBattery + "')");
         Log.d("save history : ", "insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "')");
     }
 
@@ -37,9 +37,10 @@ public class SqLiteOpenHelperUtils {
         return cursor;
     }
 
-    public void updateHistory(String type, String typeString, String date) {
+    public void updateHistory(String type, String typeString, String date,String endBattery) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbData + "='" + date + "'");
+        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString +"'," +Content.dbEndBattery + "='" +endBattery+ "' where " + Content.dbData + "='" + date + "'");
+        Log.d("UPDATE HISTORY : " , "update " + Content.tableName + " set " + type + "='" + typeString +"'," +Content.dbEndBattery + "='" +endBattery+ "' where " + Content.dbData + "='" + date + "'");
     }
 
     //定时任务
@@ -133,12 +134,6 @@ public class SqLiteOpenHelperUtils {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName +"'");
     Log.d("ZDZD : " , "update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName +"'");
-        //        ContentValues values1 = new ContentValues();
-//        values1.put(Content.dbTaskStatePointState, state);
-//        String[] whereArgs1 = {"#100", b.getStorage_id()};
-//        String whereClause1 = DatabaseSchema.TABLE_TALKS.COLUMN_TID + "=? AND " + DatabaseSchema.TABLE_TALKS.COLUMN_STORAGEID + "=?";
-//        db.update(DatabaseSchema.TABLE_TALKS.NAME, values1, whereClause1, whereArgs1);
-//        db.close();
 
     }
 

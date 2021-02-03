@@ -29,12 +29,11 @@ public class AlarmUtils {
     }
 
     public void setAlarmTime(long time, long interval, String action) {
-        Log.d("AlarmReceiver", "开启定时任务 ：" + time);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(action);
         intent.setClass(mContext, AlarmReceiver.class);
         intent.putExtra("week", getWeek(System.currentTimeMillis()));
-        PendingIntent mPendingIntent = PendingIntent.getBroadcast(
+        mPendingIntent = PendingIntent.getBroadcast(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         //闹铃间隔， 这里设为1分钟闹一次，在第2步我们将每隔1分钟收到一次广播
         mAlarmManager.setRepeating(AlarmManager.RTC, time, interval, mPendingIntent);

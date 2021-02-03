@@ -405,6 +405,7 @@ public class GsonUtils {
             jsonObject.put(Content.GET_LOW_BATTERY, low_battery);
             jsonObject.put(Content.GET_VOICE_LEVEL, voice);
             jsonObject.put(Content.GET_WORKING_MODE, workingMode);
+            jsonObject.put(Content.GET_CHARGING_MODE, Content.have_charging_mode);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.GET_TASK_STATE, task_state);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);

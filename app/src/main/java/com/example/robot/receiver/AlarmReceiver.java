@@ -15,11 +15,13 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import com.example.robot.R;
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
+import com.example.robot.utils.AssestFile;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
@@ -36,76 +38,69 @@ public class AlarmReceiver extends BroadcastReceiver {
     private SqLiteOpenHelperUtils mSqLiteOpenHelperUtils;
     private Context mContext;
     private AlarmUtils mAlarmUtils;
+    private AssestFile mAssestFile;
+    private int RotateCount = 120;
 
     public void onReceive(Context context, Intent intent) {
         this.mContext = context;
         if (Content.AlarmAction.equals(intent.getAction())) {
             // 第1步中设置的闹铃时间到，这里可以弹出闹铃提示并播放响铃
+            mAssestFile = new AssestFile(context);
             mSqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
             mAlarmUtils = new AlarmUtils(context);
             int week = intent.getIntExtra("week", -1);
             long time = System.currentTimeMillis();
-            Cursor aTrue = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");
-            Log.d("AlarmReceiver", "开启定时任务week ：" + week + ",   " + mAlarmUtils.getTimeMillis(time));
-            Log.d("AlarmReceiver", "开启定时任务week ：" + aTrue.getCount());
-
-            while (aTrue.moveToNext()) {
-                Log.d("AlarmReceiver", "开启定时任务taskname ：" + Content.taskName);
-                Log.d("AlarmReceiver", "开启定时任务dbAlarmCycle ：" + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)));
-                Log.d("AlarmReceiver", "开启定时任务dbAlarmTime ：" + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)));
-                Log.d("AlarmReceiver ", mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime))) + ", "
-                        + TextUtils.isEmpty(Content.taskName) + ", "
-                        + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
-                Log.d("AlarmReceiver", "size : " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)).length());
-                if (!TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
-                        && week == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
-                        && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
-                        && TextUtils.isEmpty(Content.taskName)) {
-                    Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
-                    Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
-                    Log.d("Cursor 111 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    if (Content.isCharging) {
-                        handler.sendEmptyMessageDelayed(1001, 0);
-                        handler.sendEmptyMessageDelayed(1002, 2000);
-                    } else {
-                        handler.sendEmptyMessageDelayed(1002, 0);
+            if (!Content.have_charging_mode && Content.isCharging) {
+                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.have_charging_mode)));
+            } else {
+                Cursor aTrue = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");
+                while (aTrue.moveToNext()) {
+                   Log.d("AlarmReceiver ", mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                            + ", taskName" + TextUtils.isEmpty(Content.taskName)
+                            + ",  dbAlarmCycle :" + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
+                    mAssestFile.deepFile("dbAlarmTime " + mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                            + ", taskName : " + TextUtils.isEmpty(Content.taskName)
+                            + ",  dbAlarmCycle : " + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
+                    if (!TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                            && week == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                            && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                            && TextUtils.isEmpty(Content.taskName)) {
+                        Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                        Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                        if (Content.isCharging) {
+                            handler.sendEmptyMessageDelayed(1001, 0);
+                            handler.sendEmptyMessageDelayed(1002, 2000);
+                        } else {
+                            handler.sendEmptyMessageDelayed(1002, 0);
+                        }
+                    } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                            && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                            && TextUtils.isEmpty(Content.taskName)) {
+                        Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                        Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                        mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
+                        if (Content.isCharging) {
+                            handler.sendEmptyMessageDelayed(1001, 0);
+                            handler.sendEmptyMessageDelayed(1002, 2000);
+                        } else {
+                            handler.sendEmptyMessageDelayed(1002, 0);
+                        }
+                    } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                            && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                            && TextUtils.isEmpty(Content.taskName)) {
+                        Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                        Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                        mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
+                        if (Content.isCharging) {
+                            handler.sendEmptyMessageDelayed(1001, 0);
+                            handler.sendEmptyMessageDelayed(1002, 2000);
+                        } else {
+                            handler.sendEmptyMessageDelayed(1002, 0);
+                        }
                     }
-//                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
-//                    handler.post(runnable);
-                } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
-                        && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
-                        && TextUtils.isEmpty(Content.taskName)) {
-                    Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
-                    Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
-                    mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
-                    Log.d("Cursor 222 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    if (Content.isCharging) {
-                        handler.sendEmptyMessageDelayed(1001, 0);
-                        handler.sendEmptyMessageDelayed(1002, 2000);
-                    } else {
-                        handler.sendEmptyMessageDelayed(1002, 0);
-                    }
-//                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
-//                    handler.post(runnable);
-                } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
-                        && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
-                        && TextUtils.isEmpty(Content.taskName)) {
-                    Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
-                    Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
-                    mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
-                    Log.d("Cursor 333 aTrue1111", aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)) + ",   " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmIsRun)));
-                    if (Content.isCharging) {
-                        handler.sendEmptyMessageDelayed(1001, 0);
-                        handler.sendEmptyMessageDelayed(1002, 2000);
-                    } else {
-                        handler.sendEmptyMessageDelayed(1002, 0);
-                    }
-
-//                    TaskManager.getInstances(context).use_map(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0]);
-//                    handler.post(runnable);
                 }
+                mSqLiteOpenHelperUtils.close();
             }
-            mSqLiteOpenHelperUtils.close();
             // 可以继续设置下一次闹铃时间;
         }
     }
@@ -130,30 +125,46 @@ public class AlarmReceiver extends BroadcastReceiver {
         public void run() {
             Log.d("ALARMreceiver :", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
             if (Content.is_initialize_finished == 1) {
+                RotateCount = 120;
                 handler.removeCallbacks(this::run);
                 if (Content.taskName != null && Content.mapName != null) {
-                    Log.d("ALARMreceiver :", "" + SocketServices.battery + " ,  " + Content.battery);
                     if (SocketServices.battery < Content.battery) {
                         Content.robotState = 6;
                         Content.time = 4000;
                         GsonUtils gsonUtils = new GsonUtils();
                         gsonUtils.setTvTime("电量回充,不能开始任务");
+                        mAssestFile.deepFile("电量回充,不能开始任务 : 当前：" + SocketServices.battery + " , 回充： " + Content.battery);
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
+                        if (Content.have_charging_mode && !Content.isCharging) {
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                        } else if (!Content.have_charging_mode){
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.InitializePositionName);
+                        }
                         Content.taskName = null;
                     } else {
-                        Log.d("ALARM starttask :", Content.mapName + " , " + Content.taskName);
                         TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
                     }
                 } else {
                     Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
                 }
             } else if (Content.is_initialize_finished == 0) {
-                handler.postDelayed(runnable, 1000);
+                if (RotateCount >= 0) {
+                    RotateCount --;
+                    handler.postDelayed(runnable, 1000);
+                } else {
+                    RotateCount = 120;
+                    handler.removeCallbacks(this::run);
+                    TaskManager.getInstances(mContext).use_map(Content.mapName);
+                    handler.post(this::run);
+                }
             } else if (Content.is_initialize_finished == 2) {
                 Content.taskName = null;
+                RotateCount = 120;
+                handler.removeCallbacks(this::run);
             } else if (Content.is_initialize_finished == -1) {
+                RotateCount = 120;
                 handler.removeCallbacks(this::run);
             }
         }

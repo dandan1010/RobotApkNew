@@ -10,19 +10,19 @@ import com.example.robot.utils.Content;
 
 public class TaskSqLite extends SQLiteOpenHelper {
 
-    public TaskSqLite(@Nullable Context context) {
+    public TaskSqLite(@Nullable Context context,int version) {
         super(context,
                 Content.dbName,
                 null,
-                1);
+                version);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("create table " + Content.tableName + "(_id integer primary key autoincrement, " + Content.dbTaskMapName + " varchar(50), " + Content.dbTaskName + " varchar(50), " + Content.dbTime + " varchar(50)," + Content.dbData + " varchar(50))");
-        db.execSQL("create table " + Content.dbAlarmName + "(_id integer primary key autoincrement, " + Content.dbAlarmMapTaskName + " varchar(50), " + Content.dbAlarmTime + " varchar(100)," + Content.dbAlarmCycle + " varchar(200) ," + Content.dbAlarmIsRun + " varchar(50))");
-        db.execSQL("create table " + Content.dbPointTime + "(_id integer primary key autoincrement, " + Content.dbPointTaskName + " varchar(50), " + Content.dbPointName + " varchar(50), " + Content.dbSpinnerTime + " varchar(50)," + Content.dbPointX + " varchar(50)," + Content.dbPointY + " varchar(50))");
-        db.execSQL("create table " + Content.dbTaskState + "(_id integer primary key autoincrement, " + Content.dbTaskStateMapName + " varchar(50), " + Content.dbTaskStateTaskName + " varchar(50), " + Content.dbTaskStatePointState + " varchar(50)," + Content.dbData + " varchar(50))");
+        db.execSQL("create table " + Content.tableName + "(_id integer primary key autoincrement, " + Content.dbTaskMapName + " varchar(200), " + Content.dbTaskName + " varchar(200), " + Content.dbTime + " varchar(200)," + Content.dbData + " varchar(200)," + Content.dbStartBattery +" varchar(50)," + Content.dbEndBattery + " varchar(50))");
+        db.execSQL("create table " + Content.dbAlarmName + "(_id integer primary key autoincrement, " + Content.dbAlarmMapTaskName + " varchar(200), " + Content.dbAlarmTime + " varchar(200)," + Content.dbAlarmCycle + " varchar(200) ," + Content.dbAlarmIsRun + " varchar(200))");
+        db.execSQL("create table " + Content.dbPointTime + "(_id integer primary key autoincrement, " + Content.dbPointTaskName + " varchar(200), " + Content.dbPointName + " varchar(200), " + Content.dbSpinnerTime + " varchar(200)," + Content.dbPointX + " varchar(200)," + Content.dbPointY + " varchar(200))");
+        db.execSQL("create table " + Content.dbTaskState + "(_id integer primary key autoincrement, " + Content.dbTaskStateMapName + " varchar(200), " + Content.dbTaskStateTaskName + " varchar(200), " + Content.dbTaskStatePointState + " varchar(1000)," + Content.dbData + " varchar(200))");
     }
 
     @Override

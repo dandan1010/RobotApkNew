@@ -17,8 +17,11 @@ public final class Content {
      * 正式版本：2
      */
     public static int Working_mode = 2;
+    public static boolean have_charging_mode = true;
     public static final String WORKING_MODE = "working_mode";//工作模式
     public static final String GET_WORKING_MODE = "get_working_mode";//工作模式
+    public static final String SET_CHARGING_MODE = "set_charging_mode";//有无充电桩模式
+    public static final String GET_CHARGING_MODE = "get_charging_mode";//有无充电桩模式
 
     public static boolean isUpdate = false;
     public static final String UPDATE = "update";
@@ -136,6 +139,7 @@ public final class Content {
     public static int maxBattery = 70;//最高电量
     public static int fullBattery = 99;//充满电
     public static boolean isCharging = false;//充电窗台
+    public static int chargingState = 0;//充电状态
     public static int chargerVoltage = 0;//充满电
     public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
@@ -209,6 +213,8 @@ public final class Content {
     public static final String dbTaskMapName = "dbTaskMapName";
     public static final String dbTime = "time";
     public static final String dbData = "data";
+    public static final String dbStartBattery = "dbStartBattery";
+    public static final String dbEndBattery = "dbEndBattery";
 
     public static final String dbAlarmName = "dbAlarmName";//表名
     public static final String dbAlarmMapTaskName = "dbAlarmMapTaskName";

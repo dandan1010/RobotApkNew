@@ -61,29 +61,26 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-//        conn.send("OK conn");
+        conn.send("OK conn");
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
         address = remoteSocketAddress.getHostName();
         Log.d(TAG, "server address :" + address);
-//        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
-        broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
-        System.out.println("new connection to " + conn.getRemoteSocketAddress());
-        Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
-        Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
-//        } else {
-//            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
-//            conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
-//        }
+        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
+            broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
+            Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
+            Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
+        } else {
+            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
+            conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
+        }
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
-        System.out.println("closed " + conn.getRemoteSocketAddress() + " with exit code " + code + " additional info: " + reason);
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
         Log.d(TAG, "close : " + remoteSocketAddress.getHostName());
         if (Content.CONNECT_ADDRESS.equals(remoteSocketAddress.getHostName())) {
             Content.CONNECT_ADDRESS = null;
-            Log.d(TAG, "connect close：" + Content.CONNECT_ADDRESS);
         }
     }
 
@@ -267,7 +264,7 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(10051, message));
                 break;
             case Content.SYSTEM_DATE://设置系统时间
-                long date = new JSONObject(Content.SYSTEM_DATE).getLong(Content.SYSTEM_DATE);
+                long date = new JSONObject(message).getLong(Content.SYSTEM_DATE);
                 EventBus.getDefault().post(new EventBusMessage(10052, date));
                 break;
             case Content.GET_TASK_STATE://是否有任务正在执行
@@ -318,6 +315,13 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GET_WORKING_MODE://获取工作模式
                 EventBus.getDefault().post(new EventBusMessage(10061, message));
+                break;
+            case Content.SET_CHARGING_MODE://有无充电桩模式
+                Content.have_charging_mode = new JSONObject(message).getBoolean(Content.SET_CHARGING_MODE);
+                SharedPrefUtil.getInstance(mContext).setSharedPrefChargingMode(Content.GET_CHARGING_MODE, Content.have_charging_mode);
+                break;
+            case Content.GET_CHARGING_MODE://有无充电桩模式
+                EventBus.getDefault().post(new EventBusMessage(10064, message));
                 break;
 
 
