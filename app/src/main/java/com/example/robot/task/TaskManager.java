@@ -42,6 +42,7 @@ import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.utils.GsonUtils;
+import com.example.robot.utils.SharedPrefUtil;
 import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
@@ -498,11 +499,12 @@ public class TaskManager {
     /**
      * 开始执行任务队列
      */
-    public void startTaskQueue(String mapName, String taskName) {
+    public void startTaskQueue(String mapName, String taskName, int taskIndex) {
         //robotStatus();
         Content.isLastTask = false;
         Content.taskIsFinish = false;
-        Content.taskIndex = 0;
+        Content.taskIndex = taskIndex;
+        Content.pir_timeCount = 20;
         getTaskPositionMsg(mapName, taskName);
 //        robotTaskQueue = exeTaskPoi(mapName, taskName, mTaskArrayList);
 
@@ -550,8 +552,9 @@ public class TaskManager {
         sqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName,
                 "-1",
                 "" + mAlarmUtils.getTimeYear(Content.startTime),
-                SocketServices.battery+"%",
-                SocketServices.battery+"%");
+                SocketServices.battery + "%",
+                SocketServices.battery + "%",
+                "" + Content.taskIndex);
         sqLiteOpenHelperUtils.close();
         EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
         handler.sendEmptyMessageDelayed(1001, 0);
@@ -590,16 +593,15 @@ public class TaskManager {
                         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
                                 "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60),
                                 mAlarmUtils.getTimeYear(Content.startTime),
-                                SocketServices.battery+"%");
+                                SocketServices.battery + "%");
                         sqLiteOpenHelperUtils.saveTaskState(Content.mapName,
                                 Content.taskName,
                                 pointStateBean.toString().replace("'", ""),
                                 mAlarmUtils.getTimeYear(Content.startTime));
                         sqLiteOpenHelperUtils.close();
-
                         Content.taskState = 0;
                         Content.robotState = 1;
-                        Content.taskIndex = 0;
+                        Content.taskIndex = -1;
                         Content.taskIsFinish = false;
                         Content.time = 4000;
                         Content.taskName = null;
@@ -629,14 +631,13 @@ public class TaskManager {
                     if (Content.taskIndex == mTaskArrayList.size() - 1 && Content.isCharging) {
                         Content.taskIsFinish = false;
                         Content.taskIndex++;
+                        sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                                "" + Content.taskIndex,
+                                "" + mAlarmUtils.getTimeYear(Content.startTime));
                     } else {
                         isSendType = true;
                         Content.is_initialize_finished = 0;
-                        if (Content.isCharging) {
-                            NavigationService.initialize_directly(Content.mapName);
-                        } else {
-                            NavigationService.initialize(Content.mapName, Content.InitializePositionName);
-                        }
+                        NavigationService.initGlobal(Content.mapName);
                         handler.removeMessages(1004);
                         handler.sendEmptyMessageDelayed(1004, 1000);
                     }
@@ -653,6 +654,9 @@ public class TaskManager {
                 } else {
                     Content.taskIsFinish = false;
                     Content.taskIndex++;
+                    sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                            "" + Content.taskIndex,
+                            "" + mAlarmUtils.getTimeYear(Content.startTime));
                     handler.removeMessages(1004);
                 }
             } else if (msg.what == 1005) {
@@ -755,7 +759,7 @@ public class TaskManager {
      */
     public void stopTaskQueue(String mapName) {
         Content.taskState = 0;
-        Content.taskIndex = 0;
+        Content.taskIndex = -1;
         Content.is_initialize_finished = 2;
         Content.taskIsFinish = false;
         isSendType = false;
@@ -777,10 +781,10 @@ public class TaskManager {
         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
                 "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60),
                 mAlarmUtils.getTimeYear(Content.startTime),
-                SocketServices.battery+"%");
+                SocketServices.battery + "%");
         sqLiteOpenHelperUtils.saveTaskState(Content.mapName,
                 Content.taskName,
-                pointStateBean.toString().replace("'", ""),
+                ""+pointStateBean.toString().replace("'", ""),
                 mAlarmUtils.getTimeYear(Content.startTime));
         sqLiteOpenHelperUtils.close();
         Content.taskName = null;
@@ -916,7 +920,7 @@ public class TaskManager {
                 mRobotPositions = robotPositions;
                 EventBus.getDefault().post(new EventBusMessage(10017, robotPositions));
                 EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapPositionList) + "successed"));
-                for (int i = 0;i<robotPositions.getData().size();i++) {
+                for (int i = 0; i < robotPositions.getData().size(); i++) {
                     Log.d(TAG, "getPosition Initialize : " + Content.InitializePositionName + ",   点名字：" + robotPositions.getData().get(i).getName());
                     if (Content.CHARGING_POINT.equals(robotPositions.getData().get(i).getName())) {
                         Content.InitializePositionName = "Initialize";
@@ -966,8 +970,10 @@ public class TaskManager {
         RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
-                Log.d(TAG, "use_map success");
-                if (Content.isCharging) {
+                Log.d(TAG, "use_map success : " + Content.taskIndex);
+                if (Content.taskIndex == -1) {
+                    NavigationService.initGlobal(Content.mapName);
+                } else if (Content.isCharging) {
                     NavigationService.initialize_directly(Content.mapName);
                 } else {
                     NavigationService.initialize(Content.mapName, Content.InitializePositionName);
@@ -1107,58 +1113,88 @@ public class TaskManager {
         });
     }
 
+    private void navigation() {
+        try {
+            NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status")
+                    .subscribe(data -> {
+                        Log.d("zdzd111 : ", "NavigationStatus : " + data);
+                        mAssestFile.deepFile(data);
+                        if (TextUtils.isEmpty(data)) {
+                            return;
+                        }
+                        JSONObject jsonObject = new JSONObject(data);
+                        String noticeType = jsonObject.getString("noticeType");
+                        navigationStatus(noticeType);
+                    }, throwable -> {
+                        Log.d(TAG, "NavigationStatus throw ：" + throwable.getMessage());
+                        navigation();
+                    }));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "NavigationStatus Exception ：" + e.getMessage());
+        }
+
+    }
+
+    private void notice_status() {
+        try {
+            NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/status")
+                    .subscribe(data -> {
+                        Log.d("zdzd222 : ", "Navigationnotice : " + data);
+                        if (TextUtils.isEmpty(data)) {
+                            return;
+                        }
+                        JSONObject jsonObject = new JSONObject(data);
+                        int statusCode = jsonObject.getInt("statusCode");
+                        switch (statusCode) {
+                            case 701:
+                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                break;
+                            case 401:
+                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                mAssestFile.deepFile(data);
+                                break;
+                            case 702:
+                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                break;
+                            case 1006:
+                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                mAssestFile.deepFile(data);
+                                break;
+                        }
+                    }, throwable -> {
+                        Log.d(TAG, "Navigationnotice throw ：" + throwable.getMessage());
+                        getRobotHealthy();
+                    }));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "Navigationnotice Exception ：" + e.getMessage());
+        }
+    }
+    private void system_health_status(){
+        try {
+            NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/system_health_status")
+                    .subscribe(data -> {
+
+                        if (TextUtils.isEmpty(data)) {
+                            return;
+                        }
+                        EventBus.getDefault().post(new EventBusMessage(10037, data));
+                    }, throwable -> {
+                        Log.d(TAG, "system_health_status ：" + throwable.getMessage());
+                        system_health_status();
+                    }));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d(TAG, "system_health_status Exception ：" + e.getMessage());
+        }
+    }
+
 
     public void getRobotHealthy() {
-        NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/system_health_status")
-                .subscribe(data -> {
-
-                    if (TextUtils.isEmpty(data)) {
-                        return;
-                    }
-                    EventBus.getDefault().post(new EventBusMessage(10037, data));
-                }, throwable -> {
-                    Log.d(TAG, "system_health_status ：" + throwable.getMessage());
-                }));
-        NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status")
-                .subscribe(data -> {
-                    Log.d("zdzd111 : ", "NavigationStatus : " + data);
-                    mAssestFile.deepFile(data);
-                    if (TextUtils.isEmpty(data)) {
-                        return;
-                    }
-                    JSONObject jsonObject = new JSONObject(data);
-                    String noticeType = jsonObject.getString("noticeType");
-                    navigationStatus(noticeType);
-                }, throwable -> {
-                    Log.d(TAG, "NavigationStatus throw ：" + throwable.getMessage());
-                }));
-        NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/status")
-                .subscribe(data -> {
-                    Log.d("zdzd222 : ", "Navigationnotice : " + data);
-                    if (TextUtils.isEmpty(data)) {
-                        return;
-                    }
-                    JSONObject jsonObject = new JSONObject(data);
-                    int statusCode = jsonObject.getInt("statusCode");
-                    switch (statusCode) {
-                        case 701:
-                            EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
-                            break;
-                        case 401:
-                            EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
-                            mAssestFile.deepFile(data);
-                            break;
-                        case 702:
-                            EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
-                            break;
-                        case 1006:
-                            EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
-                            mAssestFile.deepFile(data);
-                            break;
-                    }
-                }, throwable -> {
-                    Log.d(TAG, "Navigationnotice throw ：" + throwable.getMessage());
-                }));
+        system_health_status();
+        navigation();
+        notice_status();
     }
 
     public void navigationStatus(String type) {
@@ -1185,6 +1221,9 @@ public class TaskManager {
                 Content.taskIsFinish = false;
             }
             Content.taskIndex++;
+            sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                    "" + Content.taskIndex,
+                    "" + mAlarmUtils.getTimeYear(Content.startTime));
         } else if (type.equals("UNREACHABLE") && Content.robotState != 6 && !isSendType) {
             isSendType = true;
             handler.removeMessages(1002);
@@ -1192,7 +1231,9 @@ public class TaskManager {
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "UNREACHABLE");
-
+            sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                    "" + Content.taskIndex,
+                    "" + mAlarmUtils.getTimeYear(Content.startTime));
         } else if (type.equals("LOCALIZATION_FAILED") && Content.robotState != 6 && !isSendType) {
             isSendType = true;
             handler.removeMessages(1002);
@@ -1200,7 +1241,9 @@ public class TaskManager {
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "LOCALIZATION_FAILED");
-
+            sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                    "" + Content.taskIndex,
+                    "" + mAlarmUtils.getTimeYear(Content.startTime));
         } else if (type.equals("GOAL_NOT_SAFE") && Content.robotState != 6 && !isSendType) {
             isSendType = true;
             handler.removeMessages(1002);
@@ -1208,7 +1251,9 @@ public class TaskManager {
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "GOAL_NOT_SAFE");
-
+            sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                    "" + Content.taskIndex,
+                    "" + mAlarmUtils.getTimeYear(Content.startTime));
 //        } else if (type.equals("TOO_CLOSE_TO_OBSTACLES") && Content.robotState != 6 && !isSendType) {
 //            isSendType = true;
 //            handler.removeMessages(1002);
@@ -1223,6 +1268,9 @@ public class TaskManager {
             Content.taskIsFinish = false;
             Content.taskIndex++;
             Log.d(TAG, "UNREACHED");
+            sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
+                    "" + Content.taskIndex,
+                    "" + mAlarmUtils.getTimeYear(Content.startTime));
         } else if (type.equals("HEADING") || type.equals("PLANNING")) {
 //            handler.removeMessages(1002);
 //            handler.sendEmptyMessageDelayed(1002, 2 * 60 * 1000);

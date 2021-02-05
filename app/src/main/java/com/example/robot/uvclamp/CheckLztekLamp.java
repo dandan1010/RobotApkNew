@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.EditText;
 
 import com.example.robot.R;
+import com.example.robot.service.SocketServices;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.Content;
@@ -72,13 +73,19 @@ public class CheckLztekLamp {
                 mUVCLightStatus = flag;
                 for (int i = 3; i < 7; i++) {
                     mLztek.setGpioValue(port[i], flag);
-//                    try {
-//                        if (flag == 0) {
-//                            Thread.sleep(2000);
-//                        }
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
+                    try {
+                        if (flag == 0 && SocketServices.battery < 40) {
+                            if (getGpioSensorState()) {
+                                for (int k = 3; k < 7; k++) {
+                                    mLztek.setGpioValue(port[i], 1);
+                                }
+                            } else {
+                                Thread.sleep(2000);
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -90,13 +97,19 @@ public class CheckLztekLamp {
                 mUVCLightStatus = flag;
                 for (int i = 3; i < 7; i++) {
                     mLztek.setGpioValue(port[i], flag);
-//                    try {
-//                        if (flag == 0) {
-//                            Thread.sleep(2000);
-//                        }
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
+                    try {
+                        if (flag == 0 && SocketServices.battery < 40) {
+                            if (getGpioSensorState()) {
+                                for (int k = 3; k < 7; k++) {
+                                    mLztek.setGpioValue(port[i], 1);
+                                }
+                            } else {
+                                Thread.sleep(2000);
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -124,13 +137,17 @@ public class CheckLztekLamp {
 //        boolean k1 = mLztek.getGpioValue(port[0]) == 0 ? true : false;
 //        boolean k2 = mLztek.getGpioValue(port[1]) == 0 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 0 ? true : false;
-
+        Log.d("getGpioSensorState : " , ""+ k3);
         if (k3) {
+            Content.pir_timeCount = 0;
             return true;
         } else {
-            return false;
+            Content.pir_timeCount ++;
+            if (Content.pir_timeCount >= 20) {
+                return false;
+            }
         }
-//        return false;
+        return true;
     }
 
     public void startCheckSensorAtTime() {
@@ -444,10 +461,6 @@ public class CheckLztekLamp {
                     }
                 }
             }
-        }
-
-        public void setChargingState() {
-
         }
     };
 

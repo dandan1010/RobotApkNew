@@ -76,6 +76,22 @@ public class NavigationService extends Service {
             disposables.dispose();
     }
 
+    public static void initGlobal(String mapName){
+        GsController.INSTANCE.initGlobal(mapName, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "initGlobal" + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(10027, status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initGlobal" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(10027, error.getMessage()));
+            }
+        });
+    }
+
     public static void initialize_directly(String mapName) {//不转圈初始化
         RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.CHARGING_POINT, new RobotStatus<Status>() {
             @Override

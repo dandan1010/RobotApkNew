@@ -115,6 +115,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             } else if (msg.what == 1002) {
                 handler.removeMessages(1001);
                 handler.removeMessages(1002);
+                Content.taskIndex = 0;
                 TaskManager.getInstances(mContext).use_map(Content.mapName);
                 handler.post(runnable);
             }
@@ -143,8 +144,9 @@ public class AlarmReceiver extends BroadcastReceiver {
                             TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.InitializePositionName);
                         }
                         Content.taskName = null;
+                        Content.taskIndex = -1;
                     } else {
-                        TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName);
+                        TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName, 0);
                     }
                 } else {
                     Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
@@ -156,15 +158,18 @@ public class AlarmReceiver extends BroadcastReceiver {
                 } else {
                     RotateCount = 120;
                     handler.removeCallbacks(this::run);
+                    Content.taskIndex = 0;
                     TaskManager.getInstances(mContext).use_map(Content.mapName);
                     handler.post(this::run);
                 }
             } else if (Content.is_initialize_finished == 2) {
                 Content.taskName = null;
                 RotateCount = 120;
+                Content.taskIndex = -1;
                 handler.removeCallbacks(this::run);
             } else if (Content.is_initialize_finished == -1) {
                 RotateCount = 120;
+                Content.taskIndex = -1;
                 handler.removeCallbacks(this::run);
             }
         }

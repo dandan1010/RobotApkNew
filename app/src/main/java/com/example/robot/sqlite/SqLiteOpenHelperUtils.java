@@ -21,14 +21,13 @@ public class SqLiteOpenHelperUtils {
 
     public SqLiteOpenHelperUtils(Context mContext) {
         this.mContext = mContext;
-        taskSqLite = new TaskSqLite(mContext,1);
+        taskSqLite = new TaskSqLite(mContext, 1);
     }
 
     //历史任务
-    public void saveTaskHistory(String mapName, String taskName, String time, String data, String startBattery, String endBattery) {
+    public void saveTaskHistory(String mapName, String taskName, String time, String data, String startBattery, String endBattery, String index) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ", " + Content.dbStartBattery + ", " + Content.dbEndBattery + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "','"+ startBattery + "','"+ endBattery + "')");
-        Log.d("save history : ", "insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "')");
+        sqLiteDatabase.execSQL("insert into " + Content.tableName + "(" + Content.dbTaskMapName + ", " + Content.dbTaskName + ", " + Content.dbTime + ", " + Content.dbData + ", " + Content.dbStartBattery + ", " + Content.dbEndBattery + ", " + Content.dbTaskIndex + ") values ('" + mapName + "','" + taskName + "','" + time + "','" + data + "','" + startBattery + "','" + endBattery + "','" + index + "')");
     }
 
     public Cursor searchTaskHistory() {
@@ -37,10 +36,25 @@ public class SqLiteOpenHelperUtils {
         return cursor;
     }
 
-    public void updateHistory(String type, String typeString, String date,String endBattery) {
+    public Cursor searchTaskIndex() {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.tableName, new String[]{"_id", Content.dbTaskMapName, Content.dbTaskName, Content.dbTaskIndex}, Content.dbTime+"='-1'", null, null, null, null);
+        return cursor;
+    }
+
+    public void updateTaskIndex(String type, String typeString, String date) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString +"'," +Content.dbEndBattery + "='" +endBattery+ "' where " + Content.dbData + "='" + date + "'");
-        Log.d("UPDATE HISTORY : " , "update " + Content.tableName + " set " + type + "='" + typeString +"'," +Content.dbEndBattery + "='" +endBattery+ "' where " + Content.dbData + "='" + date + "'");
+        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "' where " + Content.dbData + "='" + date + "'");
+    }
+
+    public void updateHistory(String type, String typeString, String date, String endBattery) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("update " + Content.tableName + " set " + type + "='" + typeString + "'," + Content.dbEndBattery + "='" + endBattery + "' where " + Content.dbData + "='" + date + "'");
+    }
+
+    public void deleteHistory(int _id) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.delete(Content.tableName,"_id=?",new String[]{""+_id});
     }
 
     //定时任务
@@ -132,8 +146,8 @@ public class SqLiteOpenHelperUtils {
 
     public void updateState(String state, String mapName, String taskName) {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
-        sqLiteDatabase.execSQL("update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName +"'");
-    Log.d("ZDZD : " , "update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName +"'");
+        sqLiteDatabase.execSQL("update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName + "'");
+        Log.d("ZDZD : ", "update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName + "'");
 
     }
 

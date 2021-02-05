@@ -44,7 +44,7 @@ public final class Content {
 
     public static boolean isLastTask = false;
     public static long startTime = System.currentTimeMillis();
-    public static long endTime = System.currentTimeMillis();
+    public static final String STARTTIME = "startTime";
 
     public static boolean taskIsFinish = false;
 
@@ -66,7 +66,7 @@ public final class Content {
      * 2: 暂停任务
     */
     public static int taskState = 0;//机器人执行任务的状态
-    public static int taskIndex = 0;
+    public static int taskIndex = -1;
     public static String mapName = null;
     public static String taskName = null;
 
@@ -141,6 +141,7 @@ public final class Content {
     public static boolean isCharging = false;//充电窗台
     public static int chargingState = 0;//充电状态
     public static int chargerVoltage = 0;//充满电
+    public static int pir_timeCount = 20;//sensor
     public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
     public static final String GET_NAVIGATIONSPEEDLEVEL = "get_navigationSpeedLevel";//任务导航速度
@@ -215,6 +216,7 @@ public final class Content {
     public static final String dbData = "data";
     public static final String dbStartBattery = "dbStartBattery";
     public static final String dbEndBattery = "dbEndBattery";
+    public static final String dbTaskIndex = "dbTaskIndex";
 
     public static final String dbAlarmName = "dbAlarmName";//表名
     public static final String dbAlarmMapTaskName = "dbAlarmMapTaskName";

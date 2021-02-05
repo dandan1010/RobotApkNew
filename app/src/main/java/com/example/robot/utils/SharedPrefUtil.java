@@ -120,4 +120,16 @@ public class SharedPrefUtil {
         editor.commit();
     }
 
+    /**
+     * 工作开始时间
+     */
+    public void setSharedPrefStartTime(String key, long level){
+        editor.putLong(key, level);
+        editor.commit();
+    }
+
+    public Long getSharedPrefStartTime(String key) {
+        Log.d("get startTime " , ""+sharedPreferences.getLong(key, Content.startTime));
+        return sharedPreferences.getLong(key, Content.startTime);
+    }
 }

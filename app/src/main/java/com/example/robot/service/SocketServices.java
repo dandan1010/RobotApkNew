@@ -90,7 +90,11 @@ public class SocketServices extends Service {
     private SqLiteOpenHelperUtils mSqLiteOpenHelperUtils;
     private AlarmUtils mAlarmUtils;
     private int spinnerIndex;
-    private AssestFile assestFile ;
+    private AssestFile assestFile;
+    private String index = "0";
+    private int RotateCount = 120;
+    private long time = 0;
+    private int TimeCount = 20;
 
     @Nullable
     @Override
@@ -124,6 +128,24 @@ public class SocketServices extends Service {
                     startService(intentService);
                     myHandler.sendEmptyMessage(7);
                     threadDestory = true;
+
+                    Cursor cursor = mSqLiteOpenHelperUtils.searchTaskIndex();
+                    while (cursor.moveToNext()) {
+                        String mapName = cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName));
+                        String taskName = cursor.getString(cursor.getColumnIndex(Content.dbTaskName));
+                        index = cursor.getString(cursor.getColumnIndex(Content.dbTaskIndex));
+                        Cursor cursorList = mSqLiteOpenHelperUtils.searchPointTask(Content.dbPointTaskName, mapName + "," + taskName);
+                        if (Integer.parseInt(index) < cursorList.getCount() - 1) {
+                            Log.d(TAG, "执行任务到第 " + (Integer.parseInt(index) + 1) + "个任务");
+                            Content.mapName = mapName;
+                            Content.taskName = taskName;
+                            Content.taskIndex = -1;
+                            TaskManager.getInstances(mContext).use_map(Content.mapName);
+                            mSqLiteOpenHelperUtils.deleteHistory(cursor.getInt(cursor.getColumnIndex("_id")));
+                            handler.post(runnable);
+                        }
+                    }
+
                 } else {
                     handler.sendEmptyMessageDelayed(1, 1000);
                 }
@@ -158,6 +180,57 @@ public class SocketServices extends Service {
         //checkLztekLamp.setChargingGpio(0);
     }
 
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
+            if (Content.is_initialize_finished == 1) {
+                RotateCount = 120;
+                handler.removeCallbacks(this::run);
+                if (Content.taskName != null && Content.mapName != null) {
+                    if (SocketServices.battery < Content.battery) {
+                        Content.robotState = 6;
+                        Content.time = 4000;
+                        GsonUtils gsonUtils = new GsonUtils();
+                        gsonUtils.setTvTime("电量回充,不能开始任务");
+                        assestFile.deepFile("电量回充,不能开始任务 : 当前：" + SocketServices.battery + " , 回充： " + Content.battery);
+                        if (Content.server != null) {
+                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
+                        }
+                        if (Content.have_charging_mode && !Content.isCharging) {
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                        } else if (!Content.have_charging_mode) {
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.InitializePositionName);
+                        }
+                        Content.taskName = null;
+                        Content.taskIndex = -1;
+                    } else {
+                        TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName, Integer.parseInt(index));
+                    }
+                } else {
+                    Log.d(TAG, " ,  " + Content.mapName + " , " + Content.taskName);
+                }
+            } else if (Content.is_initialize_finished == 0) {
+                if (RotateCount >= 0) {
+                    RotateCount--;
+                    handler.postDelayed(runnable, 1000);
+                } else {
+                    RotateCount = 120;
+                    handler.removeCallbacks(this::run);
+                    TaskManager.getInstances(mContext).use_map(Content.mapName);
+                    handler.post(this::run);
+                }
+            } else if (Content.is_initialize_finished == 2) {
+                Content.taskName = null;
+                RotateCount = 120;
+                handler.removeCallbacks(this::run);
+            } else if (Content.is_initialize_finished == -1) {
+                RotateCount = 120;
+                handler.removeCallbacks(this::run);
+            }
+        }
+    };
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -184,6 +257,7 @@ public class SocketServices extends Service {
             Content.time = 4000;
             uvcWarning.stopWarning();
             checkLztekLamp.setUvcMode(1);
+            TimeCount = 20;
 //            tvText = mTimeUtils.calculateDays(System.currentTimeMillis());
 //            gsonUtils.setTvTime(tvText);
             Log.d(TAG, "case 2 click " + tvText);
@@ -218,7 +292,7 @@ public class SocketServices extends Service {
                     if (!Content.completeFlag) {
                         startUvcDetection();
                         //tvText = mTimeUtils.calculateDays(workTime);
-                        tvText = time +"";
+                        tvText = time + "";
                         Log.d(TAG, "case 2  " + tvText + " , WORKTIME :" + workTime);
                         gsonUtils.setTvTime(tvText);
                         if (Content.server != null) {
@@ -230,6 +304,7 @@ public class SocketServices extends Service {
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
+                        TimeCount = 20;
                         Content.taskIsFinish = false;
                         toLightControlBtn = false;
                         onCheckedChanged(0);
@@ -266,10 +341,13 @@ public class SocketServices extends Service {
                     myHandler.sendEmptyMessageDelayed(6, 5000);
                     break;
                 case 5:
-                    if (checkLztekLamp.getGpioSensorState() || Content.EMERGENCY) {
+                    if (checkLztekLamp.getGpioSensorState() || Content.EMERGENCY
+                            || Content.robotState == 6 || Content.robotState == 4) {
                         checkLztekLamp.setUvcModeForDemo(1);
                     } else {
-                        checkLztekLamp.setUvcModeForDemo(0);
+                        if (battery > Content.battery)  {
+                            checkLztekLamp.setUvcModeForDemo(0);
+                        }
                     }
                     myHandler.sendEmptyMessageDelayed(5, 1000);
                     break;
@@ -302,6 +380,9 @@ public class SocketServices extends Service {
 //                        Content.IS_STOP_TASK = false;
 //                    }
                     break;
+                case 9:
+                    TimeCount = 1;
+                    break;
                 default:
                     break;
             }
@@ -314,7 +395,7 @@ public class SocketServices extends Service {
      */
     private void startLoopDetection() {
         Log.d(TAG, "startLoopDetection: " + (10 * 1000 - ledtime * Content.delayTime) + "秒");
-        tvText = (float) ((10 * 1000 - ledtime * Content.delayTime) / 1000)+"";
+        tvText = (float) ((10 * 1000 - ledtime * Content.delayTime) / 1000) + "";
         gsonUtils.setTvTime(tvText);
         if (Content.server != null) {
             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
@@ -342,7 +423,9 @@ public class SocketServices extends Service {
                 Content.robotState = 5;
                 Content.time = 1000;
                 String spinnerItem = (String) spinner[spinnerIndex];
-                checkLztekLamp.setUvcMode(0);
+                if (battery > Content.battery)  {
+                    checkLztekLamp.setUvcMode(0);
+                }
 //                Date d2 = new Date(System.currentTimeMillis());
 //                long diff = d2.getTime();
                 workTime = Long.parseLong(spinnerItem.substring(0, spinnerItem.length() - 2)) * 60;
@@ -365,21 +448,24 @@ public class SocketServices extends Service {
         if (battery <= Content.battery) {//是否到达回冲电量
             myHandler.sendEmptyMessageDelayed(4, Content.delayTime);
         } else if (!checkLztekLamp.getGpioSensorState() && !isTaskFlag) {
-            Log.d(TAG, "startUvcDetection" + "关led灯,开uvc灯");
-            if (pauseTime != 0) {
-                uvcWarning.stopWarning();
-                checkLztekLamp.setUvcMode(0);
-                //workTime = workTime + System.currentTimeMillis() - pauseTime;
-                pauseTime = 0;
-            }
-            Content.robotState = 5;
-            Content.time = 1000;
-            Content.countTime++;
+            Log.d(TAG, "startUvcDetection" + "关led灯,开uvc灯 : ");
+                if (pauseTime != 0) {
+                    uvcWarning.stopWarning();
+                    if (battery > 30)  {
+                        checkLztekLamp.setUvcMode(0);
+                    }
+                    //workTime = workTime + System.currentTimeMillis() - pauseTime;
+                    pauseTime = 0;
+                }
+                Content.robotState = 5;
+                Content.time = 1000;
+                Content.countTime++;
             myHandler.sendEmptyMessageDelayed(2, Content.delayTime);
         } else {
             if (pauseTime == 0) {
                 pauseTime = System.currentTimeMillis();
             }
+            TimeCount = 20;
             Log.d(TAG, "startUvcDetection" + "关uvc灯");
             uvcWarning.startWarning();
             Content.robotState = 5;
@@ -622,6 +708,10 @@ public class SocketServices extends Service {
             if (Content.server != null) {
                 gsonUtils.setBattery(battery + "%");
                 Content.server.broadcast(gsonUtils.putBattery(Content.BATTERY_DATA));
+            }
+            if (battery <= Content.battery) {
+                Content.robotState = 6;
+                Content.time = 1000;
             }
             StringBuffer stringBuffer = new StringBuffer();
             for (int i = 0; i < bytes.length; i++) {
@@ -925,7 +1015,7 @@ public class SocketServices extends Service {
 //                gsonUtils.setRobotVersion((String) messageEvent.getT());
 //                Content.server.broadcast(gsonUtils.putJsonMessage(Content.ROBOTVERSIONCODE));
 //            }
-        } else if (messageEvent.getState() == 10064){
+        } else if (messageEvent.getState() == 10064) {
             if (Content.server != null) {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_CHARGING_MODE));
             }
@@ -1036,7 +1126,9 @@ public class SocketServices extends Service {
     };
 
     private void startDemoMode() {
-        checkLztekLamp.setUvcModeForDemo(0);
+        if (battery > Content.battery)  {
+            checkLztekLamp.setUvcModeForDemo(0);
+        }
         myHandler.sendEmptyMessageDelayed(5, 1000);
     }
 
