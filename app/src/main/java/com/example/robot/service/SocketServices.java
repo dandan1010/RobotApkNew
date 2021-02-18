@@ -112,7 +112,7 @@ public class SocketServices extends Service {
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
         initView();
         handler.sendEmptyMessage(1);
-
+        handler.sendEmptyMessage(2);
         robot_Position = new ImageView(mContext);
     }
 
@@ -149,6 +149,13 @@ public class SocketServices extends Service {
                 } else {
                     handler.sendEmptyMessageDelayed(1, 1000);
                 }
+            } else if (msg.what == 2) {
+                //Log.d("zdzd ", "chrging gpio : " + checkLztekLamp.getChargingGpio());
+//                if (!Content.isCharging && checkLztekLamp.getChargingGpio()) {
+//                    checkLztekLamp.setChargingGpio(1);
+//                    Content.chargingState = 2;
+//                }
+//                handler.sendEmptyMessageDelayed(2, 1000);
             }
         }
     };
@@ -174,10 +181,10 @@ public class SocketServices extends Service {
         Content.time = 4000;
         checkLztekLamp.startCheckSensorAtTime();
         checkLztekLamp.startLedLamp();
-        checkLztekLamp.openEth();
-        checkLztekLamp.setEthAddress();
+//        checkLztekLamp.openEth();
+//        checkLztekLamp.setEthAddress();
         checkLztekLamp.initUvcMode();
-        //checkLztekLamp.setChargingGpio(0);
+        checkLztekLamp.setChargingGpio(0);
     }
 
     Runnable runnable = new Runnable() {
@@ -893,15 +900,12 @@ public class SocketServices extends Service {
 
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.DEVICES_STATUS));
             }
-            //电压>0，电量<95，放电状态
+            //电压>0,放电状态
             Content.chargerVoltage = (int) robotDeviceStatus.getData().getChargerVoltage();
-//            if (Content.chargerVoltage > 0) {
-//                if (!Content.isCharging) {
-//                    Content.chargingState = 1;
-//                    checkLztekLamp.setChargingGpio(0);
-//                    //Log.d("zdzd555:","打开gpio口 : " + checkLztekLamp.getChargingGpio() + ",    电压：" + robotDeviceStatus.getData().getChargerVoltage());
-//                }
-//            }
+            if (Content.chargerVoltage > 0) {
+                Content.chargingState = 1;
+
+            }
         } else if (messageEvent.getState() == 10050) {//添加充电点
             Log.d(TAG, "Add charging : " + Content.isCharging + ",   " + angle);
             if (Content.isCharging) {

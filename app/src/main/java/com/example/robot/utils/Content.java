@@ -139,6 +139,10 @@ public final class Content {
     public static int maxBattery = 70;//最高电量
     public static int fullBattery = 99;//充满电
     public static boolean isCharging = false;//充电窗台
+
+    /**
+     *
+     */
     public static int chargingState = 0;//充电状态
     public static int chargerVoltage = 0;//充满电
     public static int pir_timeCount = 20;//sensor

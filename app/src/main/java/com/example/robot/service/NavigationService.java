@@ -29,6 +29,7 @@ import com.example.robot.task.TaskManager;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.ServerConnoct;
+import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -54,6 +55,7 @@ public class NavigationService extends Service {
     public static String positions = "";
     private boolean serverIsRun = false;
     private boolean threadIsRun = false;
+    private CheckLztekLamp checkLztekLamp;
 
     @Override
     public void onCreate() {
@@ -61,6 +63,7 @@ public class NavigationService extends Service {
         mContext = this;
         disposables = new CompositeDisposable();
         startGaoXianSdk();
+        checkLztekLamp = new CheckLztekLamp(this);
     }
 
     @Override
@@ -203,6 +206,11 @@ public class NavigationService extends Service {
             Log.d(TAG, "底盘连接状态：" + connect);
             isStartNavigationService = connect;
             handler.postDelayed(runnable, 10 * 1000);
+        }
+        if (!connect) {
+            Log.d(TAG, "重置底盘连接状态：" + connect);
+            checkLztekLamp.openEth();
+            checkLztekLamp.setEthAddress();
         }
     }
     Handler handler = new Handler();
