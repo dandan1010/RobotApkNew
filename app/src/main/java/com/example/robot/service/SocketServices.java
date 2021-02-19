@@ -904,7 +904,6 @@ public class SocketServices extends Service {
             Content.chargerVoltage = (int) robotDeviceStatus.getData().getChargerVoltage();
             if (Content.chargerVoltage > 0) {
                 Content.chargingState = 1;
-
             }
         } else if (messageEvent.getState() == 10050) {//添加充电点
             Log.d(TAG, "Add charging : " + Content.isCharging + ",   " + angle);

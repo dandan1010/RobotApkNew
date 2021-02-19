@@ -298,7 +298,7 @@ public class CheckLztekLamp {
                         index = 0;
                     }
                     Thread.sleep(Content.time);
-                    if (Content.robotState == 1 || Content.robotState == 5 || Content.robotState == 6 || Content.robotState == 4) {
+                    if (Content.robotState == 1 || Content.robotState == 5 || Content.robotState == 6) {
                         outputStream.write(hexBytes(mContext.getResources().getString(R.string.no_color_light)));
                         Thread.sleep(1000);
                     }
@@ -426,15 +426,10 @@ public class CheckLztekLamp {
                     }
                     if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.robotState = 4;
-                        Content.time = 1000;
+                        Content.time = 200;
                         msg = "充电";
                         Content.isCharging = true;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
-//                        if (Content.chargingState == 2) {
-//                            Log.d(TAG, "自动充电");
-//                        } else {
-//                            Log.d(TAG, "手动充电");
-//                        }
                     } else {
                         msg = "放电";
                         if (Content.robotState == 4) {
