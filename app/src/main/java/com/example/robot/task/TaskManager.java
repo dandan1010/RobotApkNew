@@ -74,7 +74,7 @@ public class TaskManager {
     private RobotPositions mRobotPositions = null;
     private SqLiteOpenHelperUtils sqLiteOpenHelperUtils;
     private GsonUtils gsonUtils;
-    private PointStateBean pointStateBean;
+    public static PointStateBean pointStateBean;
     private AlarmUtils mAlarmUtils;
     private static WebSocket webSocket;
     private int timerCount = 0;
@@ -578,6 +578,8 @@ public class TaskManager {
                             EventBus.getDefault().post(new EventBusMessage(10005, -1));
                         }
                         navigate_Position(Content.mapName, mTaskArrayList.get(Content.taskIndex).getName());
+                        pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.ongoing));
+                        EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
                         Content.taskIsFinish = true;
                         Content.taskState = 1;
                         handler.removeMessages(1001);
@@ -590,6 +592,8 @@ public class TaskManager {
                         handler.removeMessages(1001);
                         handler.removeMessages(1002);
                         handler.removeMessages(1003);
+                        Content.Sum_Time = 0;
+                        SocketServices.myHandler.removeMessages(9);
                         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
                                 "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60),
                                 mAlarmUtils.getTimeYear(Content.startTime),
@@ -645,6 +649,8 @@ public class TaskManager {
                 } else if (!Content.isCharging) {
                     Content.taskIsFinish = false;
                     navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                    pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.ongoing));
+                    EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
                 }
                 handler.removeMessages(1003);
             } else if (msg.what == 1004) {
@@ -680,6 +686,7 @@ public class TaskManager {
     public ArrayList<TaskBean> getTaskPositionMsg(String mapName, String taskName) {
         mTaskArrayList.clear();
         pointStateBean = new PointStateBean();
+        pointStateBean.setMapName(mapName);
         pointStateBean.setTaskName(taskName);
         List<PointStateBean.PointState> pointStates = new ArrayList<>();
         Cursor cursor = sqLiteOpenHelperUtils.searchPointTask(Content.dbPointTaskName, mapName + "," + taskName);
@@ -693,7 +700,13 @@ public class TaskManager {
             PointStateBean.PointState pointState = new PointStateBean.PointState();
             pointState.setPointName(cursor.getString(cursor.getColumnIndex(Content.dbPointName)));
             pointState.setPointState(mContext.getResources().getString(R.string.not_work));
+            String[] spinnerItem = mContext.getResources().getStringArray(R.array.spinner_time);
+            pointState.setTimeCount(Integer.parseInt(spinnerItem[Integer.parseInt(cursor.getString(cursor.getColumnIndex(Content.dbSpinnerTime)))]) * 60 + "");
             pointStates.add(pointState);
+            Content.Sum_Time = Content.Sum_Time
+                    + (Integer.parseInt(spinnerItem[Integer.parseInt(cursor.getString(cursor.getColumnIndex(Content.dbSpinnerTime)))]) * 60)
+                    + 60;
+            Log.d("zdzd : " ,"时间 ： " + spinnerItem[Integer.parseInt(cursor.getString(cursor.getColumnIndex(Content.dbSpinnerTime)))] + ",   " + Content.Sum_Time);
         }
         String point_Name = "";
         if (Content.have_charging_mode) {
@@ -708,6 +721,7 @@ public class TaskManager {
         PointStateBean.PointState pointState = new PointStateBean.PointState();
         pointState.setPointName(point_Name);
         pointState.setPointState(mContext.getResources().getString(R.string.not_work));
+        pointState.setTimeCount("0");
         pointStates.add(pointState);
         mTaskArrayList.add(taskBean);
         pointStateBean.setList(pointStates);
@@ -776,7 +790,6 @@ public class TaskManager {
             } else {
                 navigate_Position(mapName, Content.InitializePositionName);
             }
-
         }
         sqLiteOpenHelperUtils.updateHistory(Content.dbTime,
                 "" + ((System.currentTimeMillis() - Content.startTime) / 1000 / 60),
@@ -1199,19 +1212,21 @@ public class TaskManager {
 
     public void navigationStatus(String type) {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);
-        if (Content.taskIndex < mTaskArrayList.size()
-                && !type.equals("HEADING")
-                && Content.robotState != 6
-                && !TextUtils.isEmpty(type)
-                && !type.equals("TOO_CLOSE_TO_OBSTACLES")) {
-            pointStateBean.getList().get(Content.taskIndex).setPointState(type);
-            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-        }
+//        if (Content.taskIndex < mTaskArrayList.size()
+//                && !type.equals("HEADING")
+//                && Content.robotState != 6
+//                && !TextUtils.isEmpty(type)
+//                && !type.equals("TOO_CLOSE_TO_OBSTACLES")) {
+//            pointStateBean.getList().get(Content.taskIndex).setPointState(type);
+//            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+//        }
         if ("REACHED".equals(type) && Content.robotState != 6 && !isSendType) {//已经到达目的地
             Log.d(TAG, "REACHED");
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
+            pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
+            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
             Log.d(TAG, "Content.taskIndex" + Content.taskIndex + " ,   " + mTaskArrayList.size());
             if (Content.taskIndex < mTaskArrayList.size() - 1) {
                 EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
@@ -1228,6 +1243,8 @@ public class TaskManager {
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
+            pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
+            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "UNREACHABLE");
@@ -1238,6 +1255,8 @@ public class TaskManager {
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
+            pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
+            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "LOCALIZATION_FAILED");
@@ -1248,23 +1267,20 @@ public class TaskManager {
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
+            pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
+            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "GOAL_NOT_SAFE");
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,
                     "" + mAlarmUtils.getTimeYear(Content.startTime));
-//        } else if (type.equals("TOO_CLOSE_TO_OBSTACLES") && Content.robotState != 6 && !isSendType) {
-//            isSendType = true;
-//            handler.removeMessages(1002);
-//            handler.removeMessages(1003);
-//            Content.taskIsFinish = false;
-//            Content.taskIndex++;
-//            Log.d(TAG, "TOO_CLOSE_TO_OBSTACLES");
         } else if (type.equals("UNREACHED") && Content.robotState != 6 && !isSendType) {
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
+            pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
+            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
             Content.taskIsFinish = false;
             Content.taskIndex++;
             Log.d(TAG, "UNREACHED");
@@ -1272,8 +1288,7 @@ public class TaskManager {
                     "" + Content.taskIndex,
                     "" + mAlarmUtils.getTimeYear(Content.startTime));
         } else if (type.equals("HEADING") || type.equals("PLANNING")) {
-//            handler.removeMessages(1002);
-//            handler.sendEmptyMessageDelayed(1002, 2 * 60 * 1000);
+
         }
     }
 

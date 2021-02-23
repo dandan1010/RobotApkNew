@@ -12,6 +12,7 @@ import com.example.robot.receiver.AlarmReceiver;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -90,6 +91,21 @@ public class AlarmUtils {
     public String getTimeYear(long time) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         return dateFormat.format(new Date(time));
+    }
+
+    //时间转为时间戳
+    public long stringToTimestamp(String time){
+        long times = 0;
+        try {
+            times = (long) ((Timestamp.valueOf(time).getTime())/1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if(times==0){
+            System.out.println("String转10位时间戳失败");
+        }
+        return times;
+
     }
 
 }

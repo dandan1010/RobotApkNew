@@ -3,8 +3,17 @@ package com.example.robot.bean;
 import java.util.List;
 
 public class PointStateBean {
+    private String mapName;
     private String taskName;
     private List<PointState> list;
+
+    public String getMapName() {
+        return mapName;
+    }
+
+    public void setMapName(String mapName) {
+        this.mapName = mapName;
+    }
 
     public String getTaskName() {
         return taskName;
@@ -25,6 +34,15 @@ public class PointStateBean {
     public static class PointState{
         private String pointName;
         private String pointState;
+        private String timeCount;
+
+        public String getTimeCount() {
+            return timeCount;
+        }
+
+        public void setTimeCount(String timeCount) {
+            this.timeCount = timeCount;
+        }
 
         public String getPointName() {
             return pointName;
@@ -47,6 +65,7 @@ public class PointStateBean {
             return "PointState{" +
                     "pointName='" + pointName + '\'' +
                     ", pointState='" + pointState + '\'' +
+                    ", timeCount=" + timeCount +
                     '}';
         }
     }
@@ -54,7 +73,8 @@ public class PointStateBean {
     @Override
     public String toString() {
         return "PointStateBean{" +
-                "taskName='" + taskName + '\'' +
+                "mapName='" + mapName + '\'' +
+                ", taskName='" + taskName + '\'' +
                 ", list=" + list +
                 '}';
     }

@@ -270,6 +270,7 @@ public class GsonUtils {
                 JSONObject js = new JSONObject();
                 js.put(Content.POINT_NAME, taskState.getList().get(i).getPointName());
                 js.put(Content.POINT_STATE, taskState.getList().get(i).getPointState());
+                js.put(Content.POINT_TIME, taskState.getList().get(i).getTimeCount());
                 jsonArray.put(i, js);
             }
             jsonObject.put(Content.ROBOT_TASK_STATE, jsonArray);

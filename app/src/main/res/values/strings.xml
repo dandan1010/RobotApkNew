@@ -2,7 +2,9 @@
     <string name="app_name">RobotApk</string>
 
     <string name="minutes">分钟</string>
-    <string name="not_work">notRun</string>
+    <string name="not_work">Waiting</string>
+    <string name="done">Done</string>
+    <string name="ongoing">Ongoing</string>
     <string name="stop_initialize">停止初始化</string>
     <string name="get_mapIcon">获取地图图片</string>
     <string name="get_robotPosition">获取机器人位置</string>

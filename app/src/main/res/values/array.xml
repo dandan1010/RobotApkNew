@@ -2,11 +2,11 @@
 <resources>
 
     <string-array name="spinner_time">
-        <item>1分钟</item>
-        <item>2分钟</item>
-        <item>3分钟</item>
-        <item>4分钟</item>
-        <item>5分钟</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
     </string-array>
 
     <string-array name="move_light">

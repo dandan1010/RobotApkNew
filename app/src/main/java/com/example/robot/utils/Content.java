@@ -44,7 +44,7 @@ public final class Content {
 
     public static boolean isLastTask = false;
     public static long startTime = System.currentTimeMillis();
-    public static final String STARTTIME = "startTime";
+    public static int Sum_Time = 0;
 
     public static boolean taskIsFinish = false;
 
@@ -64,7 +64,7 @@ public final class Content {
      * 0：任务结束
      * 1：执行任务，恢复任务
      * 2: 暂停任务
-    */
+     */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = -1;
     public static String mapName = null;
@@ -74,7 +74,7 @@ public final class Content {
      * 0:正在初始化
      * 1:初始化成功
      * 2:初始化失败
-     * */
+     */
     public static int is_initialize_finished = -1;
 
     public static final String MAP_NAME = "map_Name";//地图名字
@@ -177,6 +177,7 @@ public final class Content {
     public static final String POINT_Y = "point_y";//点y坐标
     public static final String POINT_TYPE = "point_type";//点类型
     public static final String POINT_STATE = "point_state";//点执行状态
+    public static final String POINT_TIME = "point_time";//点时间
 
     public static final String REQUEST_MSG = "request_msg";//请求返回结果
 
@@ -201,7 +202,6 @@ public final class Content {
 
     public static boolean completeFlag = false;
     public static final String TASK_ALARM = "task_alarm";//任务
-
 
 
     //obstacles_name
@@ -239,7 +239,7 @@ public final class Content {
     public static final String dbTaskState = "dbTaskState";//点任务状态
     public static final String dbTaskStateMapName = "dbMapName";
     public static final String dbTaskStateTaskName = "dbTaskStateTaskName";
-//    public static final String dbTaskStatePointName = "dbTaskStatePointName";
+    //    public static final String dbTaskStatePointName = "dbTaskStatePointName";
     public static final String dbTaskStatePointState = "dbTaskStatePointState";
 
     //test
