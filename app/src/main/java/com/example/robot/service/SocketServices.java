@@ -13,6 +13,7 @@ import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.LongDef;
@@ -322,6 +323,10 @@ public class SocketServices extends Service {
                     break;
                 case 3:
                     Log.d(TAG, "case 3  " + workTime);
+                    if (Content.taskIndex >= 0) {
+                        TaskManager.pointStateBean.getList().get(Content.taskIndex - 1).setTimeCount(tvText);
+                        EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
+                    }
                     startUvcDetection();
                     break;
                 case 4:
@@ -362,6 +367,8 @@ public class SocketServices extends Service {
                     break;
                 case 6:
                     Log.d(TAG, "case 6 : " + "检测充电状态恢复任务battery : " + battery + ",  taskName: " + Content.taskName + ",   taskState: " + Content.taskState);
+                    TaskManager.pointStateBean.getList().get(Content.taskIndex - 1).setTimeCount("电量回充,消毒未完成");
+                    EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
                     if (battery > Content.maxBattery && Content.taskName != null) {
                         //TaskManager.getInstances(mContext).resumeTaskQueue();
                         Content.taskIsFinish = false;
@@ -955,22 +962,23 @@ public class SocketServices extends Service {
         } else if (messageEvent.getState() == 10053) {//是否有任务正在执行
             Cursor aTrue = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");
             long nextTaskTime = System.currentTimeMillis();
+            String nextTaskaskName = Content.taskName;
             if (Content.taskName == null) {
                 while (aTrue.moveToNext()) {
-                    if ("FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))) {
-                        Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                    if ("FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime))) && TextUtils.isEmpty(nextTaskaskName)) {
+                        nextTaskaskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     } else if (mAlarmUtils.getWeek(System.currentTimeMillis()) == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))) {
                         long integerTime = mAlarmUtils.stringToTimestamp("2021-02-22 " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)) + ":00");
                         long nowTime = mAlarmUtils.stringToTimestamp("2021-02-22 " + mAlarmUtils.getTimeMillis(System.currentTimeMillis()) + ":00");
                         if (integerTime - nowTime < nextTaskTime) {
                             nextTaskTime = integerTime - nowTime;
-                            Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                            nextTaskaskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                         }
                     }
                 }
             }
             if (Content.server != null) {
-                gsonUtils.setTask_state(Content.taskName);
+                gsonUtils.setTask_state(nextTaskaskName);
                 gsonUtils.setMapName(Content.mapName);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_TASK_STATE));
             }
