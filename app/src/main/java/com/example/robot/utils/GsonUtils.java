@@ -62,6 +62,11 @@ public class GsonUtils {
     private int workingMode;
     private boolean emergency;
     private String robotVersion;
+    private long totalArea = 0;
+
+    public void setTotalArea(long totalArea) {
+        this.totalArea = totalArea;
+    }
 
     public void setRobotVersion(String robotVersion) {
         this.robotVersion = robotVersion;
@@ -411,6 +416,7 @@ public class GsonUtils {
             jsonObject.put(Content.TASK_NAME, task_state);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
             jsonObject.put(Content.ROBOTVERSIONCODE, robotVersion);
+            jsonObject.put(Content.TOTAL_AREA, totalArea);
             JSONArray edPointArray = new JSONArray();
             if (taskBeans != null) {
                 for (int i = 0; i < taskBeans.size(); i++) {

@@ -420,11 +420,11 @@ public class CheckLztekLamp {
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
                     String msg = "";
                     //读gpio
-                    if (!Content.isCharging && getChargingGpio()) {
+                    if (!Content.isCharging && getChargingGpio() && SocketServices.battery < 95) {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
-                    if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
+                    if (!editText.getText().toString().substring(12, 14).startsWith("F") && (SocketServices.battery != 100 || Integer.parseInt(editText.getText().toString().substring(12, 16),16) * 10 < 200)) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";

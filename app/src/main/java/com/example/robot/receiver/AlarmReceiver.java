@@ -25,6 +25,7 @@ import com.example.robot.utils.AssestFile;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
+import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -40,12 +41,14 @@ public class AlarmReceiver extends BroadcastReceiver {
     private AlarmUtils mAlarmUtils;
     private AssestFile mAssestFile;
     private int RotateCount = 120;
+    private CheckLztekLamp checkLztekLamp;
 
     public void onReceive(Context context, Intent intent) {
         this.mContext = context;
         if (Content.AlarmAction.equals(intent.getAction())) {
             // 第1步中设置的闹铃时间到，这里可以弹出闹铃提示并播放响铃
             mAssestFile = new AssestFile(context);
+            checkLztekLamp = new CheckLztekLamp(context);
             mSqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
             mAlarmUtils = new AlarmUtils(context);
             int week = intent.getIntExtra("week", -1);
@@ -67,7 +70,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                             && TextUtils.isEmpty(Content.taskName)) {
                         Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                         Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
-                        if (Content.isCharging) {
+                        if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                             handler.sendEmptyMessageDelayed(1001, 0);
                             handler.sendEmptyMessageDelayed(1002, 2000);
                         } else {
@@ -79,7 +82,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                         Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                         Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                         mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
-                        if (Content.isCharging) {
+                        if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                             handler.sendEmptyMessageDelayed(1001, 0);
                             handler.sendEmptyMessageDelayed(1002, 2000);
                         } else {
@@ -91,7 +94,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                         Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                         Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                         mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
-                        if (Content.isCharging) {
+                        if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                             handler.sendEmptyMessageDelayed(1001, 0);
                             handler.sendEmptyMessageDelayed(1002, 2000);
                         } else {

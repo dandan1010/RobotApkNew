@@ -323,6 +323,9 @@ public class SimpleServer extends WebSocketServer {
             case Content.GET_CHARGING_MODE://有无充电桩模式
                 EventBus.getDefault().post(new EventBusMessage(10064, message));
                 break;
+            case Content.TOTAL_AREA://消毒面积
+                EventBus.getDefault().post(new EventBusMessage(10065, message));
+                break;
 
 
 //test request:

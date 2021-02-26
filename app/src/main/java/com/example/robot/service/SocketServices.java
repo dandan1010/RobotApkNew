@@ -421,8 +421,10 @@ public class SocketServices extends Service {
 //        if (Content.server != null) {
 //            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
 //        }
-        TaskManager.pointStateBean.getList().get(Content.taskIndex - 1).setTimeCount(tvText);
-        EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
+        if (Content.taskIndex > 0) {
+            TaskManager.pointStateBean.getList().get(Content.taskIndex - 1).setTimeCount(tvText);
+            EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
+        }
         if (battery <= Content.battery) {//是否到达回冲电量
             myHandler.sendEmptyMessageDelayed(4, Content.delayTime);
         } else {
@@ -1052,6 +1054,11 @@ public class SocketServices extends Service {
         } else if (messageEvent.getState() == 10064) {
             if (Content.server != null) {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_CHARGING_MODE));
+            }
+        } else if (messageEvent.getState() == 10065) {//消毒面积
+            if (Content.server != null) {
+                gsonUtils.setTotalArea(SharedPrefUtil.getInstance(mContext).getSharedPrefTotalArea(Content.TOTAL_AREA));
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.TOTAL_AREA));
             }
         }
 

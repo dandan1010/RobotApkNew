@@ -11,6 +11,7 @@ public final class Content {
     public static String InitializePositionName = "Initialize";//初始化的点
     public static int countTime = 0;
 
+    public static final String TOTAL_AREA = "total_area";//消毒面积
     /**
      * //测试版本不亮灯 ：0
      * demo : 1

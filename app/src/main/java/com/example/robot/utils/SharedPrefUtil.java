@@ -108,7 +108,6 @@ public class SharedPrefUtil {
     }
 
     public boolean getSharedPrefChargingMode(String key) {
-        Log.d("get battery " , ""+sharedPreferences.getBoolean(key, Content.have_charging_mode));
         return sharedPreferences.getBoolean(key,Content.have_charging_mode);
     }
 
@@ -129,7 +128,20 @@ public class SharedPrefUtil {
     }
 
     public Long getSharedPrefStartTime(String key) {
-        Log.d("get startTime " , ""+sharedPreferences.getLong(key, Content.startTime));
         return sharedPreferences.getLong(key, Content.startTime);
     }
+
+    /**
+     * 消毒面积
+     */
+    public void setSharedPrefTotalArea(String key, long level){
+        editor.putLong(key, level);
+        editor.commit();
+    }
+
+    public Long getSharedPrefTotalArea(String key) {
+        Log.d("get TotalArea " , ""+sharedPreferences.getLong(key, 0));
+        return sharedPreferences.getLong(key, 0);
+    }
+
 }

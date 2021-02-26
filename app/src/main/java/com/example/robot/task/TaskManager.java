@@ -1235,6 +1235,8 @@ public class TaskManager {
             } else {
                 Content.taskIsFinish = false;
             }
+            Long sharedPrefTotalArea = SharedPrefUtil.getInstance(mContext).getSharedPrefTotalArea(Content.TOTAL_AREA);
+            SharedPrefUtil.getInstance(mContext).setSharedPrefTotalArea(Content.TOTAL_AREA,sharedPrefTotalArea + 9);
             Content.taskIndex++;
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,
