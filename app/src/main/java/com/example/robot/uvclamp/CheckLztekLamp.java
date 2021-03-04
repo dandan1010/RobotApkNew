@@ -126,6 +126,13 @@ public class CheckLztekLamp {
     }
 
     public boolean getChargingGpio() {
+        Log.d("zdzd : ", "gpio 218 值: "+mLztek.getGpioValue(port[0]));
+        if (Content.charging_gpio != mLztek.getGpioValue(port[0])){
+            Content.is_first_charging = true;
+        } else {
+            Content.is_first_charging = false;
+        }
+        Content.charging_gpio = mLztek.getGpioValue(port[0]);
         return mLztek.getGpioValue(port[0]) == 0 ? true : false;
     }
 
@@ -420,11 +427,11 @@ public class CheckLztekLamp {
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
                     String msg = "";
                     //读gpio
-                    if (!Content.isCharging && getChargingGpio() && SocketServices.battery < 95) {
+                    if (!Content.isCharging && getChargingGpio() && (Content.is_first_charging || SocketServices.battery < 95)) {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
-                    if (!editText.getText().toString().substring(12, 14).startsWith("F") && (SocketServices.battery != 100 || Integer.parseInt(editText.getText().toString().substring(12, 16),16) * 10 < 200)) {
+                    if (!editText.getText().toString().substring(12, 14).startsWith("F") && (SocketServices.battery != 100 || Integer.parseInt(editText.getText().toString().substring(12, 16),16) * 10 > 200)) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";
@@ -437,12 +444,13 @@ public class CheckLztekLamp {
                             Content.time = 4000;
                         }
                         //关闭gpio口
+                        Log.d("zdzd555:","关闭gpio口 : Content.chargingState = " + Content.chargingState + "charging = " + Content.isCharging);
                         if (Content.chargingState == 2 && Content.isCharging) {
                             setChargingGpio(0);
+                            Content.chargingState = 0;
                             Log.d("zdzd555:","关闭gpio口 : ");
                         }
                         Content.isCharging = false;
-                        Content.chargingState = 0;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
                     }
                 }

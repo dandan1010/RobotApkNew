@@ -10,6 +10,8 @@ public final class Content {
     public static int delayTime = 200;
     public static String InitializePositionName = "Initialize";//初始化的点
     public static int countTime = 0;
+    public static int charging_gpio = 1;
+    public static boolean is_first_charging = false;
 
     public static final String TOTAL_AREA = "total_area";//消毒面积
     /**
