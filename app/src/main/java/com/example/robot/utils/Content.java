@@ -7,6 +7,20 @@ import com.example.robot.service.SimpleServer;
 public final class Content {
     public static final String AlarmAction = "android.alarm.task.action";
 
+    public static final boolean isNewSerialPort = false;
+    public static String getBatterySerialPortPath(){
+        if (isNewSerialPort) {
+            return "/dev/ttyS1";
+        }
+        return "/dev/ttyS0";
+    }
+    public static String getLedSerialPortPath(){
+        if (isNewSerialPort) {
+            return "/dev/ttyS3";
+        }
+        return "/dev/ttyS1";
+    }
+
     public static int delayTime = 200;
     public static String InitializePositionName = "Initialize";//初始化的点
     public static int countTime = 0;

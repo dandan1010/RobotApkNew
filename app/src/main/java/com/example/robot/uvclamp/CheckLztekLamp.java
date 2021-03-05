@@ -126,8 +126,8 @@ public class CheckLztekLamp {
     }
 
     public boolean getChargingGpio() {
-        Log.d("zdzd : ", "gpio 218 值: "+mLztek.getGpioValue(port[0]));
-        if (Content.charging_gpio != mLztek.getGpioValue(port[0])){
+        Log.d("zdzd : ", "gpio 218 值: " + mLztek.getGpioValue(port[0]));
+        if (Content.charging_gpio != mLztek.getGpioValue(port[0])) {
             Content.is_first_charging = true;
         } else {
             Content.is_first_charging = false;
@@ -141,12 +141,12 @@ public class CheckLztekLamp {
 //        boolean k1 = mLztek.getGpioValue(port[0]) == 0 ? true : false;
 //        boolean k2 = mLztek.getGpioValue(port[1]) == 0 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 0 ? true : false;
-        Log.d("getGpioSensorState : " , ""+ k3);
+        Log.d("getGpioSensorState : ", "" + k3);
         if (k3) {
             Content.pir_timeCount = 0;
             return true;
         } else {
-            Content.pir_timeCount ++;
+            Content.pir_timeCount++;
             if (Content.pir_timeCount >= 20) {
                 return false;
             }
@@ -238,7 +238,7 @@ public class CheckLztekLamp {
      * 请求led灯光
      */
     private void openSerialPort() {//控制Led灯
-        serialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
+        serialPort = mLztek.openSerialPort(Content.getLedSerialPortPath(), 115200, 8, 0, 1, 0);
         if (serialPort == null) {
             Log.d(TAG, "serialPort is null");
             return;
@@ -359,7 +359,7 @@ public class CheckLztekLamp {
      * 请求电池数据
      */
     public void openBatteryPort() {//获取电池
-        batterySerialPort = mLztek.openSerialPort("/dev/ttyS0", 9600, 8, 0, 1, 0);
+        batterySerialPort = mLztek.openSerialPort(Content.getBatterySerialPortPath(), 9600, 8, 0, 1, 0);
         if (batterySerialPort == null) {
             Log.d(TAG, "BatteryPort is null");
             return;
@@ -431,7 +431,7 @@ public class CheckLztekLamp {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
-                    if (!editText.getText().toString().substring(12, 14).startsWith("F") && (SocketServices.battery != 100 || Integer.parseInt(editText.getText().toString().substring(12, 16),16) * 10 > 200)) {
+                    if (!editText.getText().toString().substring(12, 14).startsWith("F") && (SocketServices.battery != 100 || Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 > 200)) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";
@@ -444,11 +444,11 @@ public class CheckLztekLamp {
                             Content.time = 4000;
                         }
                         //关闭gpio口
-                        Log.d("zdzd555:","关闭gpio口 : Content.chargingState = " + Content.chargingState + "charging = " + Content.isCharging);
+                        Log.d("zdzd555:", "关闭gpio口 : Content.chargingState = " + Content.chargingState + "charging = " + Content.isCharging);
                         if (Content.chargingState == 2 && Content.isCharging) {
                             setChargingGpio(0);
                             Content.chargingState = 0;
-                            Log.d("zdzd555:","关闭gpio口 : ");
+                            Log.d("zdzd555:", "关闭gpio口 : ");
                         }
                         Content.isCharging = false;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
@@ -474,7 +474,7 @@ public class CheckLztekLamp {
         //boolean k1 = mLztek.getGpioValue(port[0]) == 0 ? true : false;
         //boolean k2 = mLztek.getGpioValue(port[1]) == 1 ? true : false;
         boolean k3 = mLztek.getGpioValue(port[2]) == 0 ? true : false;
-        return ""+k3;
+        return "" + k3;
     }
 
     public void test_uvc_start1() {
