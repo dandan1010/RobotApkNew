@@ -1,6 +1,5 @@
 package com.example.robot.service;
 
-import android.Manifest;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -9,14 +8,10 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.os.SystemClock;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.LongDef;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -42,6 +37,7 @@ import com.example.robot.utils.AssestFile;
 import com.example.robot.utils.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
+import com.example.robot.utils.PropertyUtils;
 import com.example.robot.utils.SharedPrefUtil;
 import com.example.robot.utils.TimeUtils;
 import com.example.robot.utils.VirtualBeanUtils;
@@ -49,8 +45,6 @@ import com.example.robot.uvclamp.CheckLztekLamp;
 import com.example.robot.uvclamp.UvcWarning;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,16 +52,14 @@ import org.json.JSONObject;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-public class SocketServices extends Service {
+public class SocketServices extends BaseService {
 
     private static final String TAG = "SocketServices";
     private NavigationService navigationService;
     private Intent intentService;
     private Context mContext;
-    private ImageView robot_Position;
     private UvcWarning uvcWarning;
     public static CheckLztekLamp checkLztekLamp;
     private GsonUtils gsonUtils;
@@ -106,13 +98,10 @@ public class SocketServices extends Service {
         super.onCreate();
         LogcatHelper.getInstance(this).stop();
         LogcatHelper.getInstance(this).start();
-        EventBus.getDefault().register(this);
         mContext = this;
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
         initView();
         handler.sendEmptyMessage(1);
-        handler.sendEmptyMessage(2);
-        robot_Position = new ImageView(mContext);
     }
 
     Handler handler = new Handler() {
@@ -148,13 +137,6 @@ public class SocketServices extends Service {
                 } else {
                     handler.sendEmptyMessageDelayed(1, 1000);
                 }
-            } else if (msg.what == 2) {
-                //Log.d("zdzd ", "chrging gpio : " + checkLztekLamp.getChargingGpio());
-//                if (!Content.isCharging && checkLztekLamp.getChargingGpio()) {
-//                    checkLztekLamp.setChargingGpio(1);
-//                    Content.chargingState = 2;
-//                }
-//                handler.sendEmptyMessageDelayed(2, 1000);
             }
         }
     };
@@ -180,8 +162,6 @@ public class SocketServices extends Service {
         Content.time = 4000;
         checkLztekLamp.startCheckSensorAtTime();
         checkLztekLamp.startLedLamp();
-//        checkLztekLamp.openEth();
-//        checkLztekLamp.setEthAddress();
         checkLztekLamp.initUvcMode();
         checkLztekLamp.setChargingGpio(0);
     }
@@ -241,10 +221,7 @@ public class SocketServices extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "server onDestroy");
-        EventBus.getDefault().unregister(this);
         stopService(intentService);
-        Intent intentServer = new Intent(mContext, SocketServices.class);
-        mContext.startService(intentServer);
     }
 
     public void onCheckedChanged(int index) {
@@ -302,16 +279,12 @@ public class SocketServices extends Service {
                             TaskManager.pointStateBean.getList().get(Content.taskIndex - 1).setTimeCount(tvText);
                             EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
                         }
-//                        gsonUtils.setTvTime(Sum_time + "");
-//                        if (Content.server != null) {
-//                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
-//                        }
+
+                        Log.d("zdzd prop111 : " , "" + PropertyUtils.getProperty(Content.isRobotAngularSpeed,"false"));
+                        if ("true".equals(PropertyUtils.getProperty(Content.isRobotAngularSpeed, "false"))) {
+                            NavigationService.move(0, 0.2f);
+                        }
                     } else {
-//                        gsonUtils.setTvTime("消毒完成");
-//                        Log.d(TAG, "case 2  " + "消毒完成");
-//                        if (Content.server != null) {
-//                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
-//                        }
                         Content.taskIsFinish = false;
                         toLightControlBtn = false;
                         onCheckedChanged(0);
@@ -501,13 +474,9 @@ public class SocketServices extends Service {
         }
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMsg(EventBusMessage messageEvent) {
-        onBaseEventMessage(messageEvent);
-    }
-
-
+    @Override
     protected void onBaseEventMessage(EventBusMessage messageEvent) {
+        super.onBaseEventMessage(messageEvent);
         //phone 发送的命令
         if (messageEvent.getState() == 1007) {
             toLightControlBtn = true;

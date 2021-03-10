@@ -7,6 +7,8 @@ import com.example.robot.service.SimpleServer;
 public final class Content {
     public static final String AlarmAction = "android.alarm.task.action";
 
+    public static final String isRobotAngularSpeed = "persist.robot.isRobotAngular";//消毒时是否转圈
+
     public static final boolean isNewSerialPort = false;
     public static String getBatterySerialPortPath(){
         if (isNewSerialPort) {
