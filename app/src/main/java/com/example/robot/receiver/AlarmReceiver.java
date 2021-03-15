@@ -77,36 +77,36 @@ public class AlarmReceiver extends BroadcastReceiver {
                         && TextUtils.isEmpty(Content.taskName)) {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
-                    if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
+                    //if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                         handler.sendEmptyMessageDelayed(1001, 0);
                         handler.sendEmptyMessageDelayed(1002, 2000);
-                    } else {
-                        handler.sendEmptyMessageDelayed(1002, 0);
-                    }
+//                    } else {
+//                        handler.sendEmptyMessageDelayed(1002, 0);
+//                    }
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
-                    if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
+                    //if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                         handler.sendEmptyMessageDelayed(1001, 0);
                         handler.sendEmptyMessageDelayed(1002, 2000);
-                    } else {
-                        handler.sendEmptyMessageDelayed(1002, 0);
-                    }
+//                    } else {
+//                        handler.sendEmptyMessageDelayed(1002, 0);
+//                    }
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
                     Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
                     Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
-                    if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
+                    //if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                         handler.sendEmptyMessageDelayed(1001, 0);
                         handler.sendEmptyMessageDelayed(1002, 2000);
-                    } else {
-                        handler.sendEmptyMessageDelayed(1002, 0);
-                    }
+//                    } else {
+//                        handler.sendEmptyMessageDelayed(1002, 0);
+//                    }
                 }
             }
             mSqLiteOpenHelperUtils.close();
