@@ -3,8 +3,12 @@ package com.example.robot.service;
 import android.app.Service;
 import android.content.Context;
 import android.media.AudioManager;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
 
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
@@ -35,6 +39,7 @@ public class SimpleServer extends WebSocketServer {
     private JSONObject jsonObject;
     private String address = "";
     private Context mContext;
+    public WebSocket conn;
 
     private SimpleServer(InetSocketAddress address, Context mContext) {
         super(address);
@@ -61,27 +66,15 @@ public class SimpleServer extends WebSocketServer {
 
     @Override
     public void onOpen(WebSocket conn, ClientHandshake handshake) {
-        conn.send("OK conn");
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
-        address = remoteSocketAddress.getHostName();
+        this.address = remoteSocketAddress.getHostName();
+        this.conn = conn;
         Log.d(TAG, "server address :" + address);
-        if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
-            broadcast(gsonUtils.putConnMsg(Content.CONN_OK)); //This method sends a message to all clients connected
-            Content.CONNECT_ADDRESS = remoteSocketAddress.getHostName();
-            Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
-        } else {
-            gsonUtils.setMapName(Content.CONNECT_ADDRESS);
-            conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
-        }
     }
 
     @Override
     public void onClose(WebSocket conn, int code, String reason, boolean remote) {
         InetSocketAddress remoteSocketAddress = conn.getRemoteSocketAddress();
-        Log.d(TAG, "close : " + remoteSocketAddress.getHostName());
-        if (Content.CONNECT_ADDRESS.equals(remoteSocketAddress.getHostName())) {
-            Content.CONNECT_ADDRESS = null;
-        }
     }
 
     @Override
@@ -139,6 +132,9 @@ public class SimpleServer extends WebSocketServer {
         String mapName;
         String taskName;
         switch (gsonUtils.getType(message)) {
+            case Content.PING:
+                EventBus.getDefault().post(new EventBusMessage(30000, message));
+                break;
             case Content.STARTDOWN:
                 EventBus.getDefault().post(new EventBusMessage(10001, message));
                 break;
@@ -323,8 +319,11 @@ public class SimpleServer extends WebSocketServer {
             case Content.GET_CHARGING_MODE://有无充电桩模式
                 EventBus.getDefault().post(new EventBusMessage(10064, message));
                 break;
-            case Content.TOTAL_AREA://消毒面积
+            case Content.dbTotalCount://统计一共执行任务个数，时间，面积
                 EventBus.getDefault().post(new EventBusMessage(10065, message));
+                break;
+            case Content.dbCurrentCount://统计当月执行任务个数，时间，面积
+                EventBus.getDefault().post(new EventBusMessage(10066, message));
                 break;
 
 

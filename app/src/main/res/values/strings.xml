@@ -42,4 +42,23 @@
     <string name="reset_robot">恢复出厂设置</string>
     <string name="get_ultrasonic_phit">获取声呐设备信息</string>
     <string name="have_charging_mode">无充电桩模式</string>
+
+
+    <string name="a_password1">01 06 21 19 26 94 49 FE</string>
+    <string name="a_password2">01 06 21 19 26 8E C8 35</string>
+
+    <string name="b_password1">01 06 31 19 26 94 4D 3E</string>
+    <string name="b_password2">01 06 21 19 26 8E CC F5</string>
+    
+    <string name="temp_request">01 43 50 1B 51 1B 58 99</string>
+    
+    <string name="a_flow_20A">01 06 24 2A 07 D0 A1 5E</string>
+    <string name="a_flow_7A">01 06 24 2A 02 BC A2 23</string>
+    <string name="a_flow_5A">01 06 24 2A 01 F4 A2 E5</string>
+    <string name="a_flow_0A">01 06 24 2A 00 00 A2 F2</string>
+
+    <string name="b_flow_20A">01 06 34 2A 07 D0 A5 9E</string>
+    <string name="b_flow_7A">01 06 34 2A 02 BC A6 E3</string>
+    <string name="b_flow_5A">01 06 34 2A 01 F4 A6 25</string>
+    <string name="b_flow_0A">01 06 34 2A 00 00 A6 32</string>
 </resources>

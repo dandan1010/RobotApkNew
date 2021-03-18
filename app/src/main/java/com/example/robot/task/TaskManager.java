@@ -81,6 +81,8 @@ public class TaskManager {
     private boolean isSendType = false;
     private boolean isAddInitialize = false;
     private AssestFile mAssestFile;
+    private int currentTaskArea = 0;
+    private long taskCount = 0, taskTime = 0, area = 0;
 
 
     private TaskManager(Context mContext) {
@@ -139,6 +141,7 @@ public class TaskManager {
      * 获取机器人的位置
      */
     public void getPositions(String mapName) {
+
         GsController.INSTANCE.getPositions(mapName, new RobotStatus<RobotPosition>() {
             @Override
             public void success(RobotPosition robotPosition) {
@@ -549,6 +552,7 @@ public class TaskManager {
 //            }
 //        });
         Content.startTime = System.currentTimeMillis();
+        currentTaskArea = 0;
         sqLiteOpenHelperUtils.saveTaskHistory(Content.mapName, Content.taskName,
                 "-1",
                 "" + mAlarmUtils.getTimeYear(Content.startTime),
@@ -602,7 +606,33 @@ public class TaskManager {
                                 Content.taskName,
                                 pointStateBean.toString().replace("'", ""),
                                 mAlarmUtils.getTimeYear(Content.startTime));
+                        //所有任务
+                        Cursor cursor = sqLiteOpenHelperUtils.searchTaskTotalCount();
+                        taskCount = 0;
+                        taskTime = 0;
+                        area = 0;
+                        while (cursor.moveToNext()) {
+                            taskCount = Long.parseLong(cursor.getString(cursor.getColumnIndex(Content.dbTaskTotalCount)));
+                            taskTime = Long.parseLong(cursor.getString(cursor.getColumnIndex(Content.dbTimeTotalCount)));
+                            area = Long.parseLong(cursor.getString(cursor.getColumnIndex(Content.dbAreaTotalCount)));
+                        }
+                        sqLiteOpenHelperUtils.reset_Db(Content.dbTotalCount);
+                        sqLiteOpenHelperUtils.saveTaskTotalCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "");
+                        //当月任务
+                        Cursor currentCursor = sqLiteOpenHelperUtils.searchTaskCurrentCount(mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+                        taskCount = 0;
+                        taskTime = 0;
+                        area = 0;
+                        while (currentCursor.moveToNext()) {
+                            taskCount = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbTaskCurrentCount)));
+                            taskTime = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbTimeCurrentCount)));
+                            area = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbAreaCurrentCount)));
+                        }
+                        sqLiteOpenHelperUtils.reset_Db(Content.dbCurrentCount);
+                        sqLiteOpenHelperUtils.saveTaskCurrentCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "" , mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+
                         sqLiteOpenHelperUtils.close();
+                        currentTaskArea = 0;
                         Content.taskState = 0;
                         Content.robotState = 1;
                         Content.taskIndex = -1;
@@ -706,7 +736,7 @@ public class TaskManager {
             Content.Sum_Time = Content.Sum_Time
                     + (Integer.parseInt(spinnerItem[Integer.parseInt(cursor.getString(cursor.getColumnIndex(Content.dbSpinnerTime)))]) * 60)
                     + 60;
-            Log.d("zdzd : " ,"时间 ： " + spinnerItem[Integer.parseInt(cursor.getString(cursor.getColumnIndex(Content.dbSpinnerTime)))] + ",   " + Content.Sum_Time);
+            Log.d("zdzd : ", "时间 ： " + spinnerItem[Integer.parseInt(cursor.getString(cursor.getColumnIndex(Content.dbSpinnerTime)))] + ",   " + Content.Sum_Time);
         }
         String point_Name = "";
         if (Content.have_charging_mode) {
@@ -797,9 +827,35 @@ public class TaskManager {
                 SocketServices.battery + "%");
         sqLiteOpenHelperUtils.saveTaskState(Content.mapName,
                 Content.taskName,
-                ""+pointStateBean.toString().replace("'", ""),
+                "" + pointStateBean.toString().replace("'", ""),
                 mAlarmUtils.getTimeYear(Content.startTime));
+        //更新总任务个数统计
+        Cursor totalCursor = sqLiteOpenHelperUtils.searchTaskTotalCount();
+        taskCount = 0;
+        taskTime = 0;
+        area = 0;
+        while (totalCursor.moveToNext()) {
+            taskCount = Long.parseLong(totalCursor.getString(totalCursor.getColumnIndex(Content.dbTaskTotalCount)));
+            taskTime = Long.parseLong(totalCursor.getString(totalCursor.getColumnIndex(Content.dbTimeTotalCount)));
+            area = Long.parseLong(totalCursor.getString(totalCursor.getColumnIndex(Content.dbAreaTotalCount)));
+        }
+        sqLiteOpenHelperUtils.reset_Db(Content.dbTotalCount);
+        sqLiteOpenHelperUtils.saveTaskTotalCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "");
+        //当月任务
+        Cursor currentCursor = sqLiteOpenHelperUtils.searchTaskCurrentCount(mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+        taskCount = 0;
+        taskTime = 0;
+        area = 0;
+        while (currentCursor.moveToNext()) {
+            taskCount = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbTaskCurrentCount)));
+            taskTime = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbTimeCurrentCount)));
+            area = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbAreaCurrentCount)));
+        }
+        sqLiteOpenHelperUtils.reset_Db(Content.dbCurrentCount);
+        sqLiteOpenHelperUtils.saveTaskCurrentCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "" , mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+
         sqLiteOpenHelperUtils.close();
+        currentTaskArea = 0;
         Content.taskName = null;
         mTaskArrayList.clear();
         Content.startTime = System.currentTimeMillis();
@@ -1184,7 +1240,8 @@ public class TaskManager {
             Log.d(TAG, "Navigationnotice Exception ：" + e.getMessage());
         }
     }
-    private void system_health_status(){
+
+    private void system_health_status() {
         try {
             NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/system_health_status")
                     .subscribe(data -> {
@@ -1212,14 +1269,6 @@ public class TaskManager {
 
     public void navigationStatus(String type) {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);
-//        if (Content.taskIndex < mTaskArrayList.size()
-//                && !type.equals("HEADING")
-//                && Content.robotState != 6
-//                && !TextUtils.isEmpty(type)
-//                && !type.equals("TOO_CLOSE_TO_OBSTACLES")) {
-//            pointStateBean.getList().get(Content.taskIndex).setPointState(type);
-//            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
-//        }
         if ("REACHED".equals(type) && Content.robotState != 6 && !isSendType) {//已经到达目的地
             Log.d(TAG, "REACHED");
             isSendType = true;
@@ -1235,8 +1284,7 @@ public class TaskManager {
             } else {
                 Content.taskIsFinish = false;
             }
-            Long sharedPrefTotalArea = SharedPrefUtil.getInstance(mContext).getSharedPrefTotalArea(Content.TOTAL_AREA);
-            SharedPrefUtil.getInstance(mContext).setSharedPrefTotalArea(Content.TOTAL_AREA,sharedPrefTotalArea + 9);
+            currentTaskArea = currentTaskArea + 9;
             Content.taskIndex++;
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,

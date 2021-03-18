@@ -92,6 +92,10 @@ public class AlarmUtils {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         return dateFormat.format(new Date(time));
     }
+    public String getTimeMonth(long time) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
+        return dateFormat.format(new Date(time));
+    }
 
     //时间转为时间戳
     public long stringToTimestamp(String time){

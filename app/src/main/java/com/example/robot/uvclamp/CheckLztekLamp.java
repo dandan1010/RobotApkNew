@@ -7,7 +7,6 @@ import android.widget.EditText;
 
 import com.example.robot.R;
 import com.example.robot.service.SocketServices;
-import com.example.robot.task.TaskManager;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.Content;
 import com.lztek.toolkit.AddrInfo;
@@ -18,6 +17,7 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
 
 public class CheckLztekLamp {
 
@@ -32,6 +32,10 @@ public class CheckLztekLamp {
     private int mUVCLightStatus = OFF;
     private int mLEDStatus = OFF;
     private int mSensorStatus = OFF;
+    private SerialPort speedSerialPort;
+    private SerialPort tempSerialPort;
+    private ArrayList<String> setArrayList = new ArrayList<>();
+    private int flowId = 0;
 
     /**
      * 248:充电
@@ -365,7 +369,6 @@ public class CheckLztekLamp {
             return;
         }
         handler.postDelayed(runnable, 0);
-//        handler.postDelayed(runnableVoltage, 0);
     }
 
     Handler handler = new Handler();
@@ -427,11 +430,14 @@ public class CheckLztekLamp {
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
                     String msg = "";
                     //读gpio
-                    if (!Content.isCharging && getChargingGpio() && (Content.is_first_charging || SocketServices.battery < 95)) {
+                    if (!Content.isCharging && getChargingGpio()
+                        /*&& (Content.is_first_charging || SocketServices.battery < 95)*/) {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
-                    if (!editText.getText().toString().substring(12, 14).startsWith("F") && (SocketServices.battery != 100 || Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 > 200)) {
+                    if (!editText.getText().toString().substring(12, 14).startsWith("F")
+                            /*&& (SocketServices.battery != 100
+                            || Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 > 200)*/) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";
@@ -463,6 +469,183 @@ public class CheckLztekLamp {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                }
+            }
+        }
+    };
+
+    /**
+     * 请求速度和温度
+     */
+    public void getSpeed() {
+        speedSerialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
+        if (speedSerialPort == null) {
+            Log.d(TAG, "Speed is null");
+            return;
+        }
+        handler.postDelayed(speedA, 0);
+    }
+
+    Runnable speedA = new Runnable() {
+        @Override
+        public void run() {
+            OutputStream outputStream = null;
+            byte[] speed = hexBytes(mContext.getString(R.string.temp_request).replace(" ", ""));
+            try {
+                if (null != speed) {
+                    outputStream = speedSerialPort.getOutputStream();
+                    outputStream.write(speed);
+                    outputStream.flush();
+                }
+                java.io.InputStream input = speedSerialPort.getInputStream();
+                try {
+                    byte[] buffer = new byte[1024];
+                    int len = input.read(buffer);
+                    byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
+                    EditText editText = new EditText(mContext);
+                    for (byte b : data) {
+                        byte h = (byte) (0x0F & (b >> 4));
+                        byte l = (byte) (0x0F & b);
+                        editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
+                        editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
+                    }
+                    Log.d(TAG, "getSpeedAndTemp11 : " + editText.getText().toString());
+                    setLimiting(editText.getText().toString().substring(12,16), editText.getText().toString().substring(16,20));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (outputStream != null) {
+                    try {
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            handler.postDelayed(this::run, 1000);
+        }
+    };
+
+    private void setLimiting(String substring, String substring1) {
+        setArrayList.clear();
+        int aTemp = Integer.parseInt(substring, 16);
+        int bTemp = Integer.parseInt(substring1, 16);
+        Log.d("setLimiting ", "Content.limitint_init_flag : " + Content.limitint_init_flag
+                + ",  Content.isLimiting_flag: " + Content.isLimiting_flag
+        + ",   Content.limiting_flag : " + Content.limiting_flag
+        + ", temp :" +aTemp + "----" + bTemp);
+        if (Content.limitint_init_flag == 0) {
+            setArrayList.add(mContext.getString(R.string.a_password1));
+            setArrayList.add(mContext.getString(R.string.a_flow_20A));
+            setArrayList.add(mContext.getString(R.string.a_password2));
+
+            setArrayList.add(mContext.getString(R.string.b_password1));
+            setArrayList.add(mContext.getString(R.string.b_flow_20A));
+            setArrayList.add(mContext.getString(R.string.b_password2));
+            Content.limitint_init_flag = 1;
+            Content.isLimiting_flag = 0;
+            setSpeed();
+        }
+        if (Content.isLimiting_flag != 1 && (aTemp >= 58 || bTemp >= 58)) {//电流设置为0A
+            setArrayList.add(mContext.getString(R.string.a_password1));
+            setArrayList.add(mContext.getString(R.string.a_flow_0A));
+            setArrayList.add(mContext.getString(R.string.a_password2));
+
+            setArrayList.add(mContext.getString(R.string.b_password1));
+            setArrayList.add(mContext.getString(R.string.b_flow_0A));
+            setArrayList.add(mContext.getString(R.string.b_password2));
+            Content.isLimiting_flag = 1;
+            setSpeed();
+        } else if (Content.isLimiting_flag != 2 && (aTemp >= 55 || bTemp >= 55) && aTemp < 58 && bTemp < 58) {//电流设置为7A
+            setArrayList.add(mContext.getString(R.string.a_password1));
+            setArrayList.add(mContext.getString(R.string.a_flow_7A));
+            setArrayList.add(mContext.getString(R.string.a_password2));
+
+            setArrayList.add(mContext.getString(R.string.b_password1));
+            setArrayList.add(mContext.getString(R.string.b_flow_7A));
+            setArrayList.add(mContext.getString(R.string.b_password2));
+            Content.isLimiting_flag = 2;
+            setSpeed();
+        } else {
+            if (Content.limiting_flag == 0 && Content.isCharging) {//设置为5A
+                setArrayList.add(mContext.getString(R.string.a_password1));
+                setArrayList.add(mContext.getString(R.string.a_flow_5A));
+                setArrayList.add(mContext.getString(R.string.a_password2));
+
+                setArrayList.add(mContext.getString(R.string.b_password1));
+                setArrayList.add(mContext.getString(R.string.b_flow_5A));
+                setArrayList.add(mContext.getString(R.string.b_password2));
+                Content.limiting_flag = 1;
+                setSpeed();
+            } else if (Content.limiting_flag == 1 && aTemp < 55 && bTemp < 55) {//设置为20A
+                setArrayList.add(mContext.getString(R.string.a_password1));
+                setArrayList.add(mContext.getString(R.string.a_flow_20A));
+                setArrayList.add(mContext.getString(R.string.a_password2));
+
+                setArrayList.add(mContext.getString(R.string.b_password1));
+                setArrayList.add(mContext.getString(R.string.b_flow_20A));
+                setArrayList.add(mContext.getString(R.string.b_password2));
+                Content.limiting_flag = 0;
+                setSpeed();
+            }
+            if (Content.isLimiting_flag != 0 && aTemp <= 35 && bTemp <= 35){//电流设置为20A
+                setArrayList.add(mContext.getString(R.string.a_password1));
+                setArrayList.add(mContext.getString(R.string.a_flow_20A));
+                setArrayList.add(mContext.getString(R.string.a_password2));
+
+                setArrayList.add(mContext.getString(R.string.b_password1));
+                setArrayList.add(mContext.getString(R.string.b_flow_20A));
+                setArrayList.add(mContext.getString(R.string.b_password2));
+                Content.isLimiting_flag = 0;
+                setSpeed();
+            }
+        }
+    }
+
+    public void setSpeed() {
+        //6028401B500000000000
+        speedSerialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
+        if (speedSerialPort == null) {
+            Log.d(TAG, "Speed is null");
+            return;
+        }
+        handler.postDelayed(setSpeedA, 0);
+    }
+
+    Runnable setSpeedA = new Runnable() {
+        @Override
+        public void run() {
+            for (int i = 0; i < setArrayList.size(); i++) {
+                OutputStream outputStream = null;
+                byte[] speed = hexBytes(setArrayList.get(i));
+                try {
+                    if (null != speed) {
+                        outputStream = speedSerialPort.getOutputStream();
+                        outputStream.write(speed);
+                        outputStream.flush();
+                    }
+                    java.io.InputStream input = speedSerialPort.getInputStream();
+                    try {
+                        byte[] buffer = new byte[1024];
+                        int len = input.read(buffer);
+                        byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
+                        EditText editText = new EditText(mContext);
+                        for (byte b : data) {
+                            byte h = (byte) (0x0F & (b >> 4));
+                            byte l = (byte) (0x0F & b);
+                            editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
+                            editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
+                        }
+                        Log.d(TAG, "getSpeedAndTemp22 : " + editText.getText().toString());
+                        Thread.sleep(100);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }

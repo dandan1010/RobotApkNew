@@ -38,25 +38,6 @@ public class SharedPrefUtil {
     }
 
     /**
-     * 任务详情
-     * @param key
-     */
-//    public void deleteTaskQueue(String key) {
-//        editor.remove(key);
-//        editor.commit();
-//    }
-//
-//    public void setPositionMsg(String mapName, String taskName, ArrayList<TaskBean> arrayList) {
-//        GsonUtils gsonUtils = new GsonUtils();
-//        editor.putString(mapName +","+ taskName, gsonUtils.putJsonPositionMessage(taskName, arrayList));
-//        editor.commit();
-//    }
-//
-//    public String getPositionMsg(String mapName, String taskName) {
-//        return sharedPreferences.getString(mapName +","+ taskName, null);
-//    }
-
-    /**
      * LED亮度
      * @param key
      * @param level
@@ -119,29 +100,9 @@ public class SharedPrefUtil {
         editor.commit();
     }
 
-    /**
-     * 工作开始时间
-     */
-    public void setSharedPrefStartTime(String key, long level){
-        editor.putLong(key, level);
+    public void delete(String key){
+        editor.remove(key);
         editor.commit();
-    }
-
-    public Long getSharedPrefStartTime(String key) {
-        return sharedPreferences.getLong(key, Content.startTime);
-    }
-
-    /**
-     * 消毒面积
-     */
-    public void setSharedPrefTotalArea(String key, long level){
-        editor.putLong(key, level);
-        editor.commit();
-    }
-
-    public Long getSharedPrefTotalArea(String key) {
-        Log.d("get TotalArea " , ""+sharedPreferences.getLong(key, 0));
-        return sharedPreferences.getLong(key, 0);
     }
 
 }

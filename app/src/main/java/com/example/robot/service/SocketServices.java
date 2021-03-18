@@ -130,6 +130,16 @@ public class SocketServices extends BaseService {
                             Content.taskIndex = -1;
                             TaskManager.getInstances(mContext).use_map(Content.mapName);
                             mSqLiteOpenHelperUtils.deleteHistory(cursor.getInt(cursor.getColumnIndex("_id")));
+                            Cursor cursorTotal = mSqLiteOpenHelperUtils.searchTaskTotalCount();
+                            long taskCount = 0, taskTime = 0, area = 0;
+                            while (cursorTotal.moveToNext()) {
+                                taskCount = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbTaskTotalCount)));
+                                taskTime = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbTimeTotalCount)));
+                                area = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbAreaTotalCount)));
+                            }
+                            mSqLiteOpenHelperUtils.reset_Db(Content.dbTotalCount);
+                            mSqLiteOpenHelperUtils.saveTaskTotalCount((taskCount - 1) + "", taskTime + "", area + "");
+                            mSqLiteOpenHelperUtils.close();
                             handler.post(runnable);
                         }
                     }
@@ -164,6 +174,7 @@ public class SocketServices extends BaseService {
         checkLztekLamp.startLedLamp();
         checkLztekLamp.initUvcMode();
         checkLztekLamp.setChargingGpio(0);
+        checkLztekLamp.getSpeed();
     }
 
     Runnable runnable = new Runnable() {
@@ -375,6 +386,9 @@ public class SocketServices extends BaseService {
                     } else {
                         myHandler.sendEmptyMessageDelayed(9, 1000);
                     }
+                    break;
+                case 10:
+                    Content.CONNECT_ADDRESS = null;
                     break;
                 default:
                     break;
@@ -1026,8 +1040,35 @@ public class SocketServices extends BaseService {
             }
         } else if (messageEvent.getState() == 10065) {//消毒面积
             if (Content.server != null) {
-                gsonUtils.setTotalArea(SharedPrefUtil.getInstance(mContext).getSharedPrefTotalArea(Content.TOTAL_AREA));
-                Content.server.broadcast(gsonUtils.putJsonMessage(Content.TOTAL_AREA));
+                Cursor cursorTotal = mSqLiteOpenHelperUtils.searchTaskTotalCount();
+                long taskCount = 0, taskTime = 0, area = 0;
+                while (cursorTotal.moveToNext()) {
+                    taskCount = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbTaskTotalCount)));
+                    taskTime = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbTimeTotalCount)));
+                    area = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbAreaTotalCount)));
+                }
+                mSqLiteOpenHelperUtils.close();
+
+                gsonUtils.setTotalArea(area);
+                gsonUtils.setTotalTaskCount(taskCount);
+                gsonUtils.setTotalTime(taskTime);
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.dbTotalCount));
+            }
+        } else if (messageEvent.getState() == 10066) {//当月消毒
+            if (Content.server != null) {
+                Cursor cursorTotal = mSqLiteOpenHelperUtils.searchTaskCurrentCount(mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+                long taskCount = 0, taskTime = 0, area = 0;
+                while (cursorTotal.moveToNext()) {
+                    taskCount = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbTaskCurrentCount)));
+                    taskTime = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbTimeCurrentCount)));
+                    area = Long.parseLong(cursorTotal.getString(cursorTotal.getColumnIndex(Content.dbAreaCurrentCount)));
+                }
+                mSqLiteOpenHelperUtils.close();
+
+                gsonUtils.setCurrentArea(area);
+                gsonUtils.setCurrentTaskCount(taskCount);
+                gsonUtils.setCurrentTime(taskTime);
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.dbCurrentCount));
             }
         }
 
@@ -1075,6 +1116,28 @@ public class SocketServices extends BaseService {
             if (Content.server != null) {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.UPDATE));
             }
+        } else if (messageEvent.getState() == 30000) {
+            String address = null;
+            try {
+                address = new JSONObject((String)messageEvent.getT()).getString(Content.Address);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            if (Content.server != null) {
+                if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
+                    Content.server.broadcast(gsonUtils.putConnMsg(Content.CONN_OK));
+                    Content.CONNECT_ADDRESS = address;
+                    myHandler.sendEmptyMessageDelayed(10, 5000);
+                    Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
+                } else if (Content.CONNECT_ADDRESS.equals(address)) {
+                    myHandler.removeMessages(10);
+                    myHandler.sendEmptyMessageDelayed(10, 5000);
+                } else if (!Content.CONNECT_ADDRESS.equals(address)) {
+                    gsonUtils.setAddress(Content.CONNECT_ADDRESS);
+                    SimpleServer.getInstance(mContext).conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
+                }
+            }
+
         }
     }
 

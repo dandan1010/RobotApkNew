@@ -63,6 +63,36 @@ public class GsonUtils {
     private boolean emergency;
     private String robotVersion;
     private long totalArea = 0;
+    private long totalTaskCount = 0;
+    private long totalTime = 0;
+    private String address = "";
+    private long currentArea = 0;
+    private long currentTaskCount = 0;
+    private long currentTime = 0;
+
+    public void setCurrentArea(long currentArea) {
+        this.currentArea = currentArea;
+    }
+
+    public void setCurrentTaskCount(long currentTaskCount) {
+        this.currentTaskCount = currentTaskCount;
+    }
+
+    public void setCurrentTime(long currentTime) {
+        this.currentTime = currentTime;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public void setTotalTaskCount(long totalTaskCount) {
+        this.totalTaskCount = totalTaskCount;
+    }
+
+    public void setTotalTime(long totalTime) {
+        this.totalTime = totalTime;
+    }
 
     public void setTotalArea(long totalArea) {
         this.totalArea = totalArea;
@@ -316,6 +346,7 @@ public class GsonUtils {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.MAP_NAME, mapName);
             jsonObject.put(Content.TASK_NAME, taskName);
+            jsonObject.put(Content.CONNECT_ADDRESS, address);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -416,7 +447,12 @@ public class GsonUtils {
             jsonObject.put(Content.TASK_NAME, task_state);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
             jsonObject.put(Content.ROBOTVERSIONCODE, robotVersion);
-            jsonObject.put(Content.TOTAL_AREA, totalArea);
+            jsonObject.put(Content.dbAreaTotalCount, totalArea);
+            jsonObject.put(Content.dbTaskTotalCount, totalTaskCount);
+            jsonObject.put(Content.dbTimeTotalCount, totalTime);
+            jsonObject.put(Content.dbAreaCurrentCount, currentArea);
+            jsonObject.put(Content.dbTaskCurrentCount, currentTaskCount);
+            jsonObject.put(Content.dbTimeCurrentCount, currentTime);
             JSONArray edPointArray = new JSONArray();
             if (taskBeans != null) {
                 for (int i = 0; i < taskBeans.size(); i++) {

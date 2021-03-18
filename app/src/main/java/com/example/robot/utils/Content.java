@@ -29,7 +29,6 @@ public final class Content {
     public static int charging_gpio = 1;
     public static boolean is_first_charging = false;
 
-    public static final String TOTAL_AREA = "total_area";//消毒面积
     /**
      * //测试版本不亮灯 ：0
      * demo : 1
@@ -52,6 +51,7 @@ public final class Content {
     public static final String dns = "0.0.0.0";//域名服务器
     public static SimpleServer server = null;
     public static String CONNECT_ADDRESS = null;
+    public static final String Address = "address";
     public static String CONN_OK = "conn_ok";
     public static String NO_CONN = "no_conn";
     public static final double ROBOT_SIZE = 0.215f; //机器人大小(中心点到雷达距离 M)
@@ -95,6 +95,8 @@ public final class Content {
      * 2:初始化失败
      */
     public static int is_initialize_finished = -1;
+
+    public static final String PING = "ping";
 
     public static final String MAP_NAME = "map_Name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字
@@ -158,6 +160,9 @@ public final class Content {
     public static int maxBattery = 70;//最高电量
     public static int fullBattery = 99;//充满电
     public static boolean isCharging = false;//充电窗台
+    public static int isLimiting_flag = 0;//已经限流
+    public static int limiting_flag = 0;//已经限流
+    public static int limitint_init_flag = 0;//初始化限流
 
     /**
      *
@@ -258,8 +263,18 @@ public final class Content {
     public static final String dbTaskState = "dbTaskState";//点任务状态
     public static final String dbTaskStateMapName = "dbMapName";
     public static final String dbTaskStateTaskName = "dbTaskStateTaskName";
-    //    public static final String dbTaskStatePointName = "dbTaskStatePointName";
     public static final String dbTaskStatePointState = "dbTaskStatePointState";
+
+    public static final String dbTotalCount = "totalCount";//任务统计个数
+    public static final String dbTaskTotalCount = "dbTaskTotalCount";//任务总个数
+    public static final String dbTimeTotalCount = "dbTimeTotalCount";//任务总时间
+    public static final String dbAreaTotalCount = "dbAreaTotalCount";//任务总面积
+
+    public static final String dbCurrentCount = "currentCount";//当月任务统计个数
+    public static final String dbTaskCurrentCount = "dbTaskCurrentCount";//当月任务总个数
+    public static final String dbTimeCurrentCount = "dbTimeCurrentCount";//当月任务总时间
+    public static final String dbAreaCurrentCount = "dbAreaCurrentCount";//当月任务总面积
+    public static final String dbCurrentDate = "dbCurrentDate";//当月
 
     //test
     public static final String TEST_UVCSTART_1 = "test_uvcstart_1";

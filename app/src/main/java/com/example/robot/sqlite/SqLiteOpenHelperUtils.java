@@ -148,9 +148,37 @@ public class SqLiteOpenHelperUtils {
         sqLiteDatabase = taskSqLite.getWritableDatabase();
         sqLiteDatabase.execSQL("update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName + "'");
         Log.d("ZDZD : ", "update " + Content.dbTaskState + " set " + Content.dbTaskStatePointState + "='" + state + "' where " + Content.dbTaskStateMapName + "='" + mapName + "' AND " + Content.dbTaskStateTaskName + "='" + taskName + "'");
-
     }
 
+    //总任务统计
+    public void saveTaskTotalCount(String taskCount, String taskTime, String area) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("insert into " + Content.dbTotalCount + "(" + Content.dbTaskTotalCount + ", " + Content.dbTimeTotalCount + ", " + Content.dbAreaTotalCount + ") values ('" + taskCount + "','" + taskTime + "','" + area + "')");
+    }
+
+    public Cursor searchTaskTotalCount() {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.dbTotalCount, new String[]{"_id", Content.dbTaskTotalCount, Content.dbTimeTotalCount, Content.dbAreaTotalCount}, null, null, null, null, null);
+        return cursor;
+    }
+
+    //当月任务统计
+    public void saveTaskCurrentCount(String taskCount, String taskTime, String area, String date) {
+        sqLiteDatabase = taskSqLite.getWritableDatabase();
+        sqLiteDatabase.execSQL("insert into " + Content.dbCurrentCount + "(" + Content.dbTaskCurrentCount + ", " + Content.dbTimeCurrentCount + ", " + Content.dbAreaCurrentCount + ", " + Content.dbCurrentDate + ") values ('" + taskCount + "','" + taskTime + "','" + area + "','" + date + "')");
+    }
+
+    public Cursor searchTaskCurrentCount(String date) {
+        sqLiteDatabase = taskSqLite.getReadableDatabase();
+        Cursor cursor = sqLiteDatabase.query(Content.dbCurrentCount,
+                new String[]{"_id", Content.dbTaskCurrentCount, Content.dbTimeCurrentCount, Content.dbAreaCurrentCount, Content.dbCurrentDate},
+                Content.dbCurrentDate + "=?",
+                new String[]{date},
+                null,
+                null,
+                null);
+        return cursor;
+    }
 
     public void close() {
         sqLiteDatabase.close();
