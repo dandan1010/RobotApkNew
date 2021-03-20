@@ -50,7 +50,7 @@ public final class Content {
     public static final String gateway = "10.7.5.1";//网关地址
     public static final String dns = "0.0.0.0";//域名服务器
     public static SimpleServer server = null;
-    public static String CONNECT_ADDRESS = null;
+    public static String CONNECT_ADDRESS = "";
     public static final String Address = "address";
     public static String CONN_OK = "conn_ok";
     public static String NO_CONN = "no_conn";

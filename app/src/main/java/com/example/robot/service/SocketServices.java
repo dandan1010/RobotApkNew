@@ -388,7 +388,7 @@ public class SocketServices extends BaseService {
                     }
                     break;
                 case 10:
-                    Content.CONNECT_ADDRESS = null;
+                    Content.CONNECT_ADDRESS = "";
                     break;
                 default:
                     break;
