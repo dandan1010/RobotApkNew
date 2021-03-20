@@ -3,20 +3,12 @@ package com.example.robot.receiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
-import android.os.SystemClock;
 import android.util.Log;
 
-import com.example.robot.bean.TaskBean;
 import com.example.robot.service.SocketServices;
-import com.example.robot.sqlite.SqLiteOpenHelperUtils;
-import com.example.robot.task.TaskManager;
 import com.example.robot.utils.AlarmUtils;
-import com.example.robot.utils.Content;
-import com.example.robot.utils.EventBusMessage;
+import com.example.robot.content.Content;
 import com.example.robot.utils.SharedPrefUtil;
-
-import org.greenrobot.eventbus.EventBus;
 
 public class ServerReceiver extends BroadcastReceiver {
     private AlarmUtils mAlarmUtils;

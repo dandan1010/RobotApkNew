@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
-import com.example.robot.utils.Content;
+import com.example.robot.content.Content;
 
 public class TaskSqLite extends SQLiteOpenHelper {
 

@@ -4,11 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
-import com.dcm360.controller.gs.controller.bean.PositionListBean;
-import com.dcm360.controller.gs.controller.bean.WorldPoseBean;
-import com.example.robot.bean.TaskBean;
-
-import java.util.ArrayList;
+import com.example.robot.content.Content;
 
 public class SharedPrefUtil {
 

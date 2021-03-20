@@ -1,44 +1,27 @@
 package com.example.robot.service;
 
-import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.annotation.RequiresApi;
-
-import com.dcm360.controller.RobotController;
-import com.dcm360.controller.gs.GSRobotController;
 import com.dcm360.controller.gs.controller.GsController;
-import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
-import com.dcm360.controller.gs.controller.bean.system_bean.HealthStatus;
-import com.dcm360.controller.gs.controller.bean.system_bean.RobotDeviceStatus;
 import com.dcm360.controller.robot_interface.bean.Status;
-import com.dcm360.controller.robot_interface.status.NavigationStatus;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
-import com.dcm360.controller.utils.WebSocketUtil;
 import com.example.robot.R;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.task.TaskManager;
-import com.example.robot.utils.Content;
+import com.example.robot.content.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.ServerConnoct;
 import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
-import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.util.concurrent.TimeUnit;
 
-import io.reactivex.MaybeSource;
 import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
 

@@ -11,6 +11,7 @@ import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.example.robot.BuildConfig;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.TaskBean;
+import com.example.robot.content.Content;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 
 import org.json.JSONArray;

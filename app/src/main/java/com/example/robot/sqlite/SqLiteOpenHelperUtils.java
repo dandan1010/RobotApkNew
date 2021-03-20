@@ -1,14 +1,11 @@
 package com.example.robot.sqlite;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.nfc.Tag;
 import android.util.Log;
 
-import com.example.robot.R;
-import com.example.robot.utils.Content;
+import com.example.robot.content.Content;
 
 import java.util.ArrayList;
 

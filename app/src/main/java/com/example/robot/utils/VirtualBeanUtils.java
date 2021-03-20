@@ -3,6 +3,7 @@ package com.example.robot.utils;
 import android.content.Context;
 
 import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
+import com.example.robot.content.Content;
 import com.example.robot.task.TaskManager;
 
 import java.util.ArrayList;

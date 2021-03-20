@@ -1,13 +1,10 @@
 package com.example.robot.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.example.robot.content.Content;
 import com.example.robot.service.SimpleServer;
-
-import java.io.IOException;
-import java.net.InetSocketAddress;
 
 public class ServerConnoct {
 

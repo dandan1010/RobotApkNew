@@ -5,10 +5,8 @@ import android.content.Context;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Message;
-import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -26,32 +24,28 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacle
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.robot_interface.bean.Status;
-import com.dcm360.controller.robot_interface.status.NavigationStatus;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.dcm360.controller.utils.WebSocketUtil;
 import com.example.robot.R;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
 import com.example.robot.bean.TaskBean;
+import com.example.robot.content.BaseEvent;
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
 import com.example.robot.utils.AlarmUtils;
 import com.example.robot.utils.AssestFile;
-import com.example.robot.utils.Content;
+import com.example.robot.content.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.utils.GsonUtils;
-import com.example.robot.utils.SharedPrefUtil;
-import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -123,8 +117,8 @@ public class TaskManager {
         RobotManagerController.getInstance().getRobotController().getMapPicture(mapName, new RobotStatus<byte[]>() {
             @Override
             public void success(byte[] bytes) {
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapIcon) + "successed"));
-                EventBus.getDefault().post(new EventBusMessage(10020, bytes));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapIcon) + "successed"));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPICON, bytes));
             }
 
             @Override
@@ -132,7 +126,7 @@ public class TaskManager {
 
                 String msg = "get map Png failed :" + error.getMessage();
                 Log.d(TAG, msg);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapIcon) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapIcon) + error.getMessage()));
             }
         });
     }
@@ -148,8 +142,7 @@ public class TaskManager {
                 if (robotPosition != null) {
                     mRobotPosition = robotPosition;
                     if (null != robotPosition.getGridPosition()) {
-                        EventBus.getDefault().post(new EventBusMessage(1003, robotPosition));
-                        EventBus.getDefault().post(new EventBusMessage(10024, robotPosition));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDGPSPOSITION, robotPosition));
                     }
 
                 } else {
@@ -160,7 +153,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "gps error :" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_robotPosition) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_robotPosition) + error.getMessage()));
             }
         });
     }
@@ -182,16 +175,16 @@ public class TaskManager {
 
                     @Override
                     public void onNext(RobotMap robotMap) {
-                        EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapList) + "successed"));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
 
-                        EventBus.getDefault().post(new EventBusMessage(10012, robotMap));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, robotMap));
 
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         Log.d(TAG, "get map list is error ： " + e.getMessage());
-                        EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapList) + e.getMessage()));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + e.getMessage()));
                     }
 
                     @Override
@@ -210,13 +203,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "navigate " + mapName + " to " + positionName + ",     " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.navigate_position) + positionName + "successed"));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.navigate_position) + positionName + "successed"));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "navigate " + mapName + " to " + positionName + " : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.navigate_position) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.navigate_position) + error.getMessage()));
             }
         });
 
@@ -240,7 +233,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "start scan map failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.start_scanMap) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.start_scanMap) + error.getMessage()));
             }
         });
 
@@ -255,7 +248,7 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "develop map  :  " + status.toString() + " mapName ：" + map_name);
                 if ("START_SCAN_MAP_FAILED".equals(status.getErrorCode())) {
-                    EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.develop_map) + status.getMsg()));
+                    EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.develop_map) + status.getMsg()));
                 } else {
                     scanningFlag = true;
                     if (myThread == null) {
@@ -270,7 +263,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "develop map  failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.develop_map) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.develop_map) + error.getMessage()));
             }
         });
 
@@ -283,14 +276,13 @@ public class TaskManager {
         RobotManagerController.getInstance().getRobotController().scanMapPng(new RobotStatus<byte[]>() {
             @Override
             public void success(byte[] bytes) {
-                EventBus.getDefault().post(new EventBusMessage(1005, bytes));
-                EventBus.getDefault().post(new EventBusMessage(10020, bytes));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPICON, bytes));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "scanMapPng failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_scanMap) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_scanMap) + error.getMessage()));
             }
         });
     }
@@ -304,7 +296,7 @@ public class TaskManager {
         GsController.INSTANCE.stopScanMap(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_scanSaveMap) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_scanSaveMap) + status.getMsg()));
                 scanningFlag = false;
                 if (myThread != null) {
                     myThread = null;
@@ -314,7 +306,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "stopScanMap failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_scanSaveMap) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_scanSaveMap) + error.getMessage()));
             }
         });
     }
@@ -328,13 +320,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "cancleScanMap ：" + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_scanMap) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_scanMap) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "cancleScanMap failed ：" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_scanMap) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_scanMap) + error.getMessage()));
 
             }
         });
@@ -348,13 +340,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "deleteMap :  " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_map) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_map) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "deleteMap failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_map) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_map) + error.getMessage()));
             }
         });
     }
@@ -364,7 +356,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "renameMapName :  " + status);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.rename_map) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.rename_map) + status.getMsg()));
                 Cursor cursor = sqLiteOpenHelperUtils.searchAllPointTask();
                 while (cursor.moveToNext()) {
                     String mapTaskName = cursor.getString(cursor.getColumnIndex(Content.dbPointTaskName));
@@ -395,7 +387,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "renameMapName failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_map) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_map) + error.getMessage()));
             }
         });
     }
@@ -434,13 +426,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "saveTaskQueue : " + status);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.save_task) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.save_task) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "saveTaskQueue failed : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.save_task) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.save_task) + error.getMessage()));
             }
         });
 
@@ -527,7 +519,7 @@ public class TaskManager {
 //        GsController.INSTANCE.startTaskQueue(robotTaskQueue, new RobotStatus<Status>() {
 //            @Override
 //            public void success(Status status) {
-//                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.start_task) + status.getMsg()));
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.start_task) + status.getMsg()));
 //                if ("successed".equals(status.getMsg())) {
 //                    Content.robotState = 3;
 //                    Content.time = 300;
@@ -541,14 +533,14 @@ public class TaskManager {
 //                } else {
 //                    Content.taskName = null;
 //                    Log.d(TAG, "11111任务：" + status.getMsg());
-//                    EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.start_task) + status.getMsg()));
+//                    EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.start_task) + status.getMsg()));
 //                }
 //            }
 //
 //            @Override
 //            public void error(Throwable error) {
 //                Content.taskName = null;
-//                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.start_task) + error.getMessage()));
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.start_task) + error.getMessage()));
 //            }
 //        });
         Content.startTime = System.currentTimeMillis();
@@ -579,11 +571,11 @@ public class TaskManager {
                     isSendType = false;
                     if (Content.taskIndex < mTaskArrayList.size()) {
                         if (Content.Working_mode == 1) {
-                            EventBus.getDefault().post(new EventBusMessage(10005, -1));
+                            EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTLIGHT, -1));
                         }
                         navigate_Position(Content.mapName, mTaskArrayList.get(Content.taskIndex).getName());
                         pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.ongoing));
-                        EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
                         Content.taskIsFinish = true;
                         Content.taskState = 1;
                         handler.removeMessages(1001);
@@ -661,7 +653,7 @@ public class TaskManager {
                 Log.d(TAG, "timer-1003 速度 : " + Content.speed + ",   mapName : " + Content.mapName);
                 if (Content.taskIndex < mTaskArrayList.size()) {
                     pointStateBean.getList().get(Content.taskIndex).setPointState("UNREACHED");
-                    EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+                    EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
                     if (Content.taskIndex == mTaskArrayList.size() - 1 && Content.isCharging) {
                         Content.taskIsFinish = false;
                         Content.taskIndex++;
@@ -680,7 +672,7 @@ public class TaskManager {
                     Content.taskIsFinish = false;
                     navigate_Position(Content.mapName, Content.CHARGING_POINT);
                     pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.ongoing));
-                    EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+                    EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
                 }
                 handler.removeMessages(1003);
             } else if (msg.what == 1004) {
@@ -860,9 +852,9 @@ public class TaskManager {
         mTaskArrayList.clear();
         Content.startTime = System.currentTimeMillis();
         if (Content.Working_mode == 1) {
-            EventBus.getDefault().post(new EventBusMessage(10006, -1));
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPLIGHT, -1));
         }
-        EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_task) + "successed"));
+        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_task) + "successed"));
     }
 
     /**
@@ -875,13 +867,13 @@ public class TaskManager {
                 Log.d(TAG, "deleteTaskQueue : " + status.getMsg());
                 sqLiteOpenHelperUtils.deleteAlarmTask(mapName + "," + task_name);
                 sqLiteOpenHelperUtils.deletePointTask(Content.dbPointTaskName, mapName + "," + task_name);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_task) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_task) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "deleteTaskQueue failed : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_task) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_task) + error.getMessage()));
             }
         });
     }
@@ -893,16 +885,16 @@ public class TaskManager {
         GsController.INSTANCE.taskQueues(map_name, new RobotStatus<RobotTaskQueueList>() {
             @Override
             public void success(RobotTaskQueueList robotTaskQueueList) {
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_taskList) + " successed"));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_taskList) + " successed"));
                 Log.d(TAG, "getTaskQueues success" + robotTaskQueueList.getData().size());
                 mRobotTaskQueueList = robotTaskQueueList;
-                EventBus.getDefault().post(new EventBusMessage(1006, robotTaskQueueList));
-                EventBus.getDefault().post(new EventBusMessage(10016, robotTaskQueueList));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPLIGHT, robotTaskQueueList));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDTASKQUEUE, robotTaskQueueList));
             }
 
             @Override
             public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_taskList) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_taskList) + error.getMessage()));
             }
         });
 
@@ -916,7 +908,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "addPosition success : " + positionListBean.getName() + ",    " + Content.isCharging);
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_position) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.add_position) + status.getMsg()));
                 if (Content.isCharging && !isAddInitialize) {
                     isAddInitialize = true;
                     handler.sendEmptyMessageDelayed(1005, 0);
@@ -928,7 +920,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "addPosition failed : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_position) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.add_position) + error.getMessage()));
             }
         });
     }
@@ -941,7 +933,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "deletePosition success");
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_position) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_position) + status.getMsg()));
                 sqLiteOpenHelperUtils.deletePointTask(Content.dbPointName, positionName);
                 getPosition(Content.mapName);
             }
@@ -949,7 +941,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "deletePosition fail : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.delete_position) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_position) + error.getMessage()));
 
             }
         });
@@ -963,7 +955,7 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "renamePosition success");
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.rename_position) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.rename_position) + status.getMsg()));
                 sqLiteOpenHelperUtils.updatePointTask(Content.dbPointName, originName, newName);
                 sqLiteOpenHelperUtils.close();
                 getPosition(Content.mapName);
@@ -972,7 +964,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "renamePosition failed : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.rename_position) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.rename_position) + error.getMessage()));
 
             }
         });
@@ -987,8 +979,8 @@ public class TaskManager {
             public void success(RobotPositions robotPositions) {
                 Log.d(TAG, "getPosition success : " + robotPositions.getData().size());
                 mRobotPositions = robotPositions;
-                EventBus.getDefault().post(new EventBusMessage(10017, robotPositions));
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapPositionList) + "successed"));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDPOINTPOSITION, robotPositions));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapPositionList) + "successed"));
                 for (int i = 0; i < robotPositions.getData().size(); i++) {
                     Log.d(TAG, "getPosition Initialize : " + Content.InitializePositionName + ",   点名字：" + robotPositions.getData().get(i).getName());
                     if (Content.CHARGING_POINT.equals(robotPositions.getData().get(i).getName())) {
@@ -1004,7 +996,7 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "renamePosition failed : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_mapPositionList) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapPositionList) + error.getMessage()));
             }
         });
 
@@ -1019,13 +1011,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "cancel_navigate " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_navigate) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_navigate) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "cancel_navigate failed :" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.stop_navigate) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_navigate) + error.getMessage()));
             }
         });
     }
@@ -1047,13 +1039,13 @@ public class TaskManager {
                 } else {
                     NavigationService.initialize(Content.mapName, Content.InitializePositionName);
                 }
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.use_map) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.use_map) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "use_map failed " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.use_map) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.use_map) + error.getMessage()));
             }
         });
     }
@@ -1068,15 +1060,15 @@ public class TaskManager {
                 RobotManagerController.getInstance().getRobotController().getVirtualObstacleData(mapName, new RobotStatus<VirtualObstacleBean>() {
                     @Override
                     public void success(VirtualObstacleBean virtualObstacleBean) {
-                        EventBus.getDefault().post(new EventBusMessage(10042, virtualObstacleBean));
-                        EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.virtual_obstacle) + "successed"));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.SEND_VIRTUAL, virtualObstacleBean));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.virtual_obstacle) + "successed"));
 
                     }
 
                     @Override
                     public void error(Throwable error) {
                         Log.d(TAG, "lines : virtualObstacleBean error : " + error.getMessage());
-                        EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.virtual_obstacle) + error.getMessage()));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.virtual_obstacle) + error.getMessage()));
                     }
                 });
             }
@@ -1097,13 +1089,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "update_virtual " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_virtual_obstacle) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.add_virtual_obstacle) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "update_virtual " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.add_virtual_obstacle) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.add_virtual_obstacle) + error.getMessage()));
             }
         });
     }
@@ -1114,13 +1106,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "setSpeedLevel " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.set_speed_level) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "setSpeedLevel failed " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.set_speed_level) + error.getMessage()));
 
             }
         });
@@ -1132,13 +1124,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "setnavigationSpeedLevel " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.set_speed_level) + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "setnavigationSpeedLevel " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.set_speed_level) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.set_speed_level) + error.getMessage()));
 
             }
         });
@@ -1152,13 +1144,13 @@ public class TaskManager {
             @Override
             public void success(RobotDeviceStatus robotDeviceStatus) {
                 Log.d(TAG, "deviceStatus： ： " + robotDeviceStatus.getData());
-                EventBus.getDefault().post(new EventBusMessage(10049, robotDeviceStatus));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.DEVICES_STATUS, robotDeviceStatus));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "deviceStatus failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.device_status) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.device_status) + error.getMessage()));
             }
         });
     }
@@ -1171,13 +1163,13 @@ public class TaskManager {
             @Override
             public void success(VersionBean versionBean) {
                 Log.d(TAG, "VersionBean： ： " + versionBean.getData().getVersion());
-                EventBus.getDefault().post(new EventBusMessage(10062, versionBean.getData().getVersion()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOTVERSIONCODE, versionBean.getData().getVersion()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "VersionBean failed :  " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.device_status) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.device_status) + error.getMessage()));
             }
         });
     }
@@ -1217,17 +1209,17 @@ public class TaskManager {
                         int statusCode = jsonObject.getInt("statusCode");
                         switch (statusCode) {
                             case 701:
-                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
                                 break;
                             case 401:
-                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
                                 mAssestFile.deepFile(data);
                                 break;
                             case 702:
-                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
                                 break;
                             case 1006:
-                                EventBus.getDefault().post(new EventBusMessage(10000, jsonObject.getString("statusMsg")));
+                                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
                                 mAssestFile.deepFile(data);
                                 break;
                         }
@@ -1249,7 +1241,7 @@ public class TaskManager {
                         if (TextUtils.isEmpty(data)) {
                             return;
                         }
-                        EventBus.getDefault().post(new EventBusMessage(10037, data));
+                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_HEALTHY, data));
                     }, throwable -> {
                         Log.d(TAG, "system_health_status ：" + throwable.getMessage());
                         system_health_status();
@@ -1275,7 +1267,7 @@ public class TaskManager {
             handler.removeMessages(1002);
             handler.removeMessages(1003);
             pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
-            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
             Log.d(TAG, "Content.taskIndex" + Content.taskIndex + " ,   " + mTaskArrayList.size());
             if (Content.taskIndex < mTaskArrayList.size() - 1) {
                 EventBus.getDefault().post(new EventBusMessage(1007, mTaskArrayList.get(Content.taskIndex).getDisinfectTime()));
@@ -1294,7 +1286,7 @@ public class TaskManager {
             handler.removeMessages(1002);
             handler.removeMessages(1003);
             pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
-            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "UNREACHABLE");
@@ -1306,7 +1298,7 @@ public class TaskManager {
             handler.removeMessages(1002);
             handler.removeMessages(1003);
             pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
-            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "LOCALIZATION_FAILED");
@@ -1318,7 +1310,7 @@ public class TaskManager {
             handler.removeMessages(1002);
             handler.removeMessages(1003);
             pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
-            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
             Content.taskIndex++;
             Content.taskIsFinish = false;
             Log.d(TAG, "GOAL_NOT_SAFE");
@@ -1330,7 +1322,7 @@ public class TaskManager {
             handler.removeMessages(1002);
             handler.removeMessages(1003);
             pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
-            EventBus.getDefault().post(new EventBusMessage(10038, pointStateBean));
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
             Content.taskIsFinish = false;
             Content.taskIndex++;
             Log.d(TAG, "UNREACHED");
@@ -1347,13 +1339,13 @@ public class TaskManager {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "reset_robot : " + status.getMsg());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.reset_robot) + " : " + status.getMsg()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.reset_robot) + " : " + status.getMsg()));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "reset_robot failed : " + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.reset_robot) + " : " + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.reset_robot) + " : " + error.getMessage()));
             }
         });
 
@@ -1363,14 +1355,14 @@ public class TaskManager {
         GsController.INSTANCE.getUltrasonicPhit(new RobotStatus<UltrasonicPhitBean>() {
             @Override
             public void success(UltrasonicPhitBean ultrasonicPhitBean) {
-                EventBus.getDefault().post(new EventBusMessage(10059, ultrasonicPhitBean));
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_ultrasonic_phit) + "成功"));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SEND_ULTRASONIC, ultrasonicPhitBean));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_ultrasonic_phit) + "成功"));
 
             }
 
             @Override
             public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.get_ultrasonic_phit) + error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_ultrasonic_phit) + error.getMessage()));
             }
         });
     }

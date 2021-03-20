@@ -8,7 +8,7 @@ import android.widget.EditText;
 import com.example.robot.R;
 import com.example.robot.service.SocketServices;
 import com.example.robot.utils.EventBusMessage;
-import com.example.robot.utils.Content;
+import com.example.robot.content.Content;
 import com.lztek.toolkit.AddrInfo;
 import com.lztek.toolkit.Lztek;
 import com.lztek.toolkit.SerialPort;
