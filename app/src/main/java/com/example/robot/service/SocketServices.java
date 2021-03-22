@@ -390,10 +390,126 @@ public class SocketServices extends BaseService {
                 case 10:
                     Content.CONNECT_ADDRESS = "";
                     break;
+                case 11://定时任务
+                    getTaskQueue(msg.arg1);
+                    break;
+                case 12:
+                    NavigationService.move(0.2f, 0.0f);
+                    handler.sendEmptyMessageDelayed(1001, 10);
+                    break;
+                case 13:
+                    handler.removeMessages(12);
+                    handler.removeMessages(13);
+                    Content.taskIndex = 0;
+                    TaskManager.getInstances(mContext).use_map(Content.mapName);
+                    myHandler.post(alarmRunnable);
+                    break;
                 default:
                     break;
             }
 
+        }
+    }
+
+    Runnable alarmRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d("ALARMreceiver :", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
+            if (Content.is_initialize_finished == 1) {
+                RotateCount = 120;
+                myHandler.removeCallbacks(this::run);
+                if (Content.taskName != null && Content.mapName != null) {
+                    if (SocketServices.battery < Content.battery) {
+                        Content.robotState = 6;
+                        Content.time = 4000;
+                        GsonUtils gsonUtils = new GsonUtils();
+                        gsonUtils.setTvTime("电量回充,不能开始任务");
+                        assestFile.deepFile("电量回充,不能开始任务 : 当前：" + SocketServices.battery + " , 回充： " + Content.battery);
+                        if (Content.server != null) {
+                            Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
+                        }
+                        if (Content.have_charging_mode && !Content.isCharging) {
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                        } else if (!Content.have_charging_mode) {
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.InitializePositionName);
+                        }
+                        Content.taskName = null;
+                        Content.taskIndex = -1;
+                    } else {
+                        TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName, 0);
+                    }
+                } else {
+                    Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
+                }
+            } else if (Content.is_initialize_finished == 0) {
+                if (RotateCount >= 0) {
+                    RotateCount--;
+                    myHandler.postDelayed(runnable, 1000);
+                } else {
+                    RotateCount = 120;
+                    myHandler.removeCallbacks(this::run);
+                    Content.taskIndex = 0;
+                    TaskManager.getInstances(mContext).use_map(Content.mapName);
+                    myHandler.post(this::run);
+                }
+            } else if (Content.is_initialize_finished == 2) {
+                Content.taskName = null;
+                RotateCount = 120;
+                Content.taskIndex = -1;
+                myHandler.removeCallbacks(this::run);
+            } else if (Content.is_initialize_finished == -1) {
+                RotateCount = 120;
+                Content.taskIndex = -1;
+                myHandler.removeCallbacks(this::run);
+            }
+        }
+    };
+
+    public void getTaskQueue(int week) {
+        // 第1步中设置的闹铃时间到，这里可以弹出闹铃提示并播放响铃
+        long time = System.currentTimeMillis();
+        if (!Content.have_charging_mode && Content.isCharging) {
+            EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.have_charging_mode)));
+        } else {
+            Cursor aTrue = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");
+            while (aTrue.moveToNext()) {
+                Log.d("AlarmReceiver ", mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                        + ", taskName" + TextUtils.isEmpty(Content.taskName)
+                        + ",  dbAlarmCycle :" + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
+                assestFile.deepFile("dbAlarmTime " + mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                        + ", taskName : " + TextUtils.isEmpty(Content.taskName)
+                        + ",  dbAlarmCycle : " + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
+                if (!TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                        && week == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                        && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                        && TextUtils.isEmpty(Content.taskName)) {
+                    Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                    Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                    //if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
+                    checkLztekLamp.setLeaveChargingLimit();
+                    myHandler.sendEmptyMessageDelayed(12, 10000);
+                    myHandler.sendEmptyMessageDelayed(13, 11000);
+                } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                        && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                        && TextUtils.isEmpty(Content.taskName)) {
+                    Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                    Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                    mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
+                    checkLztekLamp.setLeaveChargingLimit();
+                    myHandler.sendEmptyMessageDelayed(12, 10000);
+                    myHandler.sendEmptyMessageDelayed(13, 11000);
+                } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
+                        && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
+                        && TextUtils.isEmpty(Content.taskName)) {
+                    Content.taskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                    Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                    mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
+                    checkLztekLamp.setLeaveChargingLimit();
+                    myHandler.sendEmptyMessageDelayed(12, 10000);
+                    myHandler.sendEmptyMessageDelayed(13, 11000);
+                }
+            }
+            mSqLiteOpenHelperUtils.close();
         }
     }
 

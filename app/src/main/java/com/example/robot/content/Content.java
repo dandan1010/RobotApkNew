@@ -9,6 +9,7 @@ public final class Content {
 
     public static final String isRobotAngularSpeed = "persist.robot.isRobotAngular";//消毒时是否转圈
 
+    public static final String limiting_path = "/dev/ttyS2";
     public static final boolean isNewSerialPort = false;
     public static String getBatterySerialPortPath(){
         if (isNewSerialPort) {
@@ -161,7 +162,7 @@ public final class Content {
     public static int fullBattery = 99;//充满电
     public static boolean isCharging = false;//充电窗台
     public static int isLimiting_flag = 0;//已经限流
-    public static int limiting_flag = 0;//已经限流
+    public static int charging_limiting_flag = 0;//已经限流
     public static int limitint_init_flag = 0;//初始化限流
 
     /**

@@ -431,13 +431,13 @@ public class CheckLztekLamp {
                     String msg = "";
                     //读gpio
                     if (!Content.isCharging && getChargingGpio()
-                        /*&& (Content.is_first_charging || SocketServices.battery < 95)*/) {
+                        && (Content.is_first_charging || SocketServices.battery < 95)) {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
                     if (!editText.getText().toString().substring(12, 14).startsWith("F")
-                            /*&& (SocketServices.battery != 100
-                            || Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 > 200)*/) {
+                            && (SocketServices.battery != 100
+                            || Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 > 200)) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";
@@ -478,7 +478,7 @@ public class CheckLztekLamp {
      * 请求速度和温度
      */
     public void getSpeed() {
-        speedSerialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
+        speedSerialPort = mLztek.openSerialPort(Content.limiting_path, 115200, 8, 0, 1, 0);
         if (speedSerialPort == null) {
             Log.d(TAG, "Speed is null");
             return;
@@ -525,7 +525,7 @@ public class CheckLztekLamp {
                     }
                 }
             }
-            handler.postDelayed(this::run, 1000);
+            handler.postDelayed(this::run, 5000);
         }
     };
 
@@ -535,7 +535,7 @@ public class CheckLztekLamp {
         int bTemp = Integer.parseInt(substring1, 16);
         Log.d("setLimiting ", "Content.limitint_init_flag : " + Content.limitint_init_flag
                 + ",  Content.isLimiting_flag: " + Content.isLimiting_flag
-        + ",   Content.limiting_flag : " + Content.limiting_flag
+        + ",   Content.limiting_flag : " + Content.charging_limiting_flag
         + ", temp :" +aTemp + "----" + bTemp);
         if (Content.limitint_init_flag == 0) {
             setArrayList.add(mContext.getString(R.string.a_password1));
@@ -570,44 +570,66 @@ public class CheckLztekLamp {
             Content.isLimiting_flag = 2;
             setSpeed();
         } else {
-            if (Content.limiting_flag == 0 && Content.isCharging) {//设置为5A
-                setArrayList.add(mContext.getString(R.string.a_password1));
-                setArrayList.add(mContext.getString(R.string.a_flow_5A));
-                setArrayList.add(mContext.getString(R.string.a_password2));
+            if(Content.isCharging){
+                if (Content.charging_limiting_flag == 0) {//设置为5A
+                    setArrayList.add(mContext.getString(R.string.a_password1));
+                    setArrayList.add(mContext.getString(R.string.a_flow_5A));
+                    setArrayList.add(mContext.getString(R.string.a_password2));
 
-                setArrayList.add(mContext.getString(R.string.b_password1));
-                setArrayList.add(mContext.getString(R.string.b_flow_5A));
-                setArrayList.add(mContext.getString(R.string.b_password2));
-                Content.limiting_flag = 1;
-                setSpeed();
-            } else if (Content.limiting_flag == 1 && aTemp < 55 && bTemp < 55) {//设置为20A
-                setArrayList.add(mContext.getString(R.string.a_password1));
-                setArrayList.add(mContext.getString(R.string.a_flow_20A));
-                setArrayList.add(mContext.getString(R.string.a_password2));
+                    setArrayList.add(mContext.getString(R.string.b_password1));
+                    setArrayList.add(mContext.getString(R.string.b_flow_5A));
+                    setArrayList.add(mContext.getString(R.string.b_password2));
+                    Content.charging_limiting_flag = 1;
+                    setSpeed();
+                }else{
+                    Log.d("setLimiting ", "already limit current for charging!");
+                }
+            }else{
+                if (Content.charging_limiting_flag == 1 && aTemp < 55 && bTemp < 55) {//设置为20A
+                    setArrayList.add(mContext.getString(R.string.a_password1));
+                    setArrayList.add(mContext.getString(R.string.a_flow_20A));
+                    setArrayList.add(mContext.getString(R.string.a_password2));
 
-                setArrayList.add(mContext.getString(R.string.b_password1));
-                setArrayList.add(mContext.getString(R.string.b_flow_20A));
-                setArrayList.add(mContext.getString(R.string.b_password2));
-                Content.limiting_flag = 0;
-                setSpeed();
-            }
-            if (Content.isLimiting_flag != 0 && aTemp <= 35 && bTemp <= 35){//电流设置为20A
-                setArrayList.add(mContext.getString(R.string.a_password1));
-                setArrayList.add(mContext.getString(R.string.a_flow_20A));
-                setArrayList.add(mContext.getString(R.string.a_password2));
+                    setArrayList.add(mContext.getString(R.string.b_password1));
+                    setArrayList.add(mContext.getString(R.string.b_flow_20A));
+                    setArrayList.add(mContext.getString(R.string.b_password2));
+                    Content.charging_limiting_flag = 0;
+                    setSpeed();
+                }else{
+                    if(Content.charging_limiting_flag == 1)
+                        Log.d("setLimiting ", "Content.limiting_flag=" + Content.charging_limiting_flag
+                                                                              + ",aTemp=" + aTemp
+                                                                              + ",bTemp=" + bTemp);
+                }
 
-                setArrayList.add(mContext.getString(R.string.b_password1));
-                setArrayList.add(mContext.getString(R.string.b_flow_20A));
-                setArrayList.add(mContext.getString(R.string.b_password2));
-                Content.isLimiting_flag = 0;
-                setSpeed();
+                if (Content.isLimiting_flag != 0 && aTemp <= 35 && bTemp <= 35){//电流设置为20A
+                    setArrayList.add(mContext.getString(R.string.a_flow_20A));
+                    setArrayList.add(mContext.getString(R.string.a_password2));
+
+                    setArrayList.add(mContext.getString(R.string.b_password1));
+                    setArrayList.add(mContext.getString(R.string.b_flow_20A));
+                    setArrayList.add(mContext.getString(R.string.b_password2));
+                    Content.isLimiting_flag = 0;
+                    setSpeed();
+                }
             }
         }
     }
 
+    public void setLeaveChargingLimit() {
+        setArrayList.clear();
+        setArrayList.add(mContext.getString(R.string.a_flow_20A));
+        setArrayList.add(mContext.getString(R.string.a_password2));
+
+        setArrayList.add(mContext.getString(R.string.b_password1));
+        setArrayList.add(mContext.getString(R.string.b_flow_20A));
+        setArrayList.add(mContext.getString(R.string.b_password2));
+        Content.isLimiting_flag = 0;
+        setSpeed();
+    }
+
     public void setSpeed() {
-        //6028401B500000000000
-        speedSerialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
+        speedSerialPort = mLztek.openSerialPort(Content.limiting_path, 115200, 8, 0, 1, 0);
         if (speedSerialPort == null) {
             Log.d(TAG, "Speed is null");
             return;
