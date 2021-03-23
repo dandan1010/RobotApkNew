@@ -2,11 +2,16 @@ package com.example.robot.uvclamp;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.widget.EditText;
 
+import androidx.annotation.NonNull;
+
 import com.example.robot.R;
+import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
+import com.example.robot.task.TaskManager;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.content.Content;
 import com.lztek.toolkit.AddrInfo;
@@ -36,6 +41,7 @@ public class CheckLztekLamp {
     private SerialPort tempSerialPort;
     private ArrayList<String> setArrayList = new ArrayList<>();
     private int flowId = 0;
+    private int chargingGpio = 0;
 
     /**
      * 248:充电
@@ -130,6 +136,7 @@ public class CheckLztekLamp {
     }
 
     public boolean getChargingGpio() {
+
         Log.d("zdzd : ", "gpio 218 值: " + mLztek.getGpioValue(port[0]));
         if (Content.charging_gpio != mLztek.getGpioValue(port[0])) {
             Content.is_first_charging = true;
@@ -371,8 +378,6 @@ public class CheckLztekLamp {
         handler.postDelayed(runnable, 0);
     }
 
-    Handler handler = new Handler();
-
     /**
      * 间隔1秒写入请求一次电池数据
      */
@@ -399,6 +404,20 @@ public class CheckLztekLamp {
                 }
             }
             handler.postDelayed(this::run, 1 * 1000);
+        }
+    };
+
+    Handler handler = new Handler() {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 1001) {
+                NavigationService.move(0.2f, 0.0f);
+                handler.sendEmptyMessageDelayed(1001, 10);
+            } else if (msg.what == 1002) {
+                handler.removeMessages(1001);
+                handler.removeMessages(1002);
+            }
         }
     };
 
@@ -429,15 +448,29 @@ public class CheckLztekLamp {
                     Log.d(TAG, "读取数据 ： " + editText.getText().toString() + " ,two : " + two + ", chargerVoltage : " + Content.chargerVoltage);
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
                     String msg = "";
+                    Log.d("zdzd555:", "taskName : " + Content.taskName + ", battery : " + SocketServices.battery + ",leave : " + Content.is_leave_charging);
+                    getChargingGpio();
+                    if (Content.taskName == null) {
+                        //充电桩充电 && 不在执行任务
+                        // 当前正在充电 && 电量100 && 电流小于200---->离开充电桩
+                        if (Content.charging_gpio == 0 && Content.isCharging && SocketServices.battery == 100 && Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 < 200) {
+                            handler.sendEmptyMessage(1001);
+                            handler.sendEmptyMessageDelayed(1002, 2000);
+                            Content.is_leave_charging = true;
+                        }
+                        // 不在充电 && 没有离开充电桩 && 电量小于90% ---->回到充电桩
+                        else if (Content.charging_gpio == 1 && !Content.isCharging && SocketServices.battery < 98 && Content.is_leave_charging){
+                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                            Content.is_leave_charging = false;
+                        }
+                    }
+                    Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging);
                     //读gpio
-                    if (!Content.isCharging && getChargingGpio()
-                        && (Content.is_first_charging || SocketServices.battery < 95)) {
+                    if (!Content.isCharging && Content.charging_gpio == 0 && Content.is_first_charging) {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
-                    if (!editText.getText().toString().substring(12, 14).startsWith("F")
-                            && (SocketServices.battery != 100
-                            || Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 > 200)) {
+                    if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";

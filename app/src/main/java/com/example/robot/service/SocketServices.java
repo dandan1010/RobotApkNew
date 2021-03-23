@@ -468,7 +468,7 @@ public class SocketServices extends BaseService {
     public void getTaskQueue(int week) {
         // 第1步中设置的闹铃时间到，这里可以弹出闹铃提示并播放响铃
         long time = System.currentTimeMillis();
-        if (!Content.have_charging_mode && Content.isCharging) {
+        if (Content.charging_gpio == 1 && Content.isCharging) {
             EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.have_charging_mode)));
         } else {
             Cursor aTrue = mSqLiteOpenHelperUtils.searchAlarmTask(Content.dbAlarmIsRun, "true");

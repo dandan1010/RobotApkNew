@@ -29,6 +29,7 @@ public final class Content {
     public static int countTime = 0;
     public static int charging_gpio = 1;
     public static boolean is_first_charging = false;
+    public static boolean is_leave_charging = false;
 
     /**
      * //测试版本不亮灯 ：0

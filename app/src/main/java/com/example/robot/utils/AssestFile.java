@@ -23,6 +23,7 @@ import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Timer;
 
 public class AssestFile {
 
@@ -33,9 +34,21 @@ public class AssestFile {
     private Context mContext;
     private long fileLength = 0;
     private static final String ZIP_NAME = "update.apk";
+    private RandomAccessFile raf;
+    private StringBuffer stringBuffer;
+    private Object synchronizedObject;
+
+    private RunableThread runableThread;
 
     public AssestFile(Context mContext) {
         this.mContext = mContext;
+        stringBuffer = new StringBuffer();
+        synchronizedObject = new Object();
+
+        if (runableThread == null) {
+            runableThread = new RunableThread();
+            new Thread(runableThread).start();
+        }
     }
 
     public void writeBytesToFile(ByteBuffer byteBuffer) {
@@ -103,10 +116,16 @@ public class AssestFile {
     }
 
     public void deepFile(String logString) {
+        synchronized (synchronizedObject) {
+            stringBuffer.append(logString).toString();
+        }
+    }
 
-        new Thread() {
-            @Override
-            public void run() {
+    class RunableThread implements Runnable{
+
+        @Override
+        public void run() {
+            while (true) {
                 try {
                     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
                     String path = Environment.getExternalStorageDirectory().getPath() + "/robot";
@@ -123,25 +142,31 @@ public class AssestFile {
                             e.printStackTrace();
                         }
                     }
-                    RandomAccessFile raf = new RandomAccessFile(file, "rw");
+                    raf = new RandomAccessFile(file, "rw");
                     raf.seek(file.length());
                     DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    raf.write((dateFormat1.format(new Date(System.currentTimeMillis())) + " : " + logString).getBytes());
+                    raf.write((dateFormat1.format(new Date(System.currentTimeMillis())) + " : " + stringBuffer.toString()).getBytes());
                     raf.write("\n".getBytes());
                     Log.d(TAG, "write log file success");
+                    stringBuffer.delete(0,stringBuffer.length());
+                    Thread.sleep(1000);
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     Log.d(TAG, "write log file error : " + e.getMessage());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 } finally {
-                    if (fos != null) {
+                    if (raf != null) {
                         try {
-                            fos.close();
+                            raf.close();
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                     }
                 }
+
             }
-        }.start();
+        }
     }
 }
+

@@ -35,6 +35,7 @@ public class AlarmReceiver extends BroadcastReceiver {
             Message message = new Message();
             message.arg1 = week;
             message.what = 11;
+            if (SocketServices.myHandler != null)
             SocketServices.myHandler.sendMessage(message);
         }
     }

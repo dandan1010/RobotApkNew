@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.robot.content.BaseEvent;
 import com.example.robot.content.Content;
+import com.example.robot.utils.AssestFile;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.utils.GsonUtils;
 import com.example.robot.utils.ServerConnoct;
@@ -30,10 +31,12 @@ public class SimpleServer extends WebSocketServer {
     private String address = "";
     private Context mContext;
     public WebSocket conn;
+    private AssestFile assestFile;
 
     private SimpleServer(InetSocketAddress address, Context mContext) {
         super(address);
         this.mContext = mContext;
+        assestFile = new AssestFile(mContext);
     }
 
     /**
