@@ -172,6 +172,7 @@ public final class Content {
     public static int chargingState = 0;//充电状态
     public static int chargerVoltage = 0;//充满电
     public static int pir_timeCount = 20;//sensor
+    public static int noChargingCount = 0;
     public static final String CHARGING_POINT = "charging";//充电点
     public static final String GET_SPEED_LEVEL = "get_speed_level";//导航速度
     public static final String GET_NAVIGATIONSPEEDLEVEL = "get_navigationSpeedLevel";//任务导航速度

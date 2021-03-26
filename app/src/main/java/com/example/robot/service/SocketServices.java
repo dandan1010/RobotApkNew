@@ -232,6 +232,7 @@ public class SocketServices extends BaseService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "server onDestroy");
+//        unregisterReceiver(broadcastReceiver);
         stopService(intentService);
     }
 
@@ -395,7 +396,7 @@ public class SocketServices extends BaseService {
                     break;
                 case 12:
                     NavigationService.move(0.2f, 0.0f);
-                    handler.sendEmptyMessageDelayed(1001, 10);
+                    handler.sendEmptyMessageDelayed(12, 10);
                     break;
                 case 13:
                     handler.removeMessages(12);
@@ -488,7 +489,7 @@ public class SocketServices extends BaseService {
                     //if (Content.isCharging || checkLztekLamp.getChargingGpio()) {
                     checkLztekLamp.setLeaveChargingLimit();
                     myHandler.sendEmptyMessageDelayed(12, 10000);
-                    myHandler.sendEmptyMessageDelayed(13, 11000);
+                    myHandler.sendEmptyMessageDelayed(13, 12000);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
@@ -497,7 +498,7 @@ public class SocketServices extends BaseService {
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     checkLztekLamp.setLeaveChargingLimit();
                     myHandler.sendEmptyMessageDelayed(12, 10000);
-                    myHandler.sendEmptyMessageDelayed(13, 11000);
+                    myHandler.sendEmptyMessageDelayed(13, 12000);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {
@@ -506,7 +507,7 @@ public class SocketServices extends BaseService {
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     checkLztekLamp.setLeaveChargingLimit();
                     myHandler.sendEmptyMessageDelayed(12, 10000);
-                    myHandler.sendEmptyMessageDelayed(13, 11000);
+                    myHandler.sendEmptyMessageDelayed(13, 12000);
                 }
             }
             mSqLiteOpenHelperUtils.close();
@@ -839,10 +840,6 @@ public class SocketServices extends BaseService {
             if (battery <= Content.battery) {
                 Content.robotState = 6;
                 Content.time = 1000;
-            }
-            StringBuffer stringBuffer = new StringBuffer();
-            for (int i = 0; i < bytes.length; i++) {
-                stringBuffer.append(bytes[i]);
             }
 
         } else if (messageEvent.getState() == 10034) {
@@ -1257,6 +1254,11 @@ public class SocketServices extends BaseService {
                 }
             }
 
+        } else if (messageEvent.getState() == BaseEvent.ALARM_CODE) {
+            Message message = new Message();
+            message.arg1 = (int) messageEvent.getT();
+            message.what = 11;
+            myHandler.sendMessage(message);
         }
     }
 
@@ -1328,4 +1330,18 @@ public class SocketServices extends BaseService {
         checkLztekLamp.setUvcModeForDemo(1);
         myHandler.removeMessages(5);
     }
+//    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if (Content.AlarmAction.equals(intent.getAction())) {
+//                int week = intent.getIntExtra("week", -1);
+////            handler.sendEmptyMessage(1000);
+//                Message message = new Message();
+//                message.arg1 = week;
+//                message.what = 11;
+//                if (SocketServices.myHandler != null)
+//                    SocketServices.myHandler.sendMessage(message);
+//            }
+//        }
+//    };
 }

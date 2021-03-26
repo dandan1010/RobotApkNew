@@ -1028,6 +1028,7 @@ public class TaskManager {
     public void use_map(String map_name) {
         Content.is_initialize_finished = 0;
         Log.d(TAG, "use_map： " + map_name);
+        Content.noChargingCount = 5;
         RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {

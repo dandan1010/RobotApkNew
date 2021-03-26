@@ -12,6 +12,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.robot.R;
+import com.example.robot.content.BaseEvent;
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
 import com.example.robot.sqlite.SqLiteOpenHelperUtils;
@@ -32,11 +33,12 @@ public class AlarmReceiver extends BroadcastReceiver {
         if (Content.AlarmAction.equals(intent.getAction())) {
             week = intent.getIntExtra("week", -1);
 //            handler.sendEmptyMessage(1000);
-            Message message = new Message();
-            message.arg1 = week;
-            message.what = 11;
-            if (SocketServices.myHandler != null)
-            SocketServices.myHandler.sendMessage(message);
+//            Message message = new Message();
+//            message.arg1 = week;
+//            message.what = 11;
+//            if (SocketServices.myHandler != null)
+//            SocketServices.myHandler.sendMessage(message);
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ALARM_CODE, week));
         }
     }
 }

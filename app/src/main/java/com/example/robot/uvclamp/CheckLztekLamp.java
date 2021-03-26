@@ -41,7 +41,8 @@ public class CheckLztekLamp {
     private SerialPort tempSerialPort;
     private ArrayList<String> setArrayList = new ArrayList<>();
     private int flowId = 0;
-    private int chargingGpio = 0;
+    private int lowbatteryCount = 0;
+    private int fullbatteryCount = 0;
 
     /**
      * 248:充电
@@ -445,38 +446,63 @@ public class CheckLztekLamp {
                     }
                     String two = editText.getText().toString().substring(8, 12);
                     Content.chargerVoltage = Integer.parseInt(two, 16) / 1000;
-                    Log.d(TAG, "读取数据 ： " + editText.getText().toString() + " ,two : " + two + ", chargerVoltage : " + Content.chargerVoltage);
+                    Log.d(TAG, "读取数据 ： " + editText.getText().toString() + " ,two : " + editText.getText().toString().substring(12, 14));
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
-                    String msg = "";
-                    Log.d("zdzd555:", "taskName : " + Content.taskName + ", battery : " + SocketServices.battery + ",leave : " + Content.is_leave_charging);
+                    String msg = "放电";
+                    Log.d("zdzd555:", "taskName : " + Content.taskName
+                            + ", battery : " + SocketServices.battery
+                            + ",leave : " + Content.is_leave_charging
+                            + " , mapName : " + Content.mapName);
                     getChargingGpio();
                     if (Content.taskName == null) {
                         //充电桩充电 && 不在执行任务
                         // 当前正在充电 && 电量100 && 电流小于200---->离开充电桩
-                        if (Content.charging_gpio == 0 && Content.isCharging && SocketServices.battery == 100 && Integer.parseInt(editText.getText().toString().substring(12, 16), 16) * 10 < 200) {
-                            handler.sendEmptyMessage(1001);
-                            handler.sendEmptyMessageDelayed(1002, 2000);
-                            Content.is_leave_charging = true;
+                        if (Content.charging_gpio == 0 && Content.isCharging
+                                && SocketServices.battery >= 99) {
+                            fullbatteryCount ++;
+                            if (fullbatteryCount >= 5) {
+                                setLeaveChargingLimit();
+                                handler.sendEmptyMessageDelayed(1001, 10 * 1000);
+                                handler.sendEmptyMessageDelayed(1002, 12 * 1000);
+                                Log.d("zdzd555 : ", "离开充电桩 ： " + Content.mapName);
+                                Content.is_leave_charging = true;
+                                fullbatteryCount = 0;
+                            }
+
                         }
                         // 不在充电 && 没有离开充电桩 && 电量小于90% ---->回到充电桩
-                        else if (Content.charging_gpio == 1 && !Content.isCharging && SocketServices.battery < 98 && Content.is_leave_charging){
-                            TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
-                            Content.is_leave_charging = false;
+                        else if (Content.charging_gpio == 1 && !Content.isCharging
+                                && SocketServices.battery < 90 && Content.is_leave_charging) {
+                            lowbatteryCount++;
+                            if (lowbatteryCount >= 5) {
+                                Log.d("zdzd555 : ", "导航到充点电 ： " + Content.mapName);
+                                TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
+                                Content.is_leave_charging = false;
+                                lowbatteryCount = 0;
+                            }
+
                         }
                     }
-                    Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging);
+                    Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging + ",  battery : " + SocketServices.battery);
                     //读gpio
-                    if (!Content.isCharging && Content.charging_gpio == 0 && Content.is_first_charging) {
+                    if (!Content.isCharging && Content.charging_gpio == 0 && Content.chargingState != 2) {
                         setChargingGpio(1);
                         Content.chargingState = 2;
                     }
+                    if (editText.getText().toString().substring(12, 14).startsWith("F")) {
+                        Content.noChargingCount ++;
+                    } else {
+                        Content.noChargingCount = 0;
+                    }
+                    Log.d("zdzd555 : ", "noChargingCount : " + Content.noChargingCount);
                     if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";
                         Content.isCharging = true;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
-                    } else {
+                    } else if (Content.noChargingCount >= 5){
+                        Content.noChargingCount = 0;
                         msg = "放电";
                         if (Content.robotState == 4) {
                             Content.robotState = 1;
@@ -543,7 +569,7 @@ public class CheckLztekLamp {
                         editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
                     }
                     Log.d(TAG, "getSpeedAndTemp11 : " + editText.getText().toString());
-                    setLimiting(editText.getText().toString().substring(12,16), editText.getText().toString().substring(16,20));
+                    setLimiting(editText.getText().toString().substring(12, 16), editText.getText().toString().substring(16, 20));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -568,8 +594,8 @@ public class CheckLztekLamp {
         int bTemp = Integer.parseInt(substring1, 16);
         Log.d("setLimiting ", "Content.limitint_init_flag : " + Content.limitint_init_flag
                 + ",  Content.isLimiting_flag: " + Content.isLimiting_flag
-        + ",   Content.limiting_flag : " + Content.charging_limiting_flag
-        + ", temp :" +aTemp + "----" + bTemp);
+                + ",   Content.limiting_flag : " + Content.charging_limiting_flag
+                + ", temp :" + aTemp + "----" + bTemp);
         if (Content.limitint_init_flag == 0) {
             setArrayList.add(mContext.getString(R.string.a_password1));
             setArrayList.add(mContext.getString(R.string.a_flow_20A));
@@ -603,7 +629,7 @@ public class CheckLztekLamp {
             Content.isLimiting_flag = 2;
             setSpeed();
         } else {
-            if(Content.isCharging){
+            if (Content.isCharging) {
                 if (Content.charging_limiting_flag == 0) {//设置为5A
                     setArrayList.add(mContext.getString(R.string.a_password1));
                     setArrayList.add(mContext.getString(R.string.a_flow_5A));
@@ -614,10 +640,10 @@ public class CheckLztekLamp {
                     setArrayList.add(mContext.getString(R.string.b_password2));
                     Content.charging_limiting_flag = 1;
                     setSpeed();
-                }else{
+                } else {
                     Log.d("setLimiting ", "already limit current for charging!");
                 }
-            }else{
+            } else {
                 if (Content.charging_limiting_flag == 1 && aTemp < 55 && bTemp < 55) {//设置为20A
                     setArrayList.add(mContext.getString(R.string.a_password1));
                     setArrayList.add(mContext.getString(R.string.a_flow_20A));
@@ -628,14 +654,14 @@ public class CheckLztekLamp {
                     setArrayList.add(mContext.getString(R.string.b_password2));
                     Content.charging_limiting_flag = 0;
                     setSpeed();
-                }else{
-                    if(Content.charging_limiting_flag == 1)
+                } else {
+                    if (Content.charging_limiting_flag == 1)
                         Log.d("setLimiting ", "Content.limiting_flag=" + Content.charging_limiting_flag
-                                                                              + ",aTemp=" + aTemp
-                                                                              + ",bTemp=" + bTemp);
+                                + ",aTemp=" + aTemp
+                                + ",bTemp=" + bTemp);
                 }
 
-                if (Content.isLimiting_flag != 0 && aTemp <= 35 && bTemp <= 35){//电流设置为20A
+                if (Content.isLimiting_flag != 0 && aTemp <= 35 && bTemp <= 35) {//电流设置为20A
                     setArrayList.add(mContext.getString(R.string.a_flow_20A));
                     setArrayList.add(mContext.getString(R.string.a_password2));
 
