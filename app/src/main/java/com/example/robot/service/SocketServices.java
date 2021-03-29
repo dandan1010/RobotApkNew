@@ -49,6 +49,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -100,8 +101,17 @@ public class SocketServices extends BaseService {
         LogcatHelper.getInstance(this).start();
         mContext = this;
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
+        isNewSerialPort();
         initView();
         handler.sendEmptyMessage(1);
+    }
+    public static void isNewSerialPort(){
+        File file = new File("/sys/class/rtc/rtc1");
+        Log.d("zdzd 555", "文件 ： "+ file.exists());
+        if (file.exists()) {
+            Content.isNewSerialPort = true;
+        }
+        Content.isNewSerialPort = false;
     }
 
     Handler handler = new Handler() {
@@ -1075,6 +1085,7 @@ public class SocketServices extends BaseService {
                     }
                 }
             }
+            mSqLiteOpenHelperUtils.close();
             if (Content.server != null) {
                 gsonUtils.setTask_state(nextTaskaskName);
                 gsonUtils.setMapName(Content.mapName);

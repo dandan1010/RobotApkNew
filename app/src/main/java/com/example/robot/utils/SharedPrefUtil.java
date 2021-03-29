@@ -89,6 +89,18 @@ public class SharedPrefUtil {
     }
 
     /**
+     * 地图名字
+     */
+    public void setSharedPrefMapName(String key, String level){
+        editor.putString(key, level);
+        editor.commit();
+    }
+
+    public String getSharedPrefMapName(String key) {
+        return sharedPreferences.getString(key, "");
+    }
+
+    /**
      * 清除所有数据
      */
     public void deleteAll(){

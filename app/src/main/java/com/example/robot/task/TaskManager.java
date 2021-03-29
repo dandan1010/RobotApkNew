@@ -40,6 +40,7 @@ import com.example.robot.content.Content;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.controller.RobotManagerController;
 import com.example.robot.utils.GsonUtils;
+import com.example.robot.utils.SharedPrefUtil;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
@@ -660,6 +661,7 @@ public class TaskManager {
                         sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                                 "" + Content.taskIndex,
                                 "" + mAlarmUtils.getTimeYear(Content.startTime));
+                        sqLiteOpenHelperUtils.close();
                     } else {
                         isSendType = true;
                         Content.is_initialize_finished = 0;
@@ -685,6 +687,7 @@ public class TaskManager {
                     sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                             "" + Content.taskIndex,
                             "" + mAlarmUtils.getTimeYear(Content.startTime));
+                    sqLiteOpenHelperUtils.close();
                     handler.removeMessages(1004);
                 }
             } else if (msg.what == 1005) {
@@ -1026,6 +1029,9 @@ public class TaskManager {
      * 使用地图
      */
     public void use_map(String map_name) {
+        if (!TextUtils.isEmpty(map_name)) {
+            SharedPrefUtil.getInstance(mContext).setSharedPrefMapName(Content.MAP_NAME, map_name);
+        }
         Content.is_initialize_finished = 0;
         Log.d(TAG, "use_map： " + map_name);
         Content.noChargingCount = 5;
@@ -1333,6 +1339,7 @@ public class TaskManager {
         } else if (type.equals("HEADING") || type.equals("PLANNING")) {
 
         }
+        sqLiteOpenHelperUtils.close();
     }
 
     public void robot_reset() {

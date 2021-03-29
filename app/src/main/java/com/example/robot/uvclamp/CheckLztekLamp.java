@@ -14,6 +14,7 @@ import com.example.robot.service.SocketServices;
 import com.example.robot.task.TaskManager;
 import com.example.robot.utils.EventBusMessage;
 import com.example.robot.content.Content;
+import com.example.robot.utils.SharedPrefUtil;
 import com.lztek.toolkit.AddrInfo;
 import com.lztek.toolkit.Lztek;
 import com.lztek.toolkit.SerialPort;
@@ -452,7 +453,7 @@ public class CheckLztekLamp {
                     Log.d("zdzd555:", "taskName : " + Content.taskName
                             + ", battery : " + SocketServices.battery
                             + ",leave : " + Content.is_leave_charging
-                            + " , mapName : " + Content.mapName);
+                            + " , mapName : " + SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME));
                     getChargingGpio();
                     if (Content.taskName == null) {
                         //充电桩充电 && 不在执行任务
@@ -475,12 +476,16 @@ public class CheckLztekLamp {
                                 && SocketServices.battery < 90 && Content.is_leave_charging) {
                             lowbatteryCount++;
                             if (lowbatteryCount >= 5) {
-                                Log.d("zdzd555 : ", "导航到充点电 ： " + Content.mapName);
-                                TaskManager.getInstances(mContext).navigate_Position(Content.mapName, Content.CHARGING_POINT);
-                                Content.is_leave_charging = false;
+                                String mapName = SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME);
+                                Log.d("zdzd555 : ", "导航到充点电 ： " + mapName);
+                                TaskManager.getInstances(mContext).navigate_Position(mapName, Content.CHARGING_POINT);
                                 lowbatteryCount = 0;
+                                Content.is_leave_charging = false;
                             }
 
+                        } else {
+                            fullbatteryCount = 0;
+                            lowbatteryCount = 0;
                         }
                     }
                     Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging + ",  battery : " + SocketServices.battery);
