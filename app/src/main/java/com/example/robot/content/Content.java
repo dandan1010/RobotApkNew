@@ -9,7 +9,7 @@ public final class Content {
 
     public static final String isRobotAngularSpeed = "persist.robot.isRobotAngular";//消毒时是否转圈
 
-    public static final String limiting_path = "/dev/ttyS3";
+    public static final String limiting_path = "/dev/ttyS2";
     public static boolean isNewSerialPort = false;
     public static String getBatterySerialPortPath(){
         if (isNewSerialPort) {
@@ -19,7 +19,7 @@ public final class Content {
     }
     public static String getLedSerialPortPath(){
         if (isNewSerialPort) {
-            return "/dev/ttyS2";
+            return "/dev/ttyS3";
         }
         return "/dev/ttyS1";
     }
