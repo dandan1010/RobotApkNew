@@ -99,6 +99,7 @@ public class SocketServices extends BaseService {
         super.onCreate();
         LogcatHelper.getInstance(this).stop();
         LogcatHelper.getInstance(this).start();
+        LogcatHelper.getInstance(this).alarmDeleteFile(this);
         mContext = this;
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
         isNewSerialPort();
@@ -1270,6 +1271,8 @@ public class SocketServices extends BaseService {
             message.arg1 = (int) messageEvent.getT();
             message.what = 11;
             myHandler.sendMessage(message);
+        } else if (messageEvent.getState() == BaseEvent.DELETE_FILE_ALARM_CODE) {
+            LogcatHelper.getInstance(mContext).getFileLength();
         }
     }
 
@@ -1341,18 +1344,4 @@ public class SocketServices extends BaseService {
         checkLztekLamp.setUvcModeForDemo(1);
         myHandler.removeMessages(5);
     }
-//    BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (Content.AlarmAction.equals(intent.getAction())) {
-//                int week = intent.getIntExtra("week", -1);
-////            handler.sendEmptyMessage(1000);
-//                Message message = new Message();
-//                message.arg1 = week;
-//                message.what = 11;
-//                if (SocketServices.myHandler != null)
-//                    SocketServices.myHandler.sendMessage(message);
-//            }
-//        }
-//    };
 }

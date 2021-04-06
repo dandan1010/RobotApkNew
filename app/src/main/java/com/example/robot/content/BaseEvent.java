@@ -5,7 +5,7 @@ import com.example.robot.service.SimpleServer;
 public class BaseEvent {
     public static boolean have_charging_mode = true;
     public static final int ALARM_CODE = 30004;
-
+    public static final int DELETE_FILE_ALARM_CODE = 30005;
     public static final int GET_WORKING_MODE = 10061;//工作模式
     public static final int GET_CHARGING_MODE = 10064;//有无充电桩模式
 
