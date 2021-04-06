@@ -251,7 +251,7 @@ public class CheckLztekLamp {
      * 请求led灯光
      */
     private void openSerialPort() {//控制Led灯
-        serialPort = mLztek.openSerialPort(Content.getLedSerialPortPath(), 115200, 8, 0, 1, 0);
+        serialPort = mLztek.openSerialPort("/dev/ttyS3", 115200, 8, 0, 1, 0);
         if (serialPort == null) {
             Log.d(TAG, "serialPort is null");
             return;
@@ -372,7 +372,9 @@ public class CheckLztekLamp {
      * 请求电池数据
      */
     public void openBatteryPort() {//获取电池
-        batterySerialPort = mLztek.openSerialPort(Content.getBatterySerialPortPath(), 9600, 8, 0, 1, 0);
+        //batterySerialPort = mLztek.openSerialPort(Content.getBatterySerialPortPath(), 9600, 8, 0, 1, 0);
+        batterySerialPort = mLztek.openSerialPort("/dev/ttyS1", 9600, 8, 0, 1, 0);
+
         if (batterySerialPort == null) {
             Log.d(TAG, "BatteryPort is null");
             return;
@@ -491,7 +493,7 @@ public class CheckLztekLamp {
                     Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging + ",  battery : " + SocketServices.battery);
                     //读gpio
                     if (!Content.isCharging && Content.charging_gpio == 0 && Content.chargingState != 2) {
-                        setChargingGpio(1);
+                        setChargingGpio(0);
                         Content.chargingState = 2;
                     }
                     if (editText.getText().toString().substring(12, 14).startsWith("F")) {
@@ -516,7 +518,7 @@ public class CheckLztekLamp {
                         //关闭gpio口
                         Log.d("zdzd555:", "关闭gpio口 : Content.chargingState = " + Content.chargingState + "charging = " + Content.isCharging);
                         if (Content.chargingState == 2 && Content.isCharging) {
-                            setChargingGpio(0);
+                            setChargingGpio(1);
                             Content.chargingState = 0;
                             Log.d("zdzd555:", "关闭gpio口 : ");
                         }

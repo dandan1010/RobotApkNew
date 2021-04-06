@@ -103,16 +103,17 @@ public class SocketServices extends BaseService {
         mContext = this;
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
         isNewSerialPort();
-        initView();
+
         handler.sendEmptyMessage(1);
     }
-    public static void isNewSerialPort(){
+    public void isNewSerialPort(){
         File file = new File("/sys/class/rtc/rtc1");
         Log.d("zdzd 555", "文件 ： "+ file.exists());
         if (file.exists()) {
             Content.isNewSerialPort = true;
         }
         Content.isNewSerialPort = false;
+        initView();
     }
 
     Handler handler = new Handler() {
@@ -184,7 +185,7 @@ public class SocketServices extends BaseService {
         checkLztekLamp.startCheckSensorAtTime();
         checkLztekLamp.startLedLamp();
         checkLztekLamp.initUvcMode();
-        checkLztekLamp.setChargingGpio(0);
+        checkLztekLamp.setChargingGpio(1);
         checkLztekLamp.getSpeed();
     }
 
