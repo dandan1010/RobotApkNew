@@ -301,4 +301,7 @@ public final class Content {
     public static final String GET_ULTRASONIC = "get_ultrasonic";//声呐设备
     public static final String GET_ULTRASONIC_X = "get_ultrasonic_x";//声呐设备x
     public static final String GET_ULTRASONIC_Y = "get_ultrasonic_y";//声呐设备y
+    public static final String WORLD_ULTRASONIC = "world_ultrasonic";//声呐设备
+    public static final String WORLD_ULTRASONIC_X = "world_ultrasonic_x";//声呐设备x
+    public static final String WORLD_ULTRASONIC_Y = "world_ultrasonic_y";//声呐设备y
 }

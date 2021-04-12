@@ -477,6 +477,7 @@ public class GsonUtils {
             JSONArray jsonArray = new JSONArray(data);
             jsonObject.put(Content.DATATIME, jsonArray);
             JSONArray mUltrasonicPhitBeanArray = new JSONArray();
+            JSONArray mWorldUltrasonicArray = new JSONArray();
             if (ultrasonicPhitBean != null) {
                 for (int i = 0; i < ultrasonicPhitBean.getGridPhits().size(); i++) {
                     JSONObject object = new JSONObject();
@@ -484,8 +485,15 @@ public class GsonUtils {
                     object.put(Content.GET_ULTRASONIC_Y, ultrasonicPhitBean.getGridPhits().get(i).getY());
                     mUltrasonicPhitBeanArray.put(i, object);
                 }
+                for (int i = 0; i < ultrasonicPhitBean.getWorldPhits().size(); i++) {
+                    JSONObject object = new JSONObject();
+                    object.put(Content.WORLD_ULTRASONIC_X, ultrasonicPhitBean.getWorldPhits().get(i).getX());
+                    object.put(Content.WORLD_ULTRASONIC_Y, ultrasonicPhitBean.getWorldPhits().get(i).getY());
+                    mWorldUltrasonicArray.put(i, object);
+                }
             }
             jsonObject.put(Content.GET_ULTRASONIC, mUltrasonicPhitBeanArray);
+            jsonObject.put(Content.WORLD_ULTRASONIC, mWorldUltrasonicArray);
             JSONArray mRobotPositionsArray = new JSONArray();
             if (mRobotPositions != null) {
                 for (int i = 0; i < mRobotPositions.getData().size(); i++) {
