@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.charge_bean.ModifyRobotParam;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
@@ -568,7 +569,7 @@ public class TaskManager {
                         + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY);
                 mAssestFile.deepFile("start task  taskIsFinish： " + Content.taskIsFinish + ",  taskIndex: " + Content.taskIndex + " , mTaskArrayList " + mTaskArrayList.size()
                         + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY);
-                if (!Content.taskIsFinish && !Content.EMERGENCY) {
+                if (!Content.taskIsFinish && !Content.EMERGENCY && !Content.isHightTemp) {
                     isSendType = false;
                     if (Content.taskIndex < mTaskArrayList.size()) {
                         if (Content.Working_mode == 1) {
@@ -1371,6 +1372,26 @@ public class TaskManager {
             @Override
             public void error(Throwable error) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_ultrasonic_phit) + error.getMessage()));
+            }
+        });
+    }
+
+    public void modifyRobotParam(double value) {
+        ModifyRobotParam.RobotParam robotParam = new ModifyRobotParam.RobotParam();
+        robotParam.setNamespace("/strategy/charger_base/backward_dis");
+        robotParam.setType("double");
+        robotParam.setValue(value + "");
+        ModifyRobotParam.RobotParam[] params = new ModifyRobotParam.RobotParam[]{robotParam};
+
+        GsController.INSTANCE.modifyRobotParam(params, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "设置回充电桩的距离 ： " + status + ",  value : " + value);
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "设置回充电桩的距离error ： " + error.getMessage() + ",  value : " + value);
             }
         });
     }

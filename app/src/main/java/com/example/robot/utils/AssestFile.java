@@ -103,8 +103,13 @@ public class AssestFile {
     private static String getCrashFilePath(Context context) {
         String path = null;
         path = Environment.getExternalStorageDirectory().getPath()
-                + "/" + BuildConfig.APPLICATION_ID +"/update.apk";
+                + "/" + BuildConfig.APPLICATION_ID;
         File file = new File(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        path = Environment.getExternalStorageDirectory().getPath()
+                + "/" + BuildConfig.APPLICATION_ID + "/update.apk";
         if (!file.exists()) {
             try {
                 file.createNewFile();

@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
+import com.dcm360.controller.gs.controller.bean.charge_bean.ModifyRobotParam;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
@@ -656,4 +657,9 @@ public enum GsController implements IGsRobotController {
             gsControllerService.getUltrasonicPhit().enqueue(new ResponseCallback<UltrasonicPhitBean>().call(status));
     }
 
+    @Override
+    public void modifyRobotParam(ModifyRobotParam.RobotParam[] modifyRobotParam, RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.modifyRobotParam(modifyRobotParam).enqueue(new ResponseCallback<Status>().call(status));
+    }
 }

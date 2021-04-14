@@ -9,6 +9,7 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 
 import com.example.robot.R;
+import com.example.robot.content.BaseEvent;
 import com.example.robot.service.NavigationService;
 import com.example.robot.service.SocketServices;
 import com.example.robot.task.TaskManager;
@@ -613,9 +614,14 @@ public class CheckLztekLamp {
             setArrayList.add(mContext.getString(R.string.b_password2));
             Content.limitint_init_flag = 1;
             Content.isLimiting_flag = 0;
+            Content.isHightTemp = false;
             setSpeed();
         }
         if (Content.isLimiting_flag != 1 && (aTemp >= 58 || bTemp >= 58)) {//电流设置为0A
+            Content.isHightTemp = true;
+            Content.taskIsFinish = false;
+            SocketServices.toLightControlBtn = false;
+            TaskManager.getInstances(mContext).cancel_navigate();
             setArrayList.add(mContext.getString(R.string.a_password1));
             setArrayList.add(mContext.getString(R.string.a_flow_0A));
             setArrayList.add(mContext.getString(R.string.a_password2));
@@ -626,6 +632,10 @@ public class CheckLztekLamp {
             Content.isLimiting_flag = 1;
             setSpeed();
         } else if (Content.isLimiting_flag != 2 && (aTemp >= 55 || bTemp >= 55) && aTemp < 58 && bTemp < 58) {//电流设置为7A
+            Content.isHightTemp = true;
+            Content.taskIsFinish = false;
+            SocketServices.toLightControlBtn = false;
+            TaskManager.getInstances(mContext).cancel_navigate();
             setArrayList.add(mContext.getString(R.string.a_password1));
             setArrayList.add(mContext.getString(R.string.a_flow_7A));
             setArrayList.add(mContext.getString(R.string.a_password2));
@@ -638,6 +648,10 @@ public class CheckLztekLamp {
         } else {
             if (Content.isCharging) {
                 if (Content.charging_limiting_flag == 0) {//设置为5A
+                    Content.isHightTemp = true;
+                    Content.taskIsFinish = false;
+                    SocketServices.toLightControlBtn = false;
+                    TaskManager.getInstances(mContext).cancel_navigate();
                     setArrayList.add(mContext.getString(R.string.a_password1));
                     setArrayList.add(mContext.getString(R.string.a_flow_5A));
                     setArrayList.add(mContext.getString(R.string.a_password2));
@@ -659,6 +673,7 @@ public class CheckLztekLamp {
                     setArrayList.add(mContext.getString(R.string.b_password1));
                     setArrayList.add(mContext.getString(R.string.b_flow_20A));
                     setArrayList.add(mContext.getString(R.string.b_password2));
+                    Content.isHightTemp = false;
                     Content.charging_limiting_flag = 0;
                     setSpeed();
                 } else {
@@ -675,6 +690,7 @@ public class CheckLztekLamp {
                     setArrayList.add(mContext.getString(R.string.b_password1));
                     setArrayList.add(mContext.getString(R.string.b_flow_20A));
                     setArrayList.add(mContext.getString(R.string.b_password2));
+                    Content.isHightTemp = false;
                     Content.isLimiting_flag = 0;
                     setSpeed();
                 }

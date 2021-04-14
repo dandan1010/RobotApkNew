@@ -24,6 +24,7 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacle
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.robot_interface.bean.Status;
+import com.example.robot.BuildConfig;
 import com.example.robot.R;
 import com.example.robot.bean.PointStateBean;
 import com.example.robot.bean.SaveTaskBean;
@@ -65,7 +66,7 @@ public class SocketServices extends BaseService {
     public static CheckLztekLamp checkLztekLamp;
     private GsonUtils gsonUtils;
     private String[] spinner;
-    private boolean toLightControlBtn = false;
+    public static boolean toLightControlBtn = false;
     private int ledtime = 0;
     private Long workTime;
     private String tvText;
@@ -97,13 +98,12 @@ public class SocketServices extends BaseService {
     @Override
     public void onCreate() {
         super.onCreate();
-        LogcatHelper.getInstance(this).stop();
-        LogcatHelper.getInstance(this).start();
+        LogcatHelper.getInstance(mContext).getFileLength();
         LogcatHelper.getInstance(this).alarmDeleteFile(this);
         mContext = this;
         spinner = mContext.getResources().getStringArray(R.array.spinner_time);
         isNewSerialPort();
-
+        //Log.d(TAG, "新的apk: " + BuildConfig.VERSION_NAME);
         handler.sendEmptyMessage(1);
     }
     public void isNewSerialPort(){
