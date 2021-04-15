@@ -22,6 +22,7 @@ import com.lztek.toolkit.SerialPort;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
@@ -252,7 +253,14 @@ public class CheckLztekLamp {
      * 请求led灯光
      */
     private void openSerialPort() {//控制Led灯
-        serialPort = mLztek.openSerialPort("/dev/ttyS3", 115200, 8, 0, 1, 0);
+        File file = new File("/sys/class/rtc/rtc1");
+        Log.d("zdzd 555", "文件 ： "+ file.exists());
+        if (file.exists()) {
+            serialPort = mLztek.openSerialPort( "/dev/ttyS3", 115200, 8, 0, 1, 0);
+        } else {
+            serialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
+        }
+
         if (serialPort == null) {
             Log.d(TAG, "serialPort is null");
             return;
@@ -373,8 +381,13 @@ public class CheckLztekLamp {
      * 请求电池数据
      */
     public void openBatteryPort() {//获取电池
-        //batterySerialPort = mLztek.openSerialPort(Content.getBatterySerialPortPath(), 9600, 8, 0, 1, 0);
-        batterySerialPort = mLztek.openSerialPort("/dev/ttyS1", 9600, 8, 0, 1, 0);
+        File file = new File("/sys/class/rtc/rtc1");
+        Log.d("zdzd 555", "文件 ： "+ file.exists());
+        if (file.exists()) {
+            batterySerialPort = mLztek.openSerialPort("/dev/ttyS1", 9600, 8, 0, 1, 0);
+        } else {
+            batterySerialPort = mLztek.openSerialPort("/dev/ttyS0", 9600, 8, 0, 1, 0);
+        }
 
         if (batterySerialPort == null) {
             Log.d(TAG, "BatteryPort is null");

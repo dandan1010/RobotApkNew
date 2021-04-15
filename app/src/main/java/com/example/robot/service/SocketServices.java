@@ -107,12 +107,7 @@ public class SocketServices extends BaseService {
         handler.sendEmptyMessage(1);
     }
     public void isNewSerialPort(){
-        File file = new File("/sys/class/rtc/rtc1");
-        Log.d("zdzd 555", "文件 ： "+ file.exists());
-        if (file.exists()) {
-            Content.isNewSerialPort = true;
-        }
-        Content.isNewSerialPort = false;
+
         initView();
     }
 
