@@ -61,4 +61,10 @@
     <string name="b_flow_7A">01 06 34 2A 02 BC A6 E3</string>
     <string name="b_flow_5A">01 06 34 2A 01 F4 A6 25</string>
     <string name="b_flow_0A">01 06 34 2A 00 00 A6 32</string>
+
+    <string name="open_factory">DD 5A 00 02 56 78 FF 30 77</string>
+    <string name="close_factory">DD 5A 01 02 28 28 FF AD 77</string>
+    <string name="read_battery_an">DD A5 28 00 FF D8 77</string>
+    <string name="write_25a_battery">DD 5A 28 02 09 C4 FF 09 77</string>
+
 </resources>

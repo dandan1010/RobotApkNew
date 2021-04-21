@@ -107,7 +107,6 @@ public class SocketServices extends BaseService {
         handler.sendEmptyMessage(1);
     }
     public void isNewSerialPort(){
-
         initView();
     }
 
@@ -163,7 +162,7 @@ public class SocketServices extends BaseService {
         checkLztekLamp = new CheckLztekLamp(mContext);
         gsonUtils = new GsonUtils();
         myHandler = new MyHandler(SocketServices.this);
-        checkLztekLamp.openBatteryPort();
+        checkLztekLamp.readBatteryFactory();
         if (!checkLztekLamp.getEthEnable()) {
             Log.d(TAG, "网络设置失败");
         } else {

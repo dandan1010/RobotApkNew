@@ -46,6 +46,7 @@ public class CheckLztekLamp {
     private int flowId = 0;
     private int lowbatteryCount = 0;
     private int fullbatteryCount = 0;
+    private int factoryRes = 0;
 
     /**
      * 248:充电
@@ -254,9 +255,9 @@ public class CheckLztekLamp {
      */
     private void openSerialPort() {//控制Led灯
         File file = new File("/sys/class/rtc/rtc1");
-        Log.d("zdzd 555", "文件 ： "+ file.exists());
+        Log.d("zdzd 555", "文件 ： " + file.exists());
         if (file.exists()) {
-            serialPort = mLztek.openSerialPort( "/dev/ttyS3", 115200, 8, 0, 1, 0);
+            serialPort = mLztek.openSerialPort("/dev/ttyS3", 115200, 8, 0, 1, 0);
         } else {
             serialPort = mLztek.openSerialPort("/dev/ttyS1", 115200, 8, 0, 1, 0);
         }
@@ -381,14 +382,6 @@ public class CheckLztekLamp {
      * 请求电池数据
      */
     public void openBatteryPort() {//获取电池
-        File file = new File("/sys/class/rtc/rtc1");
-        Log.d("zdzd 555", "文件 ： "+ file.exists());
-        if (file.exists()) {
-            batterySerialPort = mLztek.openSerialPort("/dev/ttyS1", 9600, 8, 0, 1, 0);
-        } else {
-            batterySerialPort = mLztek.openSerialPort("/dev/ttyS0", 9600, 8, 0, 1, 0);
-        }
-
         if (batterySerialPort == null) {
             Log.d(TAG, "BatteryPort is null");
             return;
@@ -491,7 +484,7 @@ public class CheckLztekLamp {
                         // 当前正在充电 && 电量100 && 电流小于200---->离开充电桩
                         if (Content.charging_gpio == 0 && Content.isCharging
                                 && SocketServices.battery >= 99) {
-                            fullbatteryCount ++;
+                            fullbatteryCount++;
                             if (fullbatteryCount >= 5) {
                                 setLeaveChargingLimit();
                                 handler.sendEmptyMessageDelayed(1001, 10 * 1000);
@@ -530,7 +523,7 @@ public class CheckLztekLamp {
                         Content.chargingState = 2;
                     }
                     if (editText.getText().toString().substring(12, 14).startsWith("F")) {
-                        Content.noChargingCount ++;
+                        Content.noChargingCount++;
                     } else {
                         Content.noChargingCount = 0;
                     }
@@ -541,7 +534,7 @@ public class CheckLztekLamp {
                         msg = "充电";
                         Content.isCharging = true;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
-                    } else if (Content.taskName != null || Content.noChargingCount >= 5){
+                    } else if (Content.taskName != null || Content.noChargingCount >= 5) {
                         Content.noChargingCount = 0;
                         msg = "放电";
                         if (Content.robotState == 4) {
@@ -784,6 +777,94 @@ public class CheckLztekLamp {
         }
     };
 
+    public void readBatteryFactory() {
+        File file = new File("/sys/class/rtc/rtc1");
+        Log.d("zdzd 555", "文件 ： " + file.exists());
+        if (file.exists()) {
+            batterySerialPort = mLztek.openSerialPort("/dev/ttyS1", 9600, 8, 0, 1, 0);
+        } else {
+            batterySerialPort = mLztek.openSerialPort("/dev/ttyS0", 9600, 8, 0, 1, 0);
+        }
+        if (batterySerialPort == null) {
+            Log.d(TAG, "BatteryPort is null");
+            return;
+        }
+        factoryRes = R.string.open_factory;
+        handler.postDelayed(batteryFactoryRunnable, 0);
+    }
+
+    Runnable batteryFactoryRunnable = new Runnable() {
+        @Override
+        public void run() {
+            OutputStream outputStream = null;
+            byte[] openFactory = hexBytes(mContext.getString(factoryRes).replace(" ", ""));
+            try {
+                if (null != openFactory) {
+                    outputStream = batterySerialPort.getOutputStream();
+                    outputStream.write(openFactory);
+                    outputStream.flush();
+                }
+                handler.postDelayed(readFactoryresult, 100);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (outputStream != null) {
+                    try {
+                        outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    };
+
+    Runnable readFactoryresult = new Runnable() {
+        @Override
+        public void run() {
+            java.io.InputStream input = batterySerialPort.getInputStream();
+            try {
+                byte[] buffer = new byte[1024];
+                int len = input.read(buffer);
+                byte[] data = java.util.Arrays.copyOfRange(buffer, 0, len);
+                EditText editText = new EditText(mContext);
+                for (byte b : data) {
+                    byte h = (byte) (0x0F & (b >> 4));
+                    byte l = (byte) (0x0F & b);
+                    editText.append("" + (char) (h > 9 ? 'A' + (h - 10) : '0' + h));
+                    editText.append("" + (char) (l > 9 ? 'A' + (l - 10) : '0' + l));
+                }
+                Log.d(TAG, "Factory : " + mContext.getString(factoryRes) + "------" + editText.getText().toString());
+                if ("DD 00 00 00 00 00 77".replace(" ", "").equals(editText.getText().toString())) {
+                    factoryRes = R.string.read_battery_an;
+                    handler.postDelayed(batteryFactoryRunnable, 0);
+                } else if ("DD 28 00 02 07 D0 FF 27 77".replace(" ", "").equals(editText.getText().toString())) {
+                    factoryRes = R.string.write_25a_battery;
+                    handler.postDelayed(batteryFactoryRunnable, 0);
+                } else if ("DD 28 00 00 00 00 77".replace(" ", "").equals(editText.getText().toString())) {
+                    factoryRes = R.string.close_factory;
+                    handler.postDelayed(batteryFactoryRunnable, 0);
+                } else if ("DD 28 00 02 09 C4 FF 31 77".replace(" ", "").equals(editText.getText().toString())) {
+                    factoryRes = R.string.close_factory;
+                    handler.postDelayed(batteryFactoryRunnable, 0);
+                } else if ("DD 01 00 00 00 00 77".replace(" ", "").equals(editText.getText().toString())) {
+                    handler.removeCallbacks(batteryFactoryRunnable);
+                    openBatteryPort();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (input != null) {
+                    try {
+                        input.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+    };
 
     //TEST
     public String testGpioSensorState() {
