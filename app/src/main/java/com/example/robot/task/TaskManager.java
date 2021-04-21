@@ -501,6 +501,7 @@ public class TaskManager {
         Content.isLastTask = false;
         Content.taskIsFinish = false;
         Content.taskIndex = taskIndex;
+        Log.d(TAG, "START TASK index ： " + taskIndex);
         Content.pir_timeCount = 20;
         getTaskPositionMsg(mapName, taskName);
 //        robotTaskQueue = exeTaskPoi(mapName, taskName, mTaskArrayList);

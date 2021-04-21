@@ -187,7 +187,7 @@ public class SocketServices extends BaseService {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            Log.d(TAG, "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
+            Log.d(TAG, "ZDZD : " + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
             if (Content.is_initialize_finished == 1) {
                 RotateCount = 120;
                 handler.removeCallbacks(this::run);
@@ -209,6 +209,7 @@ public class SocketServices extends BaseService {
                         Content.taskName = null;
                         Content.taskIndex = -1;
                     } else {
+                        Log.d(TAG, "TASK INDEX111 = " + Content.taskIndex);
                         TaskManager.getInstances(mContext).startTaskQueue(Content.mapName, Content.taskName, Integer.parseInt(index));
                     }
                 } else {
@@ -403,11 +404,11 @@ public class SocketServices extends BaseService {
                     break;
                 case 12:
                     NavigationService.move(0.2f, 0.0f);
-                    handler.sendEmptyMessageDelayed(12, 10);
+                    myHandler.sendEmptyMessageDelayed(12, 20);
                     break;
                 case 13:
-                    handler.removeMessages(12);
-                    handler.removeMessages(13);
+                    myHandler.removeMessages(12);
+                    myHandler.removeMessages(13);
                     Content.taskIndex = 0;
                     TaskManager.getInstances(mContext).use_map(Content.mapName);
                     myHandler.post(alarmRunnable);
@@ -450,9 +451,10 @@ public class SocketServices extends BaseService {
                     Log.d("ALARMreceiver :", " ,  " + Content.mapName + " , " + Content.taskName);
                 }
             } else if (Content.is_initialize_finished == 0) {
+                Log.d("ALARMreceiver 000:", "" + Content.is_initialize_finished + " ,  " + Content.mapName + " , " + Content.taskName);
                 if (RotateCount >= 0) {
                     RotateCount--;
-                    myHandler.postDelayed(runnable, 1000);
+                    myHandler.postDelayed(this::run, 1000);
                 } else {
                     RotateCount = 120;
                     myHandler.removeCallbacks(this::run);
@@ -505,7 +507,7 @@ public class SocketServices extends BaseService {
                     mSqLiteOpenHelperUtils.updateAlarmTask(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)), Content.dbAlarmIsRun, "false");
                     checkLztekLamp.setLeaveChargingLimit();
                     myHandler.sendEmptyMessageDelayed(12, 10000);
-                    myHandler.sendEmptyMessageDelayed(13, 12000);
+                    myHandler.sendEmptyMessageDelayed(13, 14000);
                 } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && "FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         && TextUtils.isEmpty(Content.taskName)) {

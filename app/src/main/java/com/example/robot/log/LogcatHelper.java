@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Environment;
+import android.telephony.mbms.FileInfo;
 import android.util.Log;
 
 import com.example.robot.content.Content;
@@ -18,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -83,10 +85,22 @@ public class LogcatHelper {
         stop();
         File file = new File(PATH_LOGCAT);
         if (file.listFiles().length > 10) {
-            file.listFiles()[0].delete(); //得到链表最早的文件名
+            sortFileList(file.listFiles());
         }
         start();
     }
+
+    private void sortFileList(File[] files) {
+        ArrayList<File> fileInfoArrayList = new ArrayList<>();
+        for (int i = 0; i < files.length; i++) {
+            fileInfoArrayList.add(files[i]);
+        }
+        Collections.sort(fileInfoArrayList);
+        for (int i = 0; i < (files.length - 10); i++) {
+            fileInfoArrayList.get(i).delete();
+        }
+    }
+
 
     private class LogDumper extends Thread {
 

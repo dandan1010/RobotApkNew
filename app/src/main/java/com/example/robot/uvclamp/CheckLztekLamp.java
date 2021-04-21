@@ -435,6 +435,21 @@ public class CheckLztekLamp {
             } else if (msg.what == 1002) {
                 handler.removeMessages(1001);
                 handler.removeMessages(1002);
+            } else if (msg.what == 1003) {
+                if (Content.is_initialize_finished == 1) {
+                    TaskManager.getInstances(mContext).navigate_Position((String) msg.obj, Content.CHARGING_POINT);
+                } else if (Content.is_initialize_finished == 0) {
+                    Message message = handler.obtainMessage();
+                    message.obj = msg.obj;
+                    message.what = 1003;
+                    handler.sendMessageDelayed(message, 1 * 1000);
+                } else if (Content.is_initialize_finished == 2) {
+                    NavigationService.initialize((String) msg.obj, Content.CHARGING_POINT);
+                    Message message = handler.obtainMessage();
+                    message.obj = msg.obj;
+                    message.what = 1003;
+                    handler.sendMessageDelayed(message, 1 * 1000);
+                }
             }
         }
     };
@@ -494,7 +509,11 @@ public class CheckLztekLamp {
                             if (lowbatteryCount >= 5) {
                                 String mapName = SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME);
                                 Log.d("zdzd555 : ", "导航到充点电 ： " + mapName);
-                                TaskManager.getInstances(mContext).navigate_Position(mapName, Content.CHARGING_POINT);
+                                NavigationService.initialize(mapName, Content.CHARGING_POINT);
+                                Message message = handler.obtainMessage();
+                                message.obj = mapName;
+                                message.what = 1003;
+                                handler.sendMessageDelayed(message, 3 * 1000);
                                 lowbatteryCount = 0;
                                 Content.is_leave_charging = false;
                             }
@@ -522,7 +541,7 @@ public class CheckLztekLamp {
                         msg = "充电";
                         Content.isCharging = true;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
-                    } else if (Content.noChargingCount >= 5){
+                    } else if (Content.taskName != null || Content.noChargingCount >= 5){
                         Content.noChargingCount = 0;
                         msg = "放电";
                         if (Content.robotState == 4) {
