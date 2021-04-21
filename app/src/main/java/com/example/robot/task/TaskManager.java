@@ -567,9 +567,9 @@ public class TaskManager {
             super.handleMessage(msg);
             if (msg.what == 1001) {
                 Log.d(TAG, "start task  taskIsFinish： " + Content.taskIsFinish + ",  taskIndex: " + Content.taskIndex + " , mTaskArrayList " + mTaskArrayList.size()
-                        + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY);
+                        + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY + ",   Content.isHightTemp : " + Content.isHightTemp);
                 mAssestFile.deepFile("start task  taskIsFinish： " + Content.taskIsFinish + ",  taskIndex: " + Content.taskIndex + " , mTaskArrayList " + mTaskArrayList.size()
-                        + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY);
+                        + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY + ",   Content.isHightTemp : " + Content.isHightTemp);
                 if (!Content.taskIsFinish && !Content.EMERGENCY && !Content.isHightTemp) {
                     isSendType = false;
                     if (Content.taskIndex < mTaskArrayList.size()) {

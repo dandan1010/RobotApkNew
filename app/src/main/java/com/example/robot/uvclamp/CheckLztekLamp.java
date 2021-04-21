@@ -680,10 +680,7 @@ public class CheckLztekLamp {
         } else {
             if (Content.isCharging) {
                 if (Content.charging_limiting_flag == 0) {//设置为5A
-                    Content.isHightTemp = true;
-                    Content.taskIsFinish = false;
-                    SocketServices.toLightControlBtn = false;
-                    TaskManager.getInstances(mContext).cancel_navigate();
+                    Content.isHightTemp = false;
                     setArrayList.add(mContext.getString(R.string.a_password1));
                     setArrayList.add(mContext.getString(R.string.a_flow_5A));
                     setArrayList.add(mContext.getString(R.string.a_password2));
