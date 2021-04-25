@@ -808,4 +808,10 @@ public interface GsControllerService {
     @POST("/gs-robot/cmd/modify_robot_param")
     Call<Status> modifyRobotParam(@Body ModifyRobotParam.RobotParam[] modifyRobotParam);
 
+    /**
+     * 机器人后退距离
+     */
+    @GET("/gs-robot/cmd/reboot")
+    Call<Status> reboot();
+
 }

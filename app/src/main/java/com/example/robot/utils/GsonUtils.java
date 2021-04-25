@@ -70,6 +70,11 @@ public class GsonUtils {
     private long currentArea = 0;
     private long currentTaskCount = 0;
     private long currentTime = 0;
+    private String robot_error = "";
+
+    public void setRobot_error(String robot_error) {
+        this.robot_error = robot_error;
+    }
 
     public void setCurrentArea(long currentArea) {
         this.currentArea = currentArea;
@@ -436,6 +441,7 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
+            jsonObject.put(Content.Robot_Error, robot_error);
             jsonObject.put(Content.DEVICES_STATUS, emergency);
             jsonObject.put(Content.GET_NAVIGATIONSPEEDLEVEL, navigationSpeedLevel);
             jsonObject.put(Content.GET_PLAYPATHSPEEDLEVEL, playPathSpeedLevel);

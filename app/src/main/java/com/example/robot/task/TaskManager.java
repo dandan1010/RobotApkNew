@@ -46,6 +46,7 @@ import com.example.robot.utils.SharedPrefUtil;
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -79,6 +80,7 @@ public class TaskManager {
     private AssestFile mAssestFile;
     private int currentTaskArea = 0;
     private long taskCount = 0, taskTime = 0, area = 0;
+    private boolean isChecked = false;
 
 
     private TaskManager(Context mContext) {
@@ -509,13 +511,12 @@ public class TaskManager {
         if (mTaskArrayList.size() == 0) {
             Content.taskName = null;
             Log.d(TAG, "taskList is null");
-            mAssestFile.deepFile("taskList is null");
             return;
         }
 //        if (robotTaskQueue == null) {
 //            Content.taskName = null;
 //            Log.d(TAG, "robotTaskQueue is null");
-//            mAssestFile.deepFile("robotTaskQueue is null");
+//
 //            return;
 //        }
 //        Log.d(TAG, "任务请求：" + robotTaskQueue.toString());
@@ -567,8 +568,6 @@ public class TaskManager {
             super.handleMessage(msg);
             if (msg.what == 1001) {
                 Log.d(TAG, "start task  taskIsFinish： " + Content.taskIsFinish + ",  taskIndex: " + Content.taskIndex + " , mTaskArrayList " + mTaskArrayList.size()
-                        + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY + ",   Content.isHightTemp : " + Content.isHightTemp);
-                mAssestFile.deepFile("start task  taskIsFinish： " + Content.taskIsFinish + ",  taskIndex: " + Content.taskIndex + " , mTaskArrayList " + mTaskArrayList.size()
                         + ",   isCharging: " + Content.isCharging + ",   Content.EMERGENCY : " + Content.EMERGENCY + ",   Content.isHightTemp : " + Content.isHightTemp);
                 if (!Content.taskIsFinish && !Content.EMERGENCY && !Content.isHightTemp) {
                     isSendType = false;
@@ -624,7 +623,7 @@ public class TaskManager {
                             area = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbAreaCurrentCount)));
                         }
                         sqLiteOpenHelperUtils.reset_Db(Content.dbCurrentCount);
-                        sqLiteOpenHelperUtils.saveTaskCurrentCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "" , mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+                        sqLiteOpenHelperUtils.saveTaskCurrentCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "", mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
 
                         sqLiteOpenHelperUtils.close();
                         currentTaskArea = 0;
@@ -706,9 +705,33 @@ public class TaskManager {
                 positionListBean.setType(0);
                 positionListBean.setMapName(Content.mapName);
                 add_Position(positionListBean);
+            } else if (msg.what == 1007) {
+                isChecked = false;
+                if (mAssestFile.getFileCount() == 3) {
+                    mAssestFile.deepFile((String) msg.obj);
+                    reboot();
+                } else if (mAssestFile.getFileCount() < 3){
+                    mAssestFile.deepFile((String) msg.obj);
+                } else {
+                    EventBus.getDefault().post(new EventBusMessage(BaseEvent.Robot_Error, Content.Robot_Error));
+                }
             }
         }
     };
+
+    public void reboot() {
+        RobotManagerController.getInstance().getRobotController().reboot(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "REBOOT ----" + status.getMsg());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "REBOOT ----" + error.getMessage());
+            }
+        });
+    }
 
     public ArrayList<TaskBean> getTaskPositionMsg(String mapName, String taskName) {
         mTaskArrayList.clear();
@@ -849,7 +872,7 @@ public class TaskManager {
             area = Long.parseLong(currentCursor.getString(currentCursor.getColumnIndex(Content.dbAreaCurrentCount)));
         }
         sqLiteOpenHelperUtils.reset_Db(Content.dbCurrentCount);
-        sqLiteOpenHelperUtils.saveTaskCurrentCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "" , mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
+        sqLiteOpenHelperUtils.saveTaskCurrentCount((taskCount + 1) + "", (taskTime + (System.currentTimeMillis() - Content.startTime)) + "", (area + currentTaskArea) + "", mAlarmUtils.getTimeMonth(System.currentTimeMillis()));
 
         sqLiteOpenHelperUtils.close();
         currentTaskArea = 0;
@@ -1188,7 +1211,6 @@ public class TaskManager {
             NavigationService.disposables.add(WebSocketUtil.getWebSocket(Content.ROBOROT_INF_TWO + "/gs-robot/notice/navigation_status")
                     .subscribe(data -> {
                         Log.d("zdzd111 : ", "NavigationStatus : " + data);
-                        mAssestFile.deepFile(data);
                         if (TextUtils.isEmpty(data)) {
                             return;
                         }
@@ -1222,14 +1244,12 @@ public class TaskManager {
                                 break;
                             case 401:
                                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
-                                mAssestFile.deepFile(data);
                                 break;
                             case 702:
                                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
                                 break;
                             case 1006:
                                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, jsonObject.getString("statusMsg")));
-                                mAssestFile.deepFile(data);
                                 break;
                         }
                     }, throwable -> {
@@ -1251,6 +1271,27 @@ public class TaskManager {
                             return;
                         }
                         EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_HEALTHY, data));
+                        if (!isChecked) {
+                            String[] strings = data.split(",");
+                            for (int i = 0; i < strings.length; i++) {
+                                if (!strings[i].contains("cannotRotate") && !strings[i].contains("localizationLost")) {
+                                    Log.d(TAG, "system_health_status : " + strings[i]);
+                                    if (strings[i].endsWith("false")) {
+                                        Message message = handler.obtainMessage();
+                                        message.what = 1007;
+                                        message.obj = data;
+                                        handler.sendMessageDelayed(message, 5 * 60 * 1000);
+                                        isChecked = true;
+                                        break;
+                                    }
+                                }
+                                if (i == strings.length - 1) {
+                                    handler.removeMessages(1007);
+                                    mAssestFile.deleteErrorCode();
+                                }
+                            }
+                        }
+
                     }, throwable -> {
                         Log.d(TAG, "system_health_status ：" + throwable.getMessage());
                         system_health_status();

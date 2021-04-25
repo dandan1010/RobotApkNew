@@ -662,4 +662,10 @@ public enum GsController implements IGsRobotController {
         if (gsControllerService != null)
             gsControllerService.modifyRobotParam(modifyRobotParam).enqueue(new ResponseCallback<Status>().call(status));
     }
+
+    @Override
+    public void reboot(RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.reboot().enqueue(new ResponseCallback<Status>().call(status));
+    }
 }

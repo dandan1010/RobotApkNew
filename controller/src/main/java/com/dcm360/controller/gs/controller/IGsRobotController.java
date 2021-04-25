@@ -213,4 +213,6 @@ public interface IGsRobotController {
     void deviceRobotVersion(RobotStatus<VersionBean> status);//设备版本信息
 
     void modifyRobotParam(ModifyRobotParam.RobotParam[] modifyRobotParam, RobotStatus<Status> status);//回桩距离
+
+    void reboot(RobotStatus<Status> status);//导航重启
 }

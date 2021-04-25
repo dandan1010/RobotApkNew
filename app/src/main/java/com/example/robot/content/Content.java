@@ -32,6 +32,8 @@ public final class Content {
     public static boolean is_first_charging = false;
     public static boolean is_leave_charging = false;
 
+    public static final String Robot_Error = "Robot_Error";//机器人异常
+
     /**
      * //测试版本不亮灯 ：0
      * demo : 1

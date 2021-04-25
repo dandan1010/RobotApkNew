@@ -20,6 +20,7 @@ import com.example.robot.uvclamp.CheckLztekLamp;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -195,6 +196,14 @@ public class NavigationService extends Service {
             Log.d(TAG, "重置底盘连接状态：" + connect);
             checkLztekLamp.openEth();
             checkLztekLamp.setEthAddress();
+            try {
+                Content.server.stop();
+                Content.server = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     Handler handler = new Handler();

@@ -102,6 +102,7 @@ public class BaseEvent {
     public static final int dbTotalCount = 10065;//任务统计个数
 
     public static final int dbCurrentCount = 10066;//当月任务统计个数
+    public static final int Robot_Error = 10067;//重启导航
 
     //test
     public static final int TEST_UVCSTART_1 = 20001;

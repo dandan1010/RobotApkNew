@@ -38,17 +38,10 @@ public class AssestFile {
     private StringBuffer stringBuffer;
     private Object synchronizedObject;
 
-    private RunableThread runableThread;
-
     public AssestFile(Context mContext) {
         this.mContext = mContext;
         stringBuffer = new StringBuffer();
         synchronizedObject = new Object();
-
-        if (runableThread == null) {
-            runableThread = new RunableThread();
-            new Thread(runableThread).start();
-        }
     }
 
     public void writeBytesToFile(ByteBuffer byteBuffer) {
@@ -57,7 +50,7 @@ public class AssestFile {
         try {
             out = new FileOutputStream(getCrashFilePath(mContext));
             InputStream is = new ByteArrayInputStream(byteBuffer.array());
-            Log.d(TAG,"file length： "  + is.available() + ",    " + byteBuffer.array().length);
+            Log.d(TAG, "file length： " + is.available() + ",    " + byteBuffer.array().length);
             fileLength = is.available();
             byte[] buff = new byte[1024];
             int len = 0;
@@ -120,25 +113,21 @@ public class AssestFile {
         return path;
     }
 
-    public void deepFile(String logString) {
-        synchronized (synchronizedObject) {
-            stringBuffer.append(logString).toString();
-        }
+    public void deepFile(String healthyString) {
+        stringBuffer.append(healthyString).toString();
+        runnable.run();
     }
 
-    class RunableThread implements Runnable{
-
+    Runnable runnable = new Runnable() {
         @Override
         public void run() {
-            while (true) {
                 try {
-                    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    String path = Environment.getExternalStorageDirectory().getPath() + "/robot";
+                    String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
                     File file1 = new File(path);
                     if (!file1.exists()) {
                         file1.mkdir();
                     }
-                    path = path + "/" + dateFormat.format(new Date(System.currentTimeMillis()))+".txt";
+                    path = path + "/" + System.currentTimeMillis() + ".txt";
                     File file = new File(path);
                     if (!file.exists()) {
                         try {
@@ -153,13 +142,10 @@ public class AssestFile {
                     raf.write((dateFormat1.format(new Date(System.currentTimeMillis())) + " : " + stringBuffer.toString()).getBytes());
                     raf.write("\n".getBytes());
                     Log.d(TAG, "write log file success");
-                    stringBuffer.delete(0,stringBuffer.length());
-                    Thread.sleep(1000);
+                    stringBuffer.delete(0, stringBuffer.length());
                 } catch (IOException e) {
                     // TODO Auto-generated catch block
                     Log.d(TAG, "write log file error : " + e.getMessage());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
                 } finally {
                     if (raf != null) {
                         try {
@@ -169,7 +155,26 @@ public class AssestFile {
                         }
                     }
                 }
+        }
+    };
 
+    public int getFileCount(){
+        String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
+        File file = new File(path);
+        if (file.exists()) {
+            return file.listFiles().length;
+        }
+        return 0;
+    }
+
+    public void deleteErrorCode() {
+        String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
+        File file = new File(path);
+        Log.d(TAG, "deleteErrorCode");
+        if (file.exists()) {
+            Log.d(TAG, "deleteErrorCode存在");
+            for (int i = 0;i<file.listFiles().length;i++){
+                file.listFiles()[i].delete();
             }
         }
     }

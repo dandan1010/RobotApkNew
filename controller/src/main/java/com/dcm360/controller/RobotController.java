@@ -56,4 +56,6 @@ public interface RobotController extends RobotInitialize, RobotMap, RobotNavigat
     void setSpeedLevel(String level, RobotStatus<Status> status);//跑线速度
 
     void setnavigationSpeedLevel(String level, RobotStatus<Status> status);//导航速度
+
+    void reboot(RobotStatus<Status> status);//重启导航
 }

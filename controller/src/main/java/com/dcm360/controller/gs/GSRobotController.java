@@ -400,4 +400,9 @@ public class GSRobotController implements RobotController {
         GsController.INSTANCE.setnavigationSpeedLevel(level, status);
     }
 
+    @Override
+    public void reboot(RobotStatus<Status> status){
+        GsController.INSTANCE.reboot(status);
+    }
+
 }

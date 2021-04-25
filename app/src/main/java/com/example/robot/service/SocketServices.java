@@ -106,7 +106,8 @@ public class SocketServices extends BaseService {
         //Log.d(TAG, "新的apk: " + BuildConfig.VERSION_NAME);
         handler.sendEmptyMessage(1);
     }
-    public void isNewSerialPort(){
+
+    public void isNewSerialPort() {
         initView();
     }
 
@@ -130,7 +131,7 @@ public class SocketServices extends BaseService {
                         index = cursor.getString(cursor.getColumnIndex(Content.dbTaskIndex));
                         Cursor cursorList = mSqLiteOpenHelperUtils.searchPointTask(Content.dbPointTaskName, mapName + "," + taskName);
                         if (Integer.parseInt(index) < cursorList.getCount() - 1) {
-                            Log.d(TAG, "执行任务到第 " + (Integer.parseInt(index) + 1) + "个任务");
+                            Log.d(TAG, "执行任务到第 " + (Integer.parseInt(index)) + "个任务");
                             Content.mapName = mapName;
                             Content.taskName = taskName;
                             Content.taskIndex = -1;
@@ -196,7 +197,6 @@ public class SocketServices extends BaseService {
                         Content.time = 4000;
                         GsonUtils gsonUtils = new GsonUtils();
                         gsonUtils.setTvTime("电量回充,不能开始任务");
-                        assestFile.deepFile("电量回充,不能开始任务 : 当前：" + SocketServices.battery + " , 回充： " + Content.battery);
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
@@ -299,7 +299,7 @@ public class SocketServices extends BaseService {
                             EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
                         }
 
-                        Log.d("zdzd prop111 : " , "" + PropertyUtils.getProperty(Content.isRobotAngularSpeed,"false"));
+                        Log.d("zdzd prop111 : ", "" + PropertyUtils.getProperty(Content.isRobotAngularSpeed, "false"));
                         if ("true".equals(PropertyUtils.getProperty(Content.isRobotAngularSpeed, "false"))) {
                             NavigationService.move(0, 0.2f);
                         }
@@ -432,7 +432,6 @@ public class SocketServices extends BaseService {
                         Content.time = 4000;
                         GsonUtils gsonUtils = new GsonUtils();
                         gsonUtils.setTvTime("电量回充,不能开始任务");
-                        assestFile.deepFile("电量回充,不能开始任务 : 当前：" + SocketServices.battery + " , 回充： " + Content.battery);
                         if (Content.server != null) {
                             Content.server.broadcast(gsonUtils.putTVTime(Content.TV_TIME));
                         }
@@ -485,9 +484,6 @@ public class SocketServices extends BaseService {
                 Log.d("AlarmReceiver ", mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
                         + ", taskName" + TextUtils.isEmpty(Content.taskName)
                         + ",  dbAlarmCycle :" + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
-                assestFile.deepFile("dbAlarmTime " + mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
-                        + ", taskName : " + TextUtils.isEmpty(Content.taskName)
-                        + ",  dbAlarmCycle : " + TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))));
                 if (!TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && week == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))
                         && mAlarmUtils.getTimeMillis(time).equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))
@@ -877,13 +873,11 @@ public class SocketServices extends BaseService {
                 handlerInitialize.removeCallbacks(runnableInitialize);
                 EventBus.getDefault().post(new EventBusMessage(10000, status.getErrorCode()));
             }
-            assestFile.deepFile("是否完成初始化" + (Status) messageEvent.getT());
         } else if (messageEvent.getState() == 10035) {
             Log.d(TAG, "是否完成初始化error: " + (String) messageEvent.getT());
             EventBus.getDefault().post(new EventBusMessage(10000, mContext.getResources().getString(R.string.fail_initialize)) + (String) messageEvent.getT());
             handlerInitialize.removeCallbacks(runnableInitialize);
             Content.is_initialize_finished = 2;
-            assestFile.deepFile("是否完成初始化error" + (Status) messageEvent.getT());
         } else if (messageEvent.getState() == BaseEvent.CANCEL_SCAN_MAP_NO) {//取消扫描不保存地图
             TaskManager.getInstances(mContext).cancleScanMap();
         } else if (messageEvent.getState() == BaseEvent.ROBOT_HEALTHY) {//系统健康
@@ -1195,6 +1189,11 @@ public class SocketServices extends BaseService {
                 gsonUtils.setCurrentTime(taskTime);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.dbCurrentCount));
             }
+        } else if (messageEvent.getState() == BaseEvent.Robot_Error) {
+            if (Content.server != null) {
+                gsonUtils.setRobot_error((String) messageEvent.getT());
+                Content.server.broadcast(gsonUtils.putJsonMessage(Content.Robot_Error));
+            }
         }
 
 //test request
@@ -1244,7 +1243,7 @@ public class SocketServices extends BaseService {
         } else if (messageEvent.getState() == BaseEvent.PING) {
             String address = null;
             try {
-                address = new JSONObject((String)messageEvent.getT()).getString(Content.Address);
+                address = new JSONObject((String) messageEvent.getT()).getString(Content.Address);
             } catch (JSONException e) {
                 e.printStackTrace();
             }
