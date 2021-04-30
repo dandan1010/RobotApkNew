@@ -3,6 +3,7 @@ package com.example.robot.uvclamp;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.widget.EditText;
 
@@ -47,6 +48,7 @@ public class CheckLztekLamp {
     private int lowbatteryCount = 0;
     private int fullbatteryCount = 0;
     private int factoryRes = 0;
+    private int openBattery = 0;
 
     /**
      * 248:充电
@@ -390,12 +392,25 @@ public class CheckLztekLamp {
         handler.postDelayed(runnable, 0);
     }
 
+    public void restartBatteryPort() {
+        openBattery++;
+        if (openBattery > 10) {
+            handler.removeCallbacks(runnable);
+            handler.removeCallbacks(batteryFactoryRunnable);
+            handler.removeCallbacks(batteryRunnable);
+            batterySerialPort.close();
+            readBatteryFactory();
+        }
+    }
+
     /**
      * 间隔1秒写入请求一次电池数据
      */
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
+            Log.d(TAG, "batteryRunnable : " + openBattery);
+            restartBatteryPort();
             OutputStream outputStream = null;
             byte[] battery = hexBytes("DDA50300FFFD77");
             try {
@@ -406,8 +421,6 @@ public class CheckLztekLamp {
                 handler.postDelayed(batteryRunnable, 0);
             } catch (IOException e) {
                 e.printStackTrace();
-                batterySerialPort.close();
-                readBatteryFactory();
             } finally {
                 if (outputStream != null) {
                     try {
@@ -475,6 +488,7 @@ public class CheckLztekLamp {
                     String two = editText.getText().toString().substring(8, 12);
                     Content.chargerVoltage = Integer.parseInt(two, 16) / 1000;
                     Log.d(TAG, "读取数据 ： " + editText.getText().toString() + " ,two : " + editText.getText().toString().substring(12, 14));
+                    openBattery = 0;
                     EventBus.getDefault().post(new EventBusMessage(10033, data));
                     String msg = "放电";
                     Log.d("zdzd555:", "taskName : " + Content.taskName
@@ -850,7 +864,7 @@ public class CheckLztekLamp {
                 } else if ("DD 28 00 02 09 C4 FF 31 77".replace(" ", "").equals(editText.getText().toString())) {
                     factoryRes = R.string.close_factory;
                     handler.postDelayed(batteryFactoryRunnable, 0);
-                } else if ("DD 01 00 00 00 00 77".replace(" ", "").equals(editText.getText().toString())) {
+                } else if (!TextUtils.isEmpty(editText.getText().toString())) {
                     handler.removeCallbacks(batteryFactoryRunnable);
                     openBatteryPort();
                 }
