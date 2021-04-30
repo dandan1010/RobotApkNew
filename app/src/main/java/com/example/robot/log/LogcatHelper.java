@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -109,15 +110,15 @@ public class LogcatHelper {
         private boolean mRunning = true;
         String cmds = null;
         private String mPID;
-        private FileOutputStream out = null;
+        private RandomAccessFile random = null;
 
         public LogDumper(String pid, String dir) {
             mPID = pid;
 
             file = new File(PATH_LOGCAT, "log_"
-                    + getFileName().replace(" ", "_").replace(":", "") + count + ".log");
+                    + getFileName().replace(" ", "_").replace(":", "") + ".log");
             try {
-                out = new FileOutputStream(file);
+                random = new RandomAccessFile(file,"rw");
             } catch (FileNotFoundException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -155,8 +156,9 @@ public class LogcatHelper {
                     if (line.length() == 0) {
                         continue;
                     }
-                    if (out != null && line.contains(mPID)) {
-                        out.write((line + "\n").getBytes());
+                    if (random != null && line.contains(mPID)) {
+                        random.seek(file.length());
+                        random.write((line + "\n").getBytes());
                     }
                 }
 
@@ -176,13 +178,13 @@ public class LogcatHelper {
                         e.printStackTrace();
                     }
                 }
-                if (out != null) {
+                if (random != null) {
                     try {
-                        out.close();
+                        random.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    out = null;
+                    random = null;
                 }
 
             }
@@ -192,7 +194,7 @@ public class LogcatHelper {
     }
 
     public String getFileName() {
-        SimpleDateFormat format = new SimpleDateFormat("yyyy_MM_dd HH:mm");
+        SimpleDateFormat format = new SimpleDateFormat("yyyy_MM_dd");
         String date = format.format(new Date(System.currentTimeMillis()));
         return date;// 2012年10月03日 23:41:31
     }

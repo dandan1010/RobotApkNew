@@ -190,7 +190,7 @@ public class NavigationService extends Service {
             Log.d(TAG, "底盘连接状态：" + connect);
             isStartNavigationService = connect;
             handler.postDelayed(runnable, 10 * 1000);
-            TaskManager.getInstances(mContext).modifyRobotParam(0.7);
+            TaskManager.getInstances(mContext).modifyRobotParam(0.75);
         }
         if (!connect) {
             Log.d(TAG, "重置底盘连接状态：" + connect);

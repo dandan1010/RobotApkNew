@@ -203,6 +203,7 @@ public final class Content {
     public static final String TASK_DISINFECT_TIME = "disinfect_Time";//执行任务的点的时间
     public static final String TASK_ANGLE = "angle";//机器人角度
     public static final String POINT_NAME = "point_Name";//点的名字
+    public static final String POINT_INDEX = "point_index";//点的名字
     public static final String POINT_X = "point_x";//点x坐标
     public static final String POINT_Y = "point_y";//点y坐标
     public static final String POINT_TYPE = "point_type";//点类型
@@ -231,7 +232,7 @@ public final class Content {
     public static final String VIRTUAL_Y = "virtual_y";//虚拟墙数据
 
     public static boolean completeFlag = false;
-    public static final String TASK_ALARM = "task_alarm";//任务
+    public static final String TASK_ALARM = "task_alarm";//定时任务
 
 
     //obstacles_name

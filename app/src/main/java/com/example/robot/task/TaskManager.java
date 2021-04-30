@@ -644,8 +644,8 @@ public class TaskManager {
                 }
             } else if (msg.what == 1002) {
                 Log.d(TAG, "timer-1002 速度 : " + Content.speed);
-                if (Content.speed == 0) {
-                    handler.sendEmptyMessageDelayed(1003, 5 * 60 * 1000);
+                if (Content.speed == 0 && !SocketServices.toLightControlBtn) {
+                    handler.sendEmptyMessageDelayed(1003, 1 * 60 * 1000);
                 } else {
                     handler.removeMessages(1003);
                 }
@@ -776,6 +776,7 @@ public class TaskManager {
         mTaskArrayList.add(taskBean);
         pointStateBean.setList(pointStates);
         sqLiteOpenHelperUtils.close();
+        EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
         return mTaskArrayList;
     }
 
@@ -1275,7 +1276,6 @@ public class TaskManager {
                             String[] strings = data.split(",");
                             for (int i = 0; i < strings.length; i++) {
                                 if (!strings[i].contains("cannotRotate") && !strings[i].contains("localizationLost")) {
-                                    Log.d(TAG, "system_health_status : " + strings[i]);
                                     if (strings[i].endsWith("false")) {
                                         Message message = handler.obtainMessage();
                                         message.what = 1007;

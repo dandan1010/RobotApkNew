@@ -309,6 +309,7 @@ public class GsonUtils {
             JSONArray jsonArray = new JSONArray();
             for (int i = 0; i < taskState.getList().size(); i++) {
                 JSONObject js = new JSONObject();
+                js.put(Content.POINT_INDEX, Content.taskIndex);
                 js.put(Content.POINT_NAME, taskState.getList().get(i).getPointName());
                 js.put(Content.POINT_STATE, taskState.getList().get(i).getPointState());
                 js.put(Content.POINT_TIME, taskState.getList().get(i).getTimeCount());

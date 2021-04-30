@@ -386,6 +386,7 @@ public class CheckLztekLamp {
             Log.d(TAG, "BatteryPort is null");
             return;
         }
+        handler.removeCallbacks(runnable);
         handler.postDelayed(runnable, 0);
     }
 
@@ -405,6 +406,8 @@ public class CheckLztekLamp {
                 handler.postDelayed(batteryRunnable, 0);
             } catch (IOException e) {
                 e.printStackTrace();
+                batterySerialPort.close();
+                readBatteryFactory();
             } finally {
                 if (outputStream != null) {
                     try {
@@ -479,7 +482,7 @@ public class CheckLztekLamp {
                             + ",leave : " + Content.is_leave_charging
                             + " , mapName : " + SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME));
                     getChargingGpio();
-                    if (Content.taskName == null) {
+                    /*if (Content.taskName == null) {
                         //充电桩充电 && 不在执行任务
                         // 当前正在充电 && 电量100 && 电流小于200---->离开充电桩
                         if (Content.charging_gpio == 0 && Content.isCharging
@@ -515,7 +518,7 @@ public class CheckLztekLamp {
                             fullbatteryCount = 0;
                             lowbatteryCount = 0;
                         }
-                    }
+                    }*/
                     Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging + ",  battery : " + SocketServices.battery);
                     //读gpio
                     if (!Content.isCharging && Content.charging_gpio == 0 && Content.chargingState != 2) {
@@ -544,7 +547,7 @@ public class CheckLztekLamp {
                         //关闭gpio口
                         Log.d("zdzd555:", "关闭gpio口 : Content.chargingState = " + Content.chargingState + "charging = " + Content.isCharging);
                         if (Content.chargingState == 2 && Content.isCharging) {
-                            setChargingGpio(1);
+                            //setChargingGpio(1);
                             Content.chargingState = 0;
                             Log.d("zdzd555:", "关闭gpio口 : ");
                         }
@@ -671,7 +674,7 @@ public class CheckLztekLamp {
             Content.isLimiting_flag = 2;
             setSpeed();
         } else {
-            if (Content.isCharging) {
+            if (Content.charging_gpio == 0) {
                 if (Content.charging_limiting_flag == 0) {//设置为5A
                     Content.isHightTemp = false;
                     setArrayList.add(mContext.getString(R.string.a_password1));

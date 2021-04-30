@@ -347,7 +347,7 @@ public class SocketServices extends BaseService {
                     myHandler.removeMessages(9);
                     break;
                 case 5:
-                    if (checkLztekLamp.getGpioSensorState() || Content.EMERGENCY
+                    if (/*checkLztekLamp.getGpioSensorState()||*/  Content.EMERGENCY
                             || Content.robotState == 6 || Content.robotState == 4) {
                         checkLztekLamp.setUvcModeForDemo(1);
                     } else {
@@ -362,8 +362,11 @@ public class SocketServices extends BaseService {
                     TaskManager.pointStateBean.getList().get(Content.taskIndex - 1).setTimeCount("电量回充,消毒未完成");
                     EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
                     if (battery > Content.maxBattery && Content.taskName != null) {
-                        //TaskManager.getInstances(mContext).resumeTaskQueue();
+                         //TaskManager.getInstances(mContext).resumeTaskQueue();
                         Content.taskIsFinish = false;
+                        Content.robotState = 1;
+                        Content.time = 4000;
+                        checkLztekLamp.setChargingGpio(1);
                         myHandler.sendEmptyMessage(9);
                         myHandler.removeMessages(6);
                     } else if (Content.taskName == null) {
@@ -408,6 +411,7 @@ public class SocketServices extends BaseService {
                 case 13:
                     myHandler.removeMessages(12);
                     myHandler.removeMessages(13);
+                    checkLztekLamp.setChargingGpio(1);
                     Content.taskIndex = 0;
                     TaskManager.getInstances(mContext).use_map(Content.mapName);
                     myHandler.post(alarmRunnable);
@@ -836,7 +840,9 @@ public class SocketServices extends BaseService {
             }
         } else if (messageEvent.getState() == BaseEvent.BATTERY_DATA) {//电池电量
             byte[] bytes = (byte[]) messageEvent.getT();
-            battery = bytes[23];
+            if ((battery - bytes[23]) < 10) {
+                battery = bytes[23];
+            }
             if (Content.server != null) {
                 gsonUtils.setBattery(battery + "%");
                 Content.server.broadcast(gsonUtils.putBattery(Content.BATTERY_DATA));
@@ -887,6 +893,7 @@ public class SocketServices extends BaseService {
             }
         } else if (messageEvent.getState() == BaseEvent.ROBOT_TASK_STATE) {//任务状态
             if (Content.server != null) {
+                Log.d(TAG, "ZDZD ROBOT_TASK_STATE : " + BaseEvent.ROBOT_TASK_STATE);
                 gsonUtils.setMapName(Content.mapName);
                 gsonUtils.setTaskName(Content.taskName);
                 gsonUtils.setTaskState((PointStateBean) messageEvent.getT());
@@ -1065,14 +1072,26 @@ public class SocketServices extends BaseService {
             String nextTaskaskName = Content.taskName;
             if (Content.taskName == null) {
                 while (aTrue.moveToNext()) {
-                    if ("FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime))) && TextUtils.isEmpty(nextTaskaskName)) {
+                    if ("FF:FF".equals(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)))) {
                         nextTaskaskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
-                    } else if (mAlarmUtils.getWeek(System.currentTimeMillis()) == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))) {
+                        Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                        break;
+                    } else if (TextUtils.isEmpty(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle))) ||
+                            mAlarmUtils.getWeek(System.currentTimeMillis()) == Integer.parseInt(aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmCycle)))) {
                         long integerTime = mAlarmUtils.stringToTimestamp("2021-02-22 " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)) + ":00");
                         long nowTime = mAlarmUtils.stringToTimestamp("2021-02-22 " + mAlarmUtils.getTimeMillis(System.currentTimeMillis()) + ":00");
                         if (integerTime - nowTime < nextTaskTime) {
                             nextTaskTime = integerTime - nowTime;
                             nextTaskaskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                            Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
+                        }
+                    } else {
+                        long integerTime = mAlarmUtils.stringToTimestamp("2021-02-22 " + aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmTime)) + ":00");
+                        long nowTime = mAlarmUtils.stringToTimestamp("2021-02-22 " + mAlarmUtils.getTimeMillis(System.currentTimeMillis()) + ":00");
+                        if (integerTime - nowTime < nextTaskTime) {
+                            nextTaskTime = integerTime - nowTime;
+                            nextTaskaskName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[1];
+                            Content.mapName = aTrue.getString(aTrue.getColumnIndex(Content.dbAlarmMapTaskName)).split(",")[0];
                         }
                     }
                 }
@@ -1083,9 +1102,9 @@ public class SocketServices extends BaseService {
                 gsonUtils.setMapName(Content.mapName);
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.GET_TASK_STATE));
             }
-            if (Content.taskName != null && TaskManager.pointStateBean != null) {
-                EventBus.getDefault().post(new EventBusMessage(10038, TaskManager.pointStateBean));
-            }
+
+            TaskManager.getInstances(mContext).getTaskPositionMsg(Content.mapName, nextTaskaskName);
+            Log.d(TAG,"ZDZD : pointStateBean" + (TaskManager.pointStateBean != null));
         } else if (messageEvent.getState() == 10054) {//设置led亮度
 
         } else if (messageEvent.getState() == BaseEvent.GET_LED_LEVEL) {//获取led亮度
@@ -1254,6 +1273,7 @@ public class SocketServices extends BaseService {
                     myHandler.sendEmptyMessageDelayed(10, 5000);
                     Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
                 } else if (Content.CONNECT_ADDRESS.equals(address)) {
+                    Content.server.broadcast(gsonUtils.putConnMsg(Content.CONN_OK));
                     myHandler.removeMessages(10);
                     myHandler.sendEmptyMessageDelayed(10, 5000);
                 } else if (!Content.CONNECT_ADDRESS.equals(address)) {
