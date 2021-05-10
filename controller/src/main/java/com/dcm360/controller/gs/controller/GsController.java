@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.RecordingBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ModifyRobotParam;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
@@ -667,5 +668,23 @@ public enum GsController implements IGsRobotController {
     public void reboot(RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.reboot().enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
+    public void recording(RecordingBean recordingBean, RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.recording(recordingBean).enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
+    public void getBag(String bagName, RobotStatus<ResponseBody> status) {
+        if (gsControllerService != null)
+            gsControllerService.getBag(bagName).enqueue(new ResponseCallback<ResponseBody>().call(status));
+    }
+
+    @Override
+    public void deleteBag(String bagName, RobotStatus<Status> status) {
+        if (gsControllerService != null)
+            gsControllerService.deleteBag(bagName).enqueue(new ResponseCallback<Status>().call(status));
     }
 }

@@ -41,20 +41,12 @@ public class LogcatHelper {
      * 初始化目录
      */
     private void init(Context context) {
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {// 优先保存到SD卡中
-            PATH_LOGCAT = Environment.getExternalStorageDirectory()
-                    .getAbsolutePath() + File.separator + "interprenter";
-        } else {// 如果SD卡不存在，就保存到本应用的目录下
-            PATH_LOGCAT = context.getFilesDir().getAbsolutePath()
-                    + File.separator + "interprenter";
-        }
+        PATH_LOGCAT = "/sdcard/interprenter";
         fileList = new File(PATH_LOGCAT);
         if (!fileList.exists()) {
             fileList.mkdirs();
-            Log.e("init : ", "创建文件夹");
         }
-        Log.e("init : ", "PATH_LOGCAT");
+        Log.d("init : ", "PATH_LOGCAT");
     }
 
     public static LogcatHelper getInstance(Context context) {

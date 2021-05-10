@@ -12,6 +12,7 @@ import com.dcm360.controller.RobotController;
 import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.gs.controller.ResponseCallback;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.RecordingBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
@@ -403,6 +404,31 @@ public class GSRobotController implements RobotController {
     @Override
     public void reboot(RobotStatus<Status> status){
         GsController.INSTANCE.reboot(status);
+    }
+
+    @Override
+    public void recording(RecordingBean recordingBean, RobotStatus<Status> status){
+        GsController.INSTANCE.recording(recordingBean, status);
+    }
+
+    @Override
+    public void getBag(String bagName, final RobotStatus<byte[]> bag) {
+        GsController.INSTANCE.getBag(bagName, new RobotStatus<ResponseBody>() {
+            @Override
+            public void success(ResponseBody responseBody) {
+                try {
+                    bag.success(responseBody.bytes());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    bag.error(e);
+                }
+            }
+
+            @Override
+            public void error(Throwable error) {
+                bag.error(error);
+            }
+        });
     }
 
 }

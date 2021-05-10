@@ -10,9 +10,11 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.dcm360.controller.gs.GSRobotController;
 import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.RecordingBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ModifyRobotParam;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
@@ -81,6 +83,7 @@ public class TaskManager {
     private int currentTaskArea = 0;
     private long taskCount = 0, taskTime = 0, area = 0;
     private boolean isChecked = false;
+    private long recordingTime = System.currentTimeMillis();
 
 
     private TaskManager(Context mContext) {
@@ -572,6 +575,8 @@ public class TaskManager {
                 if (!Content.taskIsFinish && !Content.EMERGENCY && !Content.isHightTemp) {
                     isSendType = false;
                     if (Content.taskIndex < mTaskArrayList.size()) {
+                        recordingTime = System.currentTimeMillis();
+                        recording(Content.startRecordingOpName);
                         if (Content.Working_mode == 1) {
                             EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTLIGHT, -1));
                         }
@@ -587,6 +592,8 @@ public class TaskManager {
                         handler.sendEmptyMessageDelayed(1001, 1000);
                     } else {
                         Log.d(TAG, "remove message ");
+                        recording(Content.endRecordingOpName);
+                        handler.sendEmptyMessageDelayed(2001, 3000);
                         handler.removeMessages(1001);
                         handler.removeMessages(1002);
                         handler.removeMessages(1003);
@@ -710,11 +717,15 @@ public class TaskManager {
                 if (mAssestFile.getFileCount() == 3) {
                     mAssestFile.deepFile((String) msg.obj);
                     reboot();
-                } else if (mAssestFile.getFileCount() < 3){
+                } else if (mAssestFile.getFileCount() < 3) {
                     mAssestFile.deepFile((String) msg.obj);
                 } else {
                     EventBus.getDefault().post(new EventBusMessage(BaseEvent.Robot_Error, Content.Robot_Error));
                 }
+            } else if (msg.what == 2001) {
+                getBag(mAlarmUtils.getTimeYear(recordingTime).replace(" ", "_") + "_0.bag");
+            } else if (msg.what == 2002) {
+                deleteBag(mAlarmUtils.getTimeYear(recordingTime).replace(" ", "_") + "_0.bag");
             }
         }
     };
@@ -1313,6 +1324,7 @@ public class TaskManager {
         Log.d(TAG, "navigationStatus ： " + type + " , isSendType : " + isSendType);
         if ("REACHED".equals(type) && Content.robotState != 6 && !isSendType) {//已经到达目的地
             Log.d(TAG, "REACHED");
+            recording(Content.endRecordingOpName);
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
@@ -1331,7 +1343,9 @@ public class TaskManager {
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,
                     "" + mAlarmUtils.getTimeYear(Content.startTime));
+            handler.sendEmptyMessageDelayed(2002, 3000);
         } else if (type.equals("UNREACHABLE") && Content.robotState != 6 && !isSendType) {
+            recording(Content.endRecordingOpName);
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
@@ -1343,19 +1357,9 @@ public class TaskManager {
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,
                     "" + mAlarmUtils.getTimeYear(Content.startTime));
-        } else if (type.equals("LOCALIZATION_FAILED") && Content.robotState != 6 && !isSendType) {
-            isSendType = true;
-            handler.removeMessages(1002);
-            handler.removeMessages(1003);
-            pointStateBean.getList().get(Content.taskIndex).setPointState(mContext.getResources().getString(R.string.done));
-            EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
-            Content.taskIndex++;
-            Content.taskIsFinish = false;
-            Log.d(TAG, "LOCALIZATION_FAILED");
-            sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
-                    "" + Content.taskIndex,
-                    "" + mAlarmUtils.getTimeYear(Content.startTime));
+            handler.sendEmptyMessageDelayed(2001, 3000);
         } else if (type.equals("GOAL_NOT_SAFE") && Content.robotState != 6 && !isSendType) {
+            recording(Content.endRecordingOpName);
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
@@ -1367,7 +1371,9 @@ public class TaskManager {
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,
                     "" + mAlarmUtils.getTimeYear(Content.startTime));
+            handler.sendEmptyMessageDelayed(2001, 3000);
         } else if (type.equals("UNREACHED") && Content.robotState != 6 && !isSendType) {
+            recording(Content.endRecordingOpName);
             isSendType = true;
             handler.removeMessages(1002);
             handler.removeMessages(1003);
@@ -1379,10 +1385,63 @@ public class TaskManager {
             sqLiteOpenHelperUtils.updateTaskIndex(Content.dbTaskIndex,
                     "" + Content.taskIndex,
                     "" + mAlarmUtils.getTimeYear(Content.startTime));
+            handler.sendEmptyMessageDelayed(2001, 3000);
         } else if (type.equals("HEADING") || type.equals("PLANNING")) {
 
         }
         sqLiteOpenHelperUtils.close();
+    }
+
+    public void recording(String op_name) {
+        RecordingBean recordingBean = new RecordingBean();
+        recordingBean.setNode_name("record-bag");
+        recordingBean.setOp_name(op_name);
+        ArrayList<String> arrayList = new ArrayList<>();
+        arrayList.clear();
+        if (Content.startRecordingOpName.equals(op_name)) {
+            arrayList.add("/root/GAUSSIAN_RUNTIME_DIR//bag/" + mAlarmUtils.getTimeYear(recordingTime).replace(" ", "_") + ".bag");
+        }
+        recordingBean.setArgs(arrayList);
+        GsController.INSTANCE.recording(recordingBean, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "recording-- op_name : " + op_name + ",  status : " + status.getMsg());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "recording error-- op_name : " + op_name + ",  status : " + error.getMessage());
+            }
+        });
+    }
+
+    public void getBag(String bagName) {
+        RobotManagerController.getInstance().getRobotController().getBag(bagName, new RobotStatus<byte[]>() {
+            @Override
+            public void success(byte[] bytes) {
+                Log.d(TAG, "下载bag文件 ： " + bagName + ",   " + bytes.length);
+                mAssestFile.writeBagFiles(bytes);
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "下载bag文件 error ： " + bagName + ",   " + error.getMessage());
+            }
+        });
+    }
+
+    public void deleteBag(String bagName) {
+        GsController.INSTANCE.deleteBag("bag/" + bagName, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "删除bag文件 : " + bagName + ",   " + status.getMsg());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "删除bag文件失败 : " + bagName + ",   " + error.getMessage());
+            }
+        });
     }
 
     public void robot_reset() {

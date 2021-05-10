@@ -178,5 +178,35 @@ public class AssestFile {
             }
         }
     }
+    public void writeBagFiles(byte[] bytes) {
+        Log.d(TAG, "ZDZD : writeBagFiles ");
+        OutputStream out = null;
+        try {
+            String path = "/sdcard/robotBag";
+            File file = new File(path);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
+            DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            path = path + "/"+ dateFormat1.format(new Date(System.currentTimeMillis())).replace(" ","_") + ".bag";
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            out = new FileOutputStream(path);
+            out.write(bytes);
+            out.flush();
+            out.close();
+        } catch (FileNotFoundException e) {
+            Log.d(TAG,  " 下载bag File : " + e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            Log.d(TAG, " 下载bag  IO : " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
 }
 

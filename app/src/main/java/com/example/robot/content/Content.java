@@ -24,6 +24,8 @@ public final class Content {
         }
         return "/dev/ttyS1";
     }
+    public static final String startRecordingOpName = "launch";//开始录制bag的op_Name
+    public static final String endRecordingOpName = "shutdown";//停止录制bag的op_Name
 
     public static int delayTime = 200;
     public static String InitializePositionName = "Initialize";//初始化的点

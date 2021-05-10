@@ -3,6 +3,7 @@ package com.dcm360.controller.gs.controller;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.RecordingBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ModifyRobotParam;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
@@ -215,4 +216,10 @@ public interface IGsRobotController {
     void modifyRobotParam(ModifyRobotParam.RobotParam[] modifyRobotParam, RobotStatus<Status> status);//回桩距离
 
     void reboot(RobotStatus<Status> status);//导航重启
+
+    void recording(RecordingBean recordingBean, RobotStatus<Status> status);//录制bag
+
+    void getBag(String bagName, RobotStatus<ResponseBody> status);
+
+    void deleteBag(String bagName, RobotStatus<Status> status);
 }

@@ -2,6 +2,7 @@ package com.dcm360.controller;
 
 
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.RecordingBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
@@ -58,4 +59,8 @@ public interface RobotController extends RobotInitialize, RobotMap, RobotNavigat
     void setnavigationSpeedLevel(String level, RobotStatus<Status> status);//导航速度
 
     void reboot(RobotStatus<Status> status);//重启导航
+
+    void recording(RecordingBean recordingBean, RobotStatus<Status> status);//录制bag
+
+    void getBag(String bagName, final RobotStatus<byte[]> bag);
 }

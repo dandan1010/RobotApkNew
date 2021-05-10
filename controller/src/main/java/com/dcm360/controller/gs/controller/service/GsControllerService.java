@@ -2,6 +2,7 @@ package com.dcm360.controller.gs.controller.service;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
+import com.dcm360.controller.gs.controller.bean.RecordingBean;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ChargeStatus;
 import com.dcm360.controller.gs.controller.bean.charge_bean.ModifyRobotParam;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
@@ -47,6 +48,7 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
+import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 /**
@@ -813,5 +815,24 @@ public interface GsControllerService {
      */
     @GET("/gs-robot/cmd/reboot")
     Call<Status> reboot();
+
+
+    /*
+    * 开始录制bag
+    * */
+    @POST("/gs-robot/cmd/op")
+    Call<Status> recording(@Body RecordingBean recordingBean);
+
+    /*
+     * 下载录制bag
+     * */
+    @GET ("/GAUSSIAN_RUNTIME_DIR/bag/{bagName}")
+    Call<ResponseBody> getBag(@Path("bagName") String bagName);
+
+    /*
+     * 删除录制bag
+     * */
+    @GET("/gs-robot/cmd/delete_runtime_file")
+    Call<Status> deleteBag(@Query("file_path") String bagName);
 
 }
