@@ -19,12 +19,6 @@ public class ServerReceiver extends BroadcastReceiver {
             Content.isUpdate = false;
             Intent intentServer = new Intent(context, SocketServices.class);
             context.startService(intentServer);
-            mAlarmUtils = new AlarmUtils(context);
-            mAlarmUtils.setAlarmTime(System.currentTimeMillis(), 60 * 1000, Content.AlarmAction);
-            Content.battery = SharedPrefUtil.getInstance(context).getSharedPrefBattery(Content.SET_LOW_BATTERY);
-            Content.led = SharedPrefUtil.getInstance(context).getSharedPrefLed(Content.SET_LED_LEVEL);
-            Content.Working_mode = SharedPrefUtil.getInstance(context).getSharedPrefWorkingMode(Content.WORKING_MODE);
-            Content.have_charging_mode = SharedPrefUtil.getInstance(context).getSharedPrefChargingMode(Content.GET_CHARGING_MODE);
 //            SqLiteOpenHelperUtils sqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
 //            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
 //            while (cursor.moveToLast()) {

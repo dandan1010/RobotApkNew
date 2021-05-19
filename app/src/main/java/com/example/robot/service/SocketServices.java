@@ -159,6 +159,14 @@ public class SocketServices extends BaseService {
     };
 
     private void initView() {
+
+        mAlarmUtils = new AlarmUtils(mContext);
+        mAlarmUtils.setAlarmTime(System.currentTimeMillis(), 60 * 1000, Content.AlarmAction);
+        Content.battery = SharedPrefUtil.getInstance(mContext).getSharedPrefBattery(Content.SET_LOW_BATTERY);
+        Content.led = SharedPrefUtil.getInstance(mContext).getSharedPrefLed(Content.SET_LED_LEVEL);
+        Content.Working_mode = SharedPrefUtil.getInstance(mContext).getSharedPrefWorkingMode(Content.WORKING_MODE);
+        Content.have_charging_mode = SharedPrefUtil.getInstance(mContext).getSharedPrefChargingMode(Content.GET_CHARGING_MODE);
+
         uvcWarning = new UvcWarning(mContext);
         checkLztekLamp = new CheckLztekLamp(mContext);
         gsonUtils = new GsonUtils();

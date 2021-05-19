@@ -188,7 +188,7 @@ public class AssestFile {
                 file.mkdirs();
             }
             DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            path = path + "/"+ dateFormat1.format(new Date(System.currentTimeMillis())).replace(" ","_") + ".bag";
+            path = path + "/"+ dateFormat1.format(new Date(System.currentTimeMillis())).replace(" ","_").replace(":","-") + ".bag";
             if (!file.exists()) {
                 try {
                     file.createNewFile();
