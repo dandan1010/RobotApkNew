@@ -41,7 +41,7 @@ public class LogcatHelper {
      * 初始化目录
      */
     private void init(Context context) {
-        PATH_LOGCAT = "/sdcard/interprenter";
+        PATH_LOGCAT = "/sdcard/robotLog/interprenter";
         fileList = new File(PATH_LOGCAT);
         if (!fileList.exists()) {
             fileList.mkdirs();

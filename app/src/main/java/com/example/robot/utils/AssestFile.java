@@ -159,7 +159,7 @@ public class AssestFile {
     };
 
     public int getFileCount(){
-        String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
+        String path = "/sdcard/robotLog/robotHealthy";
         File file = new File(path);
         if (file.exists()) {
             return file.listFiles().length;
@@ -168,7 +168,7 @@ public class AssestFile {
     }
 
     public void deleteErrorCode() {
-        String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
+        String path = "/sdcard/robotLog/robotHealthy";
         File file = new File(path);
         Log.d(TAG, "deleteErrorCode");
         if (file.exists()) {
@@ -182,7 +182,7 @@ public class AssestFile {
         Log.d(TAG, "ZDZD : writeBagFiles ");
         OutputStream out = null;
         try {
-            String path = "/sdcard/robotBag";
+            String path = "/sdcard/robotLog/robotBag";
             File file = new File(path);
             if (!file.exists()) {
                 file.mkdirs();

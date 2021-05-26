@@ -189,6 +189,7 @@ public class SocketServices extends BaseService {
         checkLztekLamp.startLedLamp();
         checkLztekLamp.initUvcMode();
         checkLztekLamp.setChargingGpio(1);
+        Content.chargingState = 0;
         checkLztekLamp.getSpeed();
     }
 
@@ -374,7 +375,8 @@ public class SocketServices extends BaseService {
                         Content.taskIsFinish = false;
                         Content.robotState = 1;
                         Content.time = 4000;
-                        checkLztekLamp.setChargingGpio(1);
+//                        checkLztekLamp.setChargingGpio(1);
+//                        Content.chargingState = 0;
                         myHandler.sendEmptyMessage(9);
                         myHandler.removeMessages(6);
                     } else if (Content.taskName == null) {
@@ -419,7 +421,8 @@ public class SocketServices extends BaseService {
                 case 13:
                     myHandler.removeMessages(12);
                     myHandler.removeMessages(13);
-                    checkLztekLamp.setChargingGpio(1);
+//                    checkLztekLamp.setChargingGpio(1);
+//                    Content.chargingState = 0;
                     Content.taskIndex = 0;
                     TaskManager.getInstances(mContext).use_map(Content.mapName);
                     myHandler.post(alarmRunnable);
@@ -1027,10 +1030,10 @@ public class SocketServices extends BaseService {
                 Content.server.broadcast(gsonUtils.putJsonMessage(Content.DEVICES_STATUS));
             }
             //电压>0,放电状态
-            Content.chargerVoltage = (int) robotDeviceStatus.getData().getChargerVoltage();
-            if (Content.chargerVoltage > 0) {
-                Content.chargingState = 1;
-            }
+//            Content.chargerVoltage = (int) robotDeviceStatus.getData().getChargerVoltage();
+//            if (Content.chargerVoltage > 0) {
+//                Content.chargingState = 1;
+//            }
         } else if (messageEvent.getState() == BaseEvent.ADD_POWER_POINT) {//添加充电点
             Log.d(TAG, "Add charging : " + Content.isCharging + ",   " + angle);
             if (Content.isCharging) {

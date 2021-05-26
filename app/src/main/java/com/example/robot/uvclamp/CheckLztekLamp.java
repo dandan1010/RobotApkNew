@@ -533,25 +533,33 @@ public class CheckLztekLamp {
                             lowbatteryCount = 0;
                         }
                     }*/
-                    Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging + ",  battery : " + SocketServices.battery);
+                    Log.d("zdzd555:", "Content.is_first_charging : " + Content.is_first_charging + ", charging : " + Content.isCharging
+                            + ",  battery : " + SocketServices.battery + ", Content.chargingState : " + Content.chargingState);
                     //读gpio
-                    if (!Content.isCharging && Content.charging_gpio == 0 && Content.chargingState != 2) {
-                        setChargingGpio(0);
-                        Content.chargingState = 2;
-                    }
                     if (editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.noChargingCount++;
                     } else {
                         Content.noChargingCount = 0;
                     }
+                    if (Content.charging_gpio == 0) {
+                        Content.hasGpioCount ++;
+                    } else {
+                        Content.hasGpioCount = 0;
+                    }
+//                    if (!Content.isCharging && Content.charging_gpio == 0 && Content.chargingState != 2 && Content.hasGpioCount > 5) {
+//                        setChargingGpio(0);
+//                        Content.chargingState = 2;
+//                    }
+
                     Log.d("zdzd555 : ", "noChargingCount : " + Content.noChargingCount);
                     if (!editText.getText().toString().substring(12, 14).startsWith("F")) {
                         Content.robotState = 4;
                         Content.time = 200;
                         msg = "充电";
                         Content.isCharging = true;
+                        Content.chargingState = 2;
                         EventBus.getDefault().post(new EventBusMessage(10000, msg));
-                    } else if (Content.taskName != null || Content.noChargingCount >= 5) {
+                    } else if (Content.taskName != null || Content.noChargingCount >= 40) {
                         Content.noChargingCount = 0;
                         msg = "放电";
                         if (Content.robotState == 4) {
@@ -561,7 +569,7 @@ public class CheckLztekLamp {
                         //关闭gpio口
                         Log.d("zdzd555:", "关闭gpio口 : Content.chargingState = " + Content.chargingState + "charging = " + Content.isCharging);
                         if (Content.chargingState == 2 && Content.isCharging) {
-                            //setChargingGpio(1);
+                            setChargingGpio(1);
                             Content.chargingState = 0;
                             Log.d("zdzd555:", "关闭gpio口 : ");
                         }

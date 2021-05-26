@@ -19,17 +19,6 @@ public class ServerReceiver extends BroadcastReceiver {
             Content.isUpdate = false;
             Intent intentServer = new Intent(context, SocketServices.class);
             context.startService(intentServer);
-//            SqLiteOpenHelperUtils sqLiteOpenHelperUtils = new SqLiteOpenHelperUtils(context);
-//            Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
-//            while (cursor.moveToLast()) {
-//                String substring = cursor.getString(cursor.getColumnIndex(Content.dbTime)).substring(0, 2);
-//                if (!Content.isCharging && "-1".equals(substring)) {
-//                    TaskManager.getInstances(context).navigate_Position(
-//                            cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)),
-//                            Content.CHARGING_POINT
-//                    );
-//                }
-//            }
         } else if ("com.android.robot.server.stop".equals(intent.getAction())){
             Intent intentServer = new Intent(context, SocketServices.class);
             context.stopService(intentServer);
