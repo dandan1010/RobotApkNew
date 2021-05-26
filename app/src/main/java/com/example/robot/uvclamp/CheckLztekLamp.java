@@ -541,11 +541,7 @@ public class CheckLztekLamp {
                     } else {
                         Content.noChargingCount = 0;
                     }
-                    if (Content.charging_gpio == 0) {
-                        Content.hasGpioCount ++;
-                    } else {
-                        Content.hasGpioCount = 0;
-                    }
+
 //                    if (!Content.isCharging && Content.charging_gpio == 0 && Content.chargingState != 2 && Content.hasGpioCount > 5) {
 //                        setChargingGpio(0);
 //                        Content.chargingState = 2;
