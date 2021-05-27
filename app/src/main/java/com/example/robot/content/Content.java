@@ -9,6 +9,10 @@ public final class Content {
     public static final String DeleteFileAlarmAction = "android.alarm.deleteFile.action";
 
     public static final String isRobotAngularSpeed = "persist.robot.isRobotAngular";//消毒时是否转圈
+    public static final String FileCount = "FileCount";//断点续传
+    public static int randomFileCount = 0;
+    public static final String COPY_FILE_LENGTH = "copy_file_length";
+    public static final String START_PTP_SERVER = "start_ptp_server";
 
     public static final String limiting_path = "/dev/ttyS2";
     public static boolean isNewSerialPort;
@@ -67,12 +71,16 @@ public final class Content {
     public static final String SYSTEM_DATE = "system_date";//系统时间
     public static final String VERSIONCODE = "versionCode";//系统版本
     public static final String ROBOTVERSIONCODE = "robotVersionCode";//下位机版本
-
+    public static String robotversioncode = "";//下位机版本
     public static boolean isLastTask = false;
     public static long startTime = System.currentTimeMillis();
     public static int Sum_Time = 0;
 
     public static boolean taskIsFinish = false;
+    public static final String ROBOT_STATUS = "robot_status";//机器人状态
+    public static final String STATUS = "status";//机器人状态
+    public static String robotStatus = "Standby";
+    public static final String TempMapName = ".;dwfltr[kgpr,;e2458;,wlf;ewkdfeopqdp1450987wqjmfkwpnvw12345678";//临时地图
 
     /**
      * robotState：
@@ -93,7 +101,6 @@ public final class Content {
      */
     public static int taskState = 0;//机器人执行任务的状态
     public static int taskIndex = -1;
-    public static String mapName = null;
     public static String taskName = null;
 
     /**
@@ -143,11 +150,12 @@ public final class Content {
     public static final String DELETETASKQUEUE = "deleteTaskQueue";//删除任务队列
     public static final String STARTTASKQUEUE = "startTaskQueue";//开始任务队列
     public static final String STOPTASKQUEUE = "stopTaskQueue";//停止任务队列
+    public static final String CANCELTASKQUEUE = "cancelTaskQueue";//取消当前任务
     public static final String EDITTASKQUEUE = "editTaskQueue";//编辑任务队列
     public static final String EDITTASKQUEUETYPE = "edittaskqueuetype";//任务类别
     public static final String EDITTASKQUEUETIME = "edittaskqueuetime";//任务类别
     public static final String GET_TASK_STATE = "get_task_state";//是否有正在执行的任务
-
+    public static final String TASK = "task";
 
     public static final String START_SCAN_MAP = "start_scan_map";//开始扫描地图
     public static final String CANCEL_SCAN_MAP = "cancel_scan_map";//取消扫描地图并且保存
@@ -183,6 +191,8 @@ public final class Content {
     public static final String GET_NAVIGATIONSPEEDLEVEL = "get_navigationSpeedLevel";//任务导航速度
     public static final String GET_PLAYPATHSPEEDLEVEL = "get_playPathSpeedLevel";//跟线导航速度
 
+    public static final String GET_SETTING_MODE = "get_setting";//设置信息
+    public static final String SET_SETTING_MODE = "set_setting";//设置信息
     public static final String SET_PLAYPATHSPEEDLEVEL = "set_playPathSpeedLevel";//设置导航速度
     public static final String SET_NAVIGATIONSPEEDLEVEL = "set_navigationSpeedLevel";//设置导航速度
     public static final String GET_LED_LEVEL = "get_led_level";//获取led亮度
@@ -195,7 +205,7 @@ public final class Content {
     public static final String DEVICES_STATUS = "devices_status";//设备信息
     public static boolean EMERGENCY = false;//急停
     public static boolean IS_STOP_TASK = false;//停止任务
-    public static double speed = 0;//停止任务
+    public static double speed = -1;//停止任务
     public static int robotSpeed = 2;//机器人速度
 
     public static final String DATATIME = "dataTime";//地图名称的列表array的key
@@ -268,6 +278,10 @@ public final class Content {
     public static final String dbSpinnerTime = "dbSpinnerTime";
     public static final String dbPointX = "dbPointX";
     public static final String dbPointY = "dbPointY";
+    public static final String POINT = "point";
+
+    public static final String dbPoint = "dbPoint";//点和时间
+    public static final String dbPointMap = "dbPointMap";
 
     public static final String dbTaskState = "dbTaskState";//点任务状态
     public static final String dbTaskStateMapName = "dbMapName";
@@ -311,4 +325,11 @@ public final class Content {
     public static final String WORLD_ULTRASONIC_Y = "world_ultrasonic_y";//声呐设备y
 
     public static boolean isHightTemp = false;//温度高，暂停任务
+
+    public static final String DOWNLOAD_LOG = "download_log";//下载log
+
+    public static final String initialize_fail = "initialize_fail";//初始化失败
+    public static final String initialize_success = "initialize_success";//初始化成功
+    public static final String initializing = "initializing";//正在初始化失败
+
 }

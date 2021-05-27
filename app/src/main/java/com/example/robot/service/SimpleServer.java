@@ -2,6 +2,7 @@ package com.example.robot.service;
 
 import android.app.Service;
 import android.content.Context;
+import android.database.Cursor;
 import android.media.AudioManager;
 import android.util.Log;
 
@@ -171,13 +172,11 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GETTASKQUEUE://任务列表
                 jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETTASKQUEUE, mapName));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETTASKQUEUE, message));
                 break;
             case Content.GETMAPPIC://地图图片
                 jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETMAPPIC, mapName));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETMAPPIC, message));
                 break;
             case Content.ADD_POSITION://添加点
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.ADD_POSITION, message));
@@ -186,7 +185,12 @@ public class SimpleServer extends WebSocketServer {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTTASKQUEUE, message));
                 break;
             case Content.STOPTASKQUEUE://停止任务
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPTASKQUEUE, message));
+                jsonObject = new JSONObject(message);
+                taskName = jsonObject.getString(Content.TASK_NAME);
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPTASKQUEUE, taskName));
+                break;
+            case Content.CANCELTASKQUEUE://取消当前任务
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.CANCELTASKQUEUE, message));
                 break;
             case Content.START_SCAN_MAP://开始扫描地图
                 jsonObject = new JSONObject(message);
@@ -195,13 +199,14 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.USE_MAP://选定地图
                 jsonObject = new JSONObject(message);
-                Content.mapName = jsonObject.getString(Content.MAP_NAME);
+                SocketServices.use_mapName = jsonObject.getString(Content.MAP_NAME);
+                if (!jsonObject.getString(Content.MAP_NAME).equals(Content.TempMapName)) {
+                    SharedPrefUtil.getInstance(mContext).setSharedPrefMapName(Content.MAP_NAME, jsonObject.getString(Content.MAP_NAME));
+                }
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.USE_MAP, message));
                 break;
             case Content.GETPOINTPOSITION://地图点数据
-                jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETPOINTPOSITION, mapName));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETPOINTPOSITION, message));
                 break;
             case Content.CANCEL_SCAN_MAP://取消扫描并且保存地图
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.CANCEL_SCAN_MAP, message));
@@ -211,8 +216,7 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.DELETE_MAP://删除地图
                 jsonObject = new JSONObject(message);
-                String deleteMapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.DELETE_MAP, deleteMapName));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.DELETE_MAP, message));
                 break;
             case Content.DELETE_POSITION://删除点
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.DELETE_POSITION, message));
@@ -225,8 +229,8 @@ public class SimpleServer extends WebSocketServer {
                 break;
             case Content.GET_VIRTUAL://获取虚拟强数据
                 jsonObject = new JSONObject(message);
-                mapName = jsonObject.getString(Content.MAP_NAME);
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_VIRTUAL, mapName));
+//                mapName = jsonObject.getString(Content.MAP_NAME);
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_VIRTUAL, message));
                 break;
             case Content.UPDATA_VIRTUAL://更新虚拟强
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.UPDATA_VIRTUAL, message));
@@ -237,15 +241,15 @@ public class SimpleServer extends WebSocketServer {
             case Content.RENAME_MAP://重命名地图
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.RENAME_MAP, message));
                 break;
-            case Content.SET_PLAYPATHSPEEDLEVEL://设置跑线速度
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SET_PLAYPATHSPEEDLEVEL, message));
-                break;
+//            case Content.SET_PLAYPATHSPEEDLEVEL://设置跑线速度
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SET_PLAYPATHSPEEDLEVEL, message));
+//                break;
             case Content.RENAME_POSITION://点重命名
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.RENAME_POSITION, message));
                 break;
-            case Content.GET_SPEED_LEVEL://获取导航速度
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_SPEED_LEVEL, message));
-                break;
+//            case Content.GET_SPEED_LEVEL://获取导航速度
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_SPEED_LEVEL, message));
+//                break;
             case Content.ADD_POWER_POINT://添加充电点
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.ADD_POWER_POINT, message));
                 break;
@@ -266,57 +270,63 @@ public class SimpleServer extends WebSocketServer {
             case Content.GET_LED_LEVEL://获取led亮度
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_LED_LEVEL, message));
                 break;
-            case Content.SET_LOW_BATTERY://设置低电量回充
-                jsonObject = new JSONObject(message);
-                Content.battery = jsonObject.getInt(Content.SET_LOW_BATTERY);
-                SharedPrefUtil.getInstance(mContext).setSharedPrefBattery(Content.SET_LOW_BATTERY, Content.battery);
-                break;
-            case Content.GET_LOW_BATTERY://获取低电量回冲
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_LOW_BATTERY, message));
-                break;
-            case Content.GET_VOICE_LEVEL://获取音量
-                AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
-                int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-                gsonUtils.setVoice(current);
-                broadcast(gsonUtils.putJsonMessage(Content.GET_VOICE_LEVEL));
-                break;
-            case Content.SET_VOICE_LEVEL://设置音量
-                jsonObject = new JSONObject(message);
-                int voice = jsonObject.getInt(Content.SET_VOICE_LEVEL);
-                AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
-                mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
-                        voice,
-                        AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
-                break;
+//            case Content.SET_LOW_BATTERY://设置低电量回充
+//                jsonObject = new JSONObject(message);
+//                Content.battery = jsonObject.getInt(Content.SET_LOW_BATTERY);
+//                SharedPrefUtil.getInstance(mContext).setSharedPrefBattery(Content.SET_LOW_BATTERY, Content.battery);
+//                break;
+//            case Content.GET_LOW_BATTERY://获取低电量回冲
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_LOW_BATTERY, message));
+//                break;
+//            case Content.GET_VOICE_LEVEL://获取音量
+//                AudioManager mAudioManager = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
+//                int current = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+//                gsonUtils.setVoice(current);
+//                broadcast(gsonUtils.putJsonMessage(Content.GET_VOICE_LEVEL));
+//                break;
+//            case Content.SET_VOICE_LEVEL://设置音量
+//                jsonObject = new JSONObject(message);
+//                int voice = jsonObject.getInt(Content.SET_VOICE_LEVEL);
+//                AudioManager mAudioManager1 = (AudioManager) mContext.getSystemService(Service.AUDIO_SERVICE);
+//                mAudioManager1.setStreamVolume(AudioManager.STREAM_MUSIC,
+//                        voice,
+//                        AudioManager.FLAG_PLAY_SOUND | AudioManager.FLAG_SHOW_UI);
+//                break;
             case Content.RESET_ROBOT://重置设置
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.RESET_ROBOT, message));
                 break;
             case Content.GET_ULTRASONIC://声呐设备
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_ULTRASONIC, message));
                 break;
-            case Content.VERSIONCODE://版本号
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.VERSIONCODE, message));
-                break;
-            case Content.WORKING_MODE://工作模式
-                JSONObject jsonObject = new JSONObject(message);
-                Content.Working_mode = new JSONObject(message).getInt(Content.WORKING_MODE);
-                SharedPrefUtil.getInstance(mContext).setSharedPrefWorkingMode(Content.WORKING_MODE, Content.Working_mode);
-                break;
-            case Content.GET_WORKING_MODE://获取工作模式
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_WORKING_MODE, message));
-                break;
-            case Content.SET_CHARGING_MODE://有无充电桩模式
-                Content.have_charging_mode = new JSONObject(message).getBoolean(Content.SET_CHARGING_MODE);
-                SharedPrefUtil.getInstance(mContext).setSharedPrefChargingMode(Content.GET_CHARGING_MODE, Content.have_charging_mode);
-                break;
-            case Content.GET_CHARGING_MODE://有无充电桩模式
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_CHARGING_MODE, message));
-                break;
+//            case Content.VERSIONCODE://版本号
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.VERSIONCODE, message));
+//                break;
+//            case Content.WORKING_MODE://工作模式
+//                JSONObject jsonObject = new JSONObject(message);
+//                Content.Working_mode = new JSONObject(message).getInt(Content.WORKING_MODE);
+//                SharedPrefUtil.getInstance(mContext).setSharedPrefWorkingMode(Content.WORKING_MODE, Content.Working_mode);
+//                break;
+//            case Content.GET_WORKING_MODE://获取工作模式
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_WORKING_MODE, message));
+//                break;
+//            case Content.SET_CHARGING_MODE://有无充电桩模式
+//                Content.have_charging_mode = new JSONObject(message).getBoolean(Content.SET_CHARGING_MODE);
+//                SharedPrefUtil.getInstance(mContext).setSharedPrefChargingMode(Content.GET_CHARGING_MODE, Content.have_charging_mode);
+//                break;
+//            case Content.GET_CHARGING_MODE://有无充电桩模式
+//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_CHARGING_MODE, message));
+//                break;
             case Content.dbTotalCount://统计一共执行任务个数，时间，面积
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.dbTotalCount, message));
                 break;
             case Content.dbCurrentCount://统计当月执行任务个数，时间，面积
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.dbCurrentCount, message));
+                break;
+            case Content.GET_SETTING_MODE://获取设置信息
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_SETTING_MODE, message));
+                break;
+            case Content.SET_SETTING_MODE://设置信息
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SET_SETTING_MODE, message));
                 break;
 
 
@@ -369,6 +379,8 @@ public class SimpleServer extends WebSocketServer {
             case Content.TEST_WARNINGSTOP:
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.TEST_WARNINGSTOP, message));
                 break;
+            case Content.DOWNLOAD_LOG:
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.DOWNLOAD_LOG, message));
             default:
                 break;
         }

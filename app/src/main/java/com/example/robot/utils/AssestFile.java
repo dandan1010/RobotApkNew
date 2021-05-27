@@ -6,6 +6,8 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.example.robot.BuildConfig;
+import com.example.robot.broadcast.BroadCastUtils;
+import com.example.robot.content.BaseEvent;
 import com.example.robot.content.Content;
 
 import org.greenrobot.eventbus.EventBus;
@@ -37,6 +39,7 @@ public class AssestFile {
     private RandomAccessFile raf;
     private StringBuffer stringBuffer;
     private Object synchronizedObject;
+    private RandomAccessFile randomAccessFile;
 
     public AssestFile(Context mContext) {
         this.mContext = mContext;
@@ -48,43 +51,68 @@ public class AssestFile {
 
         OutputStream out = null;
         try {
-            out = new FileOutputStream(getCrashFilePath(mContext));
-            InputStream is = new ByteArrayInputStream(byteBuffer.array());
-            Log.d(TAG, "file length： " + is.available() + ",    " + byteBuffer.array().length);
-            fileLength = is.available();
-            byte[] buff = new byte[1024];
-            int len = 0;
-            int count = 0;
-            while ((len = is.read(buff)) != -1) {
-                out.write(buff, 0, len);
-                count += len;
-                int progress = (int) ((float) count / (float) fileLength * 100);
-                if (progress == 100) {
-                    Log.d(TAG, "broadcast install apk");
-                    EventBus.getDefault().post(new EventBusMessage(30002, "准备升级"));
-                    if (Content.server != null) {
-                        try {
-                            Content.server.stop();
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+            randomAccessFile = new RandomAccessFile(getUpdateFilePath(mContext), "rw");
+            randomAccessFile.seek(getUpdateFilePath(mContext).length());
+            randomAccessFile.write(byteBuffer.array());
+            Content.randomFileCount++;
+            Log.d(TAG, "file length： " + Content.randomFileCount + ",    " + byteBuffer.array().length);
+            if (Content.randomFileCount >= 100) {
+                Log.d(TAG, "broadcast install apk");
+                EventBus.getDefault().post(new EventBusMessage(30002, "开始升级"));
+                if (Content.server != null) {
+                    try {
+                        Content.server.stop();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
-
-                    Intent intent = new Intent("com.android.robot.update");
-                    intent.setPackage("com.example.wireLessApk");
-                    mContext.sendBroadcast(intent);
                 }
+                BroadCastUtils.getInstance(mContext).sendUpdateBroadcast();
             }
-            out.flush();
-            is.close();
-            out.close();
         } catch (FileNotFoundException e) {
-            Log.d(TAG, e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
-            Log.d(TAG, e.getMessage());
             e.printStackTrace();
         }
+//        try {
+//            out = new FileOutputStream(getCrashFilePath(mContext));
+//            InputStream is = new ByteArrayInputStream(byteBuffer.array());
+//            Log.d(TAG, "file length： " + is.available() + ",    " + byteBuffer.array().length);
+//            fileLength = is.available();
+//            byte[] buff = new byte[1024];
+//            int len = 0;
+//            int count = 0;
+//            while ((len = is.read(buff)) != -1) {
+//                out.write(buff, 0, len);
+//                count += len;
+//                int progress = (int) ((float) count / (float) fileLength * 100);
+//                if (progress == 100) {
+//                    Log.d(TAG, "broadcast install apk");
+//                    EventBus.getDefault().post(new EventBusMessage(30002, "准备升级"));
+//                    if (Content.server != null) {
+//                        try {
+//                            Content.server.stop();
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//
+//                    Intent intent = new Intent("com.android.robot.update");
+//                    intent.setPackage("com.example.wireLessApk");
+//                    mContext.sendBroadcast(intent);
+//                }
+//            }
+//            out.flush();
+//            is.close();
+//            out.close();
+//        } catch (FileNotFoundException e) {
+//            Log.d(TAG, e.getMessage());
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            Log.d(TAG, e.getMessage());
+//            e.printStackTrace();
+//        }
     }
 
     /**
@@ -93,7 +121,7 @@ public class AssestFile {
      * @param context
      * @return
      */
-    private static String getCrashFilePath(Context context) {
+    private static String getUpdateFilePath(Context context) {
         String path = null;
         path = Environment.getExternalStorageDirectory().getPath()
                 + "/" + BuildConfig.APPLICATION_ID;
@@ -113,6 +141,16 @@ public class AssestFile {
         return path;
     }
 
+    public void deleteUpdateFile() {
+        String path = Environment.getExternalStorageDirectory().getPath()
+                + "/" + BuildConfig.APPLICATION_ID + "/update.apk";
+        File file = new File(path);
+        if (file.exists()) {
+            file.delete();
+        }
+        Log.d(TAG, "删除 update.apk 文件成功");
+    }
+
     public void deepFile(String healthyString) {
         stringBuffer.append(healthyString).toString();
         runnable.run();
@@ -121,40 +159,40 @@ public class AssestFile {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
-                try {
-                    String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
-                    File file1 = new File(path);
-                    if (!file1.exists()) {
-                        file1.mkdir();
-                    }
-                    path = path + "/" + System.currentTimeMillis() + ".txt";
-                    File file = new File(path);
-                    if (!file.exists()) {
-                        try {
-                            file.createNewFile();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    raf = new RandomAccessFile(file, "rw");
-                    raf.seek(file.length());
-                    DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    raf.write((dateFormat1.format(new Date(System.currentTimeMillis())) + " : " + stringBuffer.toString()).getBytes());
-                    raf.write("\n".getBytes());
-                    Log.d(TAG, "write log file success");
-                    stringBuffer.delete(0, stringBuffer.length());
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    Log.d(TAG, "write log file error : " + e.getMessage());
-                } finally {
-                    if (raf != null) {
-                        try {
-                            raf.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+            try {
+                String path = Environment.getExternalStorageDirectory().getPath() + "/robotHealthy";
+                File file1 = new File(path);
+                if (!file1.exists()) {
+                    file1.mkdir();
+                }
+                path = path + "/" + System.currentTimeMillis() + ".txt";
+                File file = new File(path);
+                if (!file.exists()) {
+                    try {
+                        file.createNewFile();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
+                raf = new RandomAccessFile(file, "rw");
+                raf.seek(file.length());
+                DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                raf.write((dateFormat1.format(new Date(System.currentTimeMillis())) + " : " + stringBuffer.toString()).getBytes());
+                raf.write("\n".getBytes());
+                Log.d(TAG, "write log file success");
+                stringBuffer.delete(0, stringBuffer.length());
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                Log.d(TAG, "write log file error : " + e.getMessage());
+            } finally {
+                if (raf != null) {
+                    try {
+                        raf.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
         }
     };
 
@@ -207,6 +245,115 @@ public class AssestFile {
             Log.d(TAG, " 下载bag  IO : " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    public void mCopyFile(String fromPath, String toPath) {
+        File fromFile = new File(fromPath);
+        if (!fromFile.exists()) {
+            return;
+        }
+        File toFile = new File("/sdcard/robotLog");
+        if (!fromFile.exists()) {
+            toFile.mkdirs();
+        }
+        toFile = new File(toPath + "/RobotDatabase");
+        try {
+            FileInputStream fosfrom = new FileInputStream(fromFile);
+            FileOutputStream fosto = new FileOutputStream(toFile);
+            byte bt[] = new byte[1024 * 1024];
+            int c;
+            int length = 0;
+            while ((c = fosfrom.read(bt)) > 0) {
+                fosto.write(bt, 0, c);
+                length = length + c;
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.COPY_FILE, length / fosfrom.available() * 100));
+            }
+            fosfrom.close();
+            fosto.close();
+        } catch (FileNotFoundException e) {
+            Log.i("复制文件异常", e.toString());
+        } catch (IOException e) {
+            Log.i("复制文件异常", e.toString());
+        }
+    }
+
+    public static void zipFolder(String srcFilePath, String zipFilePath) {
+        //创建Zip包
+        java.util.zip.ZipOutputStream outZip =
+                null;
+        try {
+            outZip = new java.util.zip.ZipOutputStream(new FileOutputStream(zipFilePath));
+
+
+            //打开要输出的文件
+            java.io.File file = new java.io.File(srcFilePath);
+
+            //压缩
+            zipFiles(file.getParent() + java.io.File.separator, file.getName(), outZip);
+
+            //完成,关闭
+            outZip.finish();
+            outZip.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static void zipFiles(String folderPath, String filePath,
+                                 java.util.zip.ZipOutputStream zipOut) {
+        if (zipOut == null) {
+            return;
+        }
+
+        java.io.File file = new java.io.File(folderPath + filePath);
+
+        //判断是不是文件
+        if (file.isFile()) {
+            java.util.zip.ZipEntry zipEntry = new java.util.zip.ZipEntry(filePath);
+            FileInputStream inputStream = null;
+            try {
+                inputStream = new FileInputStream(file);
+
+                zipOut.putNextEntry(zipEntry);
+
+                int len;
+                byte[] buffer = new byte[4096];
+
+                while ((len = inputStream.read(buffer)) != -1) {
+                    zipOut.write(buffer, 0, len);
+                }
+
+                zipOut.closeEntry();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //文件夹的方式,获取文件夹下的子文件
+            String fileList[] = file.list();
+
+            //如果没有子文件, 则添加进去即可
+            if (fileList.length <= 0) {
+                java.util.zip.ZipEntry zipEntry =
+                        new java.util.zip.ZipEntry(filePath + java.io.File.separator);
+                try {
+                    zipOut.putNextEntry(zipEntry);
+                    zipOut.closeEntry();
+                    //如果有子文件, 遍历子文件
+                    for (int i = 0; i < fileList.length; i++) {
+                        zipFiles(folderPath, filePath + java.io.File.separator + fileList[i], zipOut);
+                    }//end of for
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }//end of if
+
+        }//end of func
+
     }
 }
 

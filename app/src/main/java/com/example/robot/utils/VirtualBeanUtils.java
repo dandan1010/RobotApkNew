@@ -18,7 +18,7 @@ public class VirtualBeanUtils {
 
     public void updateVirtual(int type, String mapName, String obstacle_name, List<List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity>> polylinesEntities) {
         UpdataVirtualObstacleBean updataVirtualObstacleBean = new UpdataVirtualObstacleBean();
-        updataVirtualObstacleBean.setMapName(Content.mapName);
+        updataVirtualObstacleBean.setMapName(mapName);
         updataVirtualObstacleBean.setType(type);
         List<?> arrayList = new ArrayList<>();
 

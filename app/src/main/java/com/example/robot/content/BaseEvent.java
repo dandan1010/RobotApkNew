@@ -46,6 +46,7 @@ public class BaseEvent {
     public static final int DELETETASKQUEUE = 10014;//删除任务队列
     public static final int STARTTASKQUEUE = 10022;//开始任务队列
     public static final int STOPTASKQUEUE = 10023;//停止任务队列
+    public static final int CANCELTASKQUEUE = 10068;//取消当前任务
     public static final int EDITTASKQUEUE = 10051;//编辑任务队列
     public static final int GET_TASK_STATE = 10053;//是否有正在执行的任务
 
@@ -75,9 +76,11 @@ public class BaseEvent {
     public static int chargingState = 0;//充电状态
     public static int chargerVoltage = 0;//充满电
     public static int pir_timeCount = 20;//sensor
-    public static final int GET_SPEED_LEVEL = 10048;//导航速度
+//    public static final int GET_SPEED_LEVEL = 10048;//导航速度
+    public static final int GET_SETTING_MODE = 10048;//设置信息
+    public static final int SET_SETTING_MODE = 10046;//设置信息
 
-    public static final int SET_PLAYPATHSPEEDLEVEL = 10046;//设置导航速度
+//    public static final int SET_PLAYPATHSPEEDLEVEL = 10046;//设置导航速度
     public static final int GET_LED_LEVEL = 10055;//获取led亮度
 
     public static final int RESET_ROBOT = 10057;//重置设备
@@ -124,5 +127,9 @@ public class BaseEvent {
 
     public static final int GET_ULTRASONIC = 10058;//声呐设备
     public static final int SEND_ULTRASONIC = 10059;//声呐设备
+
+    public static final int DOWNLOAD_LOG = 20016;//下载log
+    public static final int COPY_FILE = 20017;//COPY 数据库
+    public static final int GO_TO_LOG_URL = 20018;//下载log
     
 }

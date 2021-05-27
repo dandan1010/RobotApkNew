@@ -202,7 +202,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 //                Content.taskName = itemString;
 //            }
 //        });
-        TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
+//        TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
 
         //checkLztekLamp.openBatteryPort();
         if (!checkLztekLamp.getEthEnable()) {
@@ -357,11 +357,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 saveTaskBean1.setTime(0);
                 list.add(saveTaskBean1);
 
-                TaskManager.getInstances(mContext).save_taskQueue(Content.mapName, "task" + i, list);
+                //TaskManager.getInstances(mContext).save_taskQueue(Content.mapName, "task" + i, list);
                 i++;
                 break;
             case R.id.stop_task_queue:
-                TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
+                //TaskManager.getInstances(mContext).stopTaskQueue(Content.mapName);
                 toLightControlBtn.setChecked(false);
                 break;
             case R.id.start_task_queue:
@@ -370,7 +370,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 }
                 break;
             case R.id.delete_task_queue:
-                TaskManager.getInstances(mContext).deleteTaskQueue(Content.mapName, Content.taskName);
+                //TaskManager.getInstances(mContext).deleteTaskQueue(Content.mapName, Content.taskName);
                 break;
             case R.id.add_position:
                 PositionListBean positionListBean = new PositionListBean();
@@ -379,23 +379,23 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                 positionListBean.setGridY(180);
                 positionListBean.setAngle(0);
                 positionListBean.setType(2);
-                positionListBean.setMapName(Content.mapName);
-                TaskManager.getInstances(mContext).add_Position(positionListBean);
+                //positionListBean.setMapName(Content.mapName);
+                //TaskManager.getInstances(mContext).add_Position(positionListBean);
                 break;
             case R.id.delete_position:
-                TaskManager.getInstances(mContext).deletePosition(Content.mapName, "bbb");
+                //TaskManager.getInstances(mContext).deletePosition(Content.mapName, "bbb");
                 break;
             case R.id.alarm_btn:
                 //mAlarmUtils.setAlarmTime("task0", System.currentTimeMillis() + 2 * 60 * 1000, 30 * 60 * 1000);
                 break;
             case R.id.getVirtualObstacleData:
-                TaskManager.getInstances(mContext).getVirtual_obstacles(Content.mapName);
+                //TaskManager.getInstances(mContext).getVirtual_obstacles(Content.mapName);
                 break;
             case R.id.updateVirtualObstacleData:
-                mVirtualBeanUtils.updateVirtual(4, Content.mapName,"carpets", null);
-                mVirtualBeanUtils.updateVirtual(6, Content.mapName, "decelerations",null);
-                mVirtualBeanUtils.updateVirtual(1, Content.mapName, "slopes",null);
-                mVirtualBeanUtils.updateVirtual(5, Content.mapName, "displays",null);
+               // mVirtualBeanUtils.updateVirtual(4, Content.mapName,"carpets", null);
+               // mVirtualBeanUtils.updateVirtual(6, Content.mapName, "decelerations",null);
+               // mVirtualBeanUtils.updateVirtual(1, Content.mapName, "slopes",null);
+               // mVirtualBeanUtils.updateVirtual(5, Content.mapName, "displays",null);
 //                //最外边「」
 //                List<UpdataVirtualObstacleBean.ObstaclesEntity.LinesEntity> polylinesEntities = new ArrayList<>();
 //                //每个「」
@@ -548,11 +548,11 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
 
     @Override
     public void OnItemClickListener(View view, int position) {
-        Content.mapName = data.get(position).getName();
-        TaskManager.getInstances(mContext).getMapPic(Content.mapName);
-        TaskManager.getInstances(mContext).use_map(Content.mapName);
-        TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
-        TaskManager.getInstances(mContext).getPosition(Content.mapName);
+//        Content.mapName = data.get(position).getName();
+//        TaskManager.getInstances(mContext).getMapPic(Content.mapName);
+//        TaskManager.getInstances(mContext).use_map(Content.mapName);
+//        TaskManager.getInstances(mContext).getTaskQueues(Content.mapName);
+//        TaskManager.getInstances(mContext).getPosition(Content.mapName);
     }
 
     @Override
@@ -632,7 +632,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
                         Content.taskState = 3;
                         TaskManager.getInstances(mContext).pauseTaskQueue();
                     }
-                    TaskManager.getInstances(mContext).navigate_Position(Content.mapName, "Origin");
+                    //TaskManager.getInstances(mContext).navigate_Position(Content.mapName, "Origin");
                     break;
                 case 5:
                     break;
@@ -729,7 +729,7 @@ public class RobotDetailActivity extends BaseActivity implements CompoundButton.
     private Runnable runnablePosition = new Runnable() {
         @Override
         public void run() {
-            TaskManager.getInstances(mContext).getPositions(Content.mapName);
+            //TaskManager.getInstances(mContext).getPositions(Content.mapName);
             myHandler.postDelayed(this, 1000);
         }
     };
