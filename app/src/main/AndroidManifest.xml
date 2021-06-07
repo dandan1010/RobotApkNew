@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:sharedUserId="android.uid.system"
-    package="com.example.robot">
+    package="com.retron.robot">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -51,7 +51,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activity.RobotDetailActivity">
+        <activity android:name="com.retron.robot.activity.RobotDetailActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -59,19 +59,19 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.NavigationService" />
+        <service android:name="com.retron.robot.service.NavigationService" />
 
-        <receiver android:name=".receiver.BootCompletedReceiver">
+        <receiver android:name="com.retron.robot.receiver.BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.AlarmReceiver">
+        <receiver android:name="com.retron.robot.receiver.AlarmReceiver">
             <intent-filter>
                 <action android:name="android.alarm.task.action" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.ServerReceiver">
+        <receiver android:name="com.retron.robot.receiver.ServerReceiver">
             <intent-filter>
                 <action android:name="com.android.robot.server.start" />
                 <action android:name="com.android.robot.server.stop" />
@@ -79,7 +79,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".service.SocketServices"></service>
+        <service android:name="com.retron.robot.service.SocketServices"></service>
     </application>
 
 </manifest>
