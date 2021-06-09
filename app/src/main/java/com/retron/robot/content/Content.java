@@ -69,7 +69,6 @@ public final class Content {
     public static final String SYSTEM_DATE = "system_date";//系统时间
     public static final String VERSIONCODE = "versionCode";//系统版本
     public static final String ROBOTVERSIONCODE = "robotVersionCode";//下位机版本
-    public static String robotversioncode = "";//下位机版本
     public static boolean isLastTask = false;
     public static long startTime = System.currentTimeMillis();
     public static int Sum_Time = 0;
@@ -113,16 +112,11 @@ public final class Content {
     public static final String MAP_NAME = "map_Name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字
     //type id
-    public static final String STARTUP = "startUp";//前进
-    public static final String STOPUP = "stopUp";//停止后退
-    public static final String STARTDOWN = "startDown";//后退
-    public static final String STOPDOWN = "stopDown";//停止后退
-    public static final String STARTLEFT = "startLeft";//向左
-    public static final String STOPLEFT = "stopLeft";//停止左转
-    public static final String STARTRIGHT = "startRight";//向右
-    public static final String STOPRIGHT = "stopRight";//停止右转
     public static final String STARTLIGHT = "startLight";//开灯
     public static final String STOPLIGHT = "stopLight";//关灯
+    public static final String STARTMOVE = "startMove";//机器人移动
+    public static final String LINEAR_SPEED = "linear_speed";//机器人线速度
+    public static final String ANGULAR_SPEED = "angular_speed";//机器人角速度
 
     public static final String GETMAPLIST = "getMapList";//请求地图列表
     public static final String SENDMAPNAME = "sendMapName";//返回地图列表名称
@@ -243,14 +237,6 @@ public final class Content {
 
     public static boolean completeFlag = false;
     public static final String TASK_ALARM = "task_alarm";//定时任务
-
-
-    //obstacles_name
-    public static final String carpets = "carpets";
-    public static final String decelerations = "decelerations";
-    public static final String slopes = "slopes";
-    public static final String displays = "displays";
-    public static final String obstacles = "obstacles";
 
     //db Name
     public static final String dbName = "RobotDatabase";//数据库名字

@@ -17,14 +17,15 @@ public class BaseEvent {
 
     //type id
     public static final int REQUEST_MSG = 10000;//信息返回
-    public static final int STARTUP = 10002;//前进
-    public static final int STOPUP = 10007;//停止后退
-    public static final int STARTDOWN = 10001;//后退
-    public static final int STOPDOWN = 10008;//停止后退
-    public static final int STARTLEFT = 10003;//向左
-    public static final int STOPLEFT = 10009;//停止左转
-    public static final int STARTRIGHT = 10004;//向右
-    public static final int STOPRIGHT = 10010;//停止右转
+//    public static final int STARTUP = 10002;//前进
+//    public static final int STOPUP = 10007;//停止后退
+//    public static final int STARTDOWN = 10001;//后退
+//    public static final int STOPDOWN = 10008;//停止后退
+//    public static final int STARTLEFT = 10003;//向左
+//    public static final int STOPLEFT = 10009;//停止左转
+//    public static final int STARTRIGHT = 10004;//向右
+//    public static final int STOPRIGHT = 10010;//停止右转
+    public static final int STARTMOVE = 10002;//机器人移动
     public static final int STARTLIGHT = 10005;//开灯
     public static final int STOPLIGHT = 10006;//关灯
 

@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.retron.robot.content.BaseEvent;
 import com.retron.robot.content.Content;
-import com.retron.robot.utils.AssestFile;
 import com.retron.robot.utils.EventBusMessage;
 import com.retron.robot.utils.GsonUtils;
 import com.retron.robot.utils.SharedPrefUtil;
@@ -28,12 +27,10 @@ public class SimpleServer extends WebSocketServer {
     private String address = "";
     private Context mContext;
     public WebSocket conn;
-    private AssestFile assestFile;
 
     private SimpleServer(InetSocketAddress address, Context mContext) {
         super(address);
         this.mContext = mContext;
-        assestFile = new AssestFile(mContext);
     }
 
     /**
@@ -44,9 +41,7 @@ public class SimpleServer extends WebSocketServer {
             synchronized (SimpleServer.class) {
                 if (Content.server == null) {
                     Log.d(TAG, "instance thread run");
-                    String host = Content.ip;
-                    int port = Content.port;
-                    Content.server = new SimpleServer(new InetSocketAddress(host, port), context);
+                    Content.server = new SimpleServer(new InetSocketAddress(Content.ip, Content.port), context);
                     Content.server.start();
                 }
             }
@@ -126,18 +121,6 @@ public class SimpleServer extends WebSocketServer {
             case Content.PING:
                 EventBus.getDefault().post(new EventBusMessage(30000, message));
                 break;
-            case Content.STARTDOWN:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTDOWN, message));
-                break;
-            case Content.STARTUP:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTUP, message));
-                break;
-            case Content.STARTLEFT:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTLEFT, message));
-                break;
-            case Content.STARTRIGHT:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTRIGHT, message));
-                break;
             case Content.STARTLIGHT:
                 jsonObject = new JSONObject(message);
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTLIGHT, message));
@@ -145,17 +128,8 @@ public class SimpleServer extends WebSocketServer {
             case Content.STOPLIGHT:
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPLIGHT, message));
                 break;
-            case Content.STOPUP:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPUP, message));
-                break;
-            case Content.STOPDOWN:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPDOWN, message));
-                break;
-            case Content.STOPLEFT:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPLEFT, message));
-                break;
-            case Content.STOPRIGHT:
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPRIGHT, message));
+            case Content.STARTMOVE:
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STARTMOVE, message));
                 break;
             case Content.GETMAPLIST://地图列表
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.GETMAPLIST, message));

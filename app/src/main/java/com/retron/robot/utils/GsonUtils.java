@@ -290,7 +290,7 @@ public class GsonUtils {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.MAP_NAME, SocketServices.use_mapName);
             jsonObject.put(Content.TASK_NAME, taskName);
-            jsonObject.put(Content.CONNECT_ADDRESS, address);
+            jsonObject.put(Content.Address, address);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -475,7 +475,7 @@ public class GsonUtils {
                     object.put(Content.GRID_HEIGHT, robotMap.getData().get(i).getMapInfo().getGridHeight());
                     object.put(Content.GRID_WIDTH, robotMap.getData().get(i).getMapInfo().getGridWidth());
                     object.put(Content.ORIGIN_X, robotMap.getData().get(i).getMapInfo().getOriginX());
-                    object.put(Content.ORIGIN_Y, robotMap.getData().get(i).getMapInfo().getOriginX());
+                    object.put(Content.ORIGIN_Y, robotMap.getData().get(i).getMapInfo().getOriginY());
                     object.put(Content.RESOLUTION, robotMap.getData().get(i).getMapInfo().getResolution());
 
                     JSONArray mRobotPositionsArray = new JSONArray();

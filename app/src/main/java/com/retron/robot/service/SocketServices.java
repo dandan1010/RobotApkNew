@@ -394,10 +394,7 @@ public class SocketServices extends BaseService {
                 case 10:
                     Content.CONNECT_ADDRESS = "";
                     TaskManager.getInstances(mContext).cancleScanMap();
-                    handler4.removeCallbacks(runnable1);
-                    handler4.removeCallbacks(runnable2);
-                    handler4.removeCallbacks(runnable3);
-                    handler4.removeCallbacks(runnable4);
+                    myHandler.removeMessages(17);
                     break;
                 case 11://定时任务
                     getTaskQueue(msg.arg1);
@@ -435,6 +432,16 @@ public class SocketServices extends BaseService {
                     break;
                 case 16:
                     TaskManager.getInstances(mContext).deleteMap(Content.TempMapName);
+                    break;
+                case 17:
+                    String obj = (String) msg.obj;
+                    NavigationService.move(Float.parseFloat(obj.split(",")[0]),
+                            Float.parseFloat(obj.split(",")[1]));
+                    Message message = myHandler.obtainMessage();
+                    message.what = 17;
+                    message.obj = msg.obj;
+                    myHandler.sendMessageDelayed(message, 20);
+
                     break;
                 default:
                     break;
@@ -651,44 +658,28 @@ public class SocketServices extends BaseService {
                 gsonUtils.setCallback((String) messageEvent.getT());
                 Content.server.broadcast(gsonUtils.putCallBackMsg(Content.REQUEST_MSG));
             }
-        } else if (messageEvent.getState() == BaseEvent.STARTDOWN) {//后退
-            handler1.postDelayed(runnable1, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == BaseEvent.STARTUP) {//前进
-            handler2.postDelayed(runnable2, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == BaseEvent.STARTLEFT) {//左转
-            handler3.postDelayed(runnable3, 10);
-            Content.time = 300;
-            Content.robotState = 3;
-        } else if (messageEvent.getState() == BaseEvent.STARTRIGHT) {//右转
-            handler4.postDelayed(runnable4, 10);
-            Content.time = 300;
-            Content.robotState = 3;
+        } else if (messageEvent.getState() == BaseEvent.STARTMOVE){
+            try {
+                JSONObject jsonObject = new JSONObject((String) messageEvent.getT());
+                float linear = (float) jsonObject.getDouble(Content.LINEAR_SPEED);
+                float angular = (float) jsonObject.getDouble(Content.ANGULAR_SPEED);
+                if (linear == 0 && angular == 0) {
+                    myHandler.removeMessages(17);
+                } else {
+                    Message message = myHandler.obtainMessage();
+                    message.what = 17;
+                    message.obj = linear+","+angular;
+                    myHandler.sendMessage(message);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         } else if (messageEvent.getState() == BaseEvent.STARTLIGHT) {//开始消毒检测
             toLightControlBtn = true;
             startDemoMode();
         } else if (messageEvent.getState() == BaseEvent.STOPLIGHT) {//停止消毒检测
             toLightControlBtn = false;
             stopDemoMode();
-        } else if (messageEvent.getState() == BaseEvent.STOPUP) {//停前
-            handler2.removeCallbacks(runnable2);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == BaseEvent.STOPDOWN) {//停退
-            handler1.removeCallbacks(runnable1);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == BaseEvent.STOPLEFT) {//停左
-            handler3.removeCallbacks(runnable3);
-            Content.robotState = 1;
-            Content.time = 4000;
-        } else if (messageEvent.getState() == BaseEvent.STOPRIGHT) {//停右
-            handler4.removeCallbacks(runnable4);
-            Content.robotState = 1;
-            Content.time = 4000;
         } else if (messageEvent.getState() == BaseEvent.GETMAPLIST) {//地图列表
             TaskManager.getInstances(mContext).loadMapList();
         } else if (messageEvent.getState() == BaseEvent.SENDMAPNAME) {//地图列表获取后发送
@@ -1359,7 +1350,7 @@ public class SocketServices extends BaseService {
                 if (TextUtils.isEmpty(Content.CONNECT_ADDRESS)) {
                     Content.server.broadcast(gsonUtils.putConnMsg(Content.CONN_OK));
                     Content.CONNECT_ADDRESS = address;
-                    myHandler.sendEmptyMessageDelayed(10, 5000);
+                    myHandler.sendEmptyMessageDelayed(10, 2000);
                     Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
                     gsonUtils.setMapName(use_mapName);
                     Log.d(TAG, "has update apk : " + assestFile.hasUpdateApk());
@@ -1378,7 +1369,7 @@ public class SocketServices extends BaseService {
                 } else if (Content.CONNECT_ADDRESS.equals(address)) {
                     Content.server.broadcast(gsonUtils.putConnMsg(Content.CONNECTED));
                     myHandler.removeMessages(10);
-                    myHandler.sendEmptyMessageDelayed(10, 5000);
+                    myHandler.sendEmptyMessageDelayed(10, 2000);
                 } else if (!Content.CONNECT_ADDRESS.equals(address)) {
                     gsonUtils.setAddress(Content.CONNECT_ADDRESS);
                     SimpleServer.getInstance(mContext).conn.send(gsonUtils.putConnMsg(Content.NO_CONN));
@@ -1433,46 +1424,6 @@ public class SocketServices extends BaseService {
         @Override
         public synchronized void run() {
             NavigationService.is_initialize_finished();
-        }
-    };
-
-    //持续移动 下
-    Handler handler1 = new Handler();
-    Runnable runnable1 = new Runnable() {
-        @Override
-        public synchronized void run() {
-            NavigationService.move(-0.2f, 0.0f);
-            handler1.postDelayed(runnable1, 10);
-        }
-    };
-
-    //持续移动 上
-    Handler handler2 = new Handler();
-    Runnable runnable2 = new Runnable() {
-        @Override
-        public synchronized void run() {
-            NavigationService.move(0.2f, 0.0f);
-            handler2.postDelayed(runnable2, 10);
-        }
-    };
-
-    //持续移动 左
-    Handler handler3 = new Handler();
-    Runnable runnable3 = new Runnable() {
-        @Override
-        public synchronized void run() {
-            NavigationService.move(0.0f, 0.2f);
-            handler3.postDelayed(runnable3, 10);
-        }
-    };
-
-    //持续移动 右
-    Handler handler4 = new Handler();
-    Runnable runnable4 = new Runnable() {
-        @Override
-        public synchronized void run() {
-            NavigationService.move(0.0f, -0.2f);
-            handler4.postDelayed(runnable4, 10);
         }
     };
 

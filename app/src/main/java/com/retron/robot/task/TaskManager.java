@@ -1214,12 +1214,12 @@ public class TaskManager {
             public void success(Status status) {
                 Log.d(TAG, "use_map success : " + ",   " + map_name + ",   " + Content.taskIndex);
                 if (Content.is_initialize_finished == 0) {
-                    if (Content.taskIndex == -1 && !Content.isCharging) {
-                        NavigationService.initGlobal(map_name);
-                    } else if (Content.isCharging) {
+                    if (Content.isCharging) {
                         NavigationService.initialize_directly(map_name);
-                    } else {
+                    } else if (Content.taskIndex == -1){
                         NavigationService.initialize(map_name, Content.InitializePositionName);
+                    } else {
+                        NavigationService.initGlobal(map_name);
                     }
                 }
                 handler.removeMessages(2003);
