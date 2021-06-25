@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:sharedUserId="android.uid.system"
-    package="com.retron.robot">
+
+    package="com.retron.robotAgent">
 
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -51,7 +51,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.retron.robot.activity.RobotDetailActivity">
+        <activity android:name="com.retron.robotAgent.activity.RobotDetailActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -59,27 +59,27 @@
             </intent-filter>
         </activity>
 
-        <service android:name="com.retron.robot.service.NavigationService" />
+        <service android:name="com.retron.robotAgent.service.NavigationService" />
 
-        <receiver android:name="com.retron.robot.receiver.BootCompletedReceiver">
+        <receiver android:name="com.retron.robotAgent.receiver.BootCompletedReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.retron.robot.receiver.AlarmReceiver">
+        <receiver android:name="com.retron.robotAgent.receiver.AlarmReceiver">
             <intent-filter>
                 <action android:name="android.alarm.task.action" />
             </intent-filter>
         </receiver>
-        <receiver android:name="com.retron.robot.receiver.ServerReceiver">
-            <intent-filter>
-                <action android:name="com.android.robot.server.start" />
-                <action android:name="com.android.robot.server.stop" />
-                <action android:name="com.android.update" />
-            </intent-filter>
-        </receiver>
+        <receiver android:name="com.retron.robotAgent.receiver.ServerReceiver">
+        <intent-filter>
+            <action android:name="com.android.robot.server.start" />
+            <action android:name="com.android.robot.server.stop" />
+            <action android:name="com.android.update" />
+        </intent-filter>
+    </receiver>
 
-        <service android:name="com.retron.robot.service.SocketServices"></service>
+        <service android:name="com.retron.robotAgent.service.SocketServices"></service>
     </application>
 
 </manifest>

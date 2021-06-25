@@ -3,7 +3,10 @@
 
     <string name="not_work">Waiting</string>
     <string name="done">Done</string>
-    <string name="ongoing">Ongoing</string>
+    <string name="working">OnWorking</string>
+    <string name="ongoing">OnGoing</string>
+    <string name="unreached">Skip</string>
+
     <string name="stop_initialize">stop initialize</string>
     <string name="get_mapIcon">get map picture</string>
     <string name="get_robotPosition">get robot position</string>
