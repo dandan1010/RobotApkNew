@@ -13,7 +13,7 @@
     <string name="get_mapList">get map list</string>
     <string name="navigate_position">navigate to point</string>
     <string name="start_scanMap">start scan map</string>
-    <string name="develop_map">develop map</string>
+    <string name="develop_map_fail">develop map fail</string>
     <string name="get_scanMap">get scan map picture</string>
     <string name="stop_scanSaveMap">save map</string>
     <string name="stop_scanMap">cancel map</string>

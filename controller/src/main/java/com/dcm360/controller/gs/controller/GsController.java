@@ -12,6 +12,7 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotNonMapData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotMapGPS;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotSyncGpsData;
@@ -686,5 +687,11 @@ public enum GsController implements IGsRobotController {
     public void deleteBag(String bagName, RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.deleteBag(bagName).enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
+    public void work_status(RobotStatus<RobotWorkStatus> status) {
+        if (gsControllerService != null)
+            gsControllerService.work_status().enqueue(new ResponseCallback<RobotWorkStatus>().call(status));
     }
 }

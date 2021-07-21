@@ -20,12 +20,6 @@ public class BroadCastUtils {
         return broadCastUtils;
     }
 
-    public void sendFTPBroadcast(){
-        Intent intent = new Intent("com.android.robot.ftpserver.start");
-        intent.setPackage("net.micode.fileexplorer");
-        mContext.sendBroadcast(intent);
-    }
-
     public void sendUpdateBroadcast(){
         Intent intent = new Intent("com.android.robot.update");
         intent.setPackage("com.retron.wireLessApk");

@@ -4,11 +4,20 @@ import java.util.ArrayList;
 
 public class RunningTaskBean {
     private String taskName;
-    private String mapName;
+    private String mapNameUuid;
     private String taskAlarm;
     private ArrayList<PointBean> arrayList;
     private String alarmCycle;
     private String isRunning;
+    private String mapName;
+
+    public String getMapNameUuid() {
+        return mapNameUuid;
+    }
+
+    public void setMapNameUuid(String mapNameUuid) {
+        this.mapNameUuid = mapNameUuid;
+    }
 
     public String getIsRunning() {
         return isRunning;

@@ -8,6 +8,7 @@ import android.util.Log;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
+import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.retron.robotAgent.BuildConfig;
 import com.retron.robotAgent.bean.PointStateBean;
 import com.retron.robotAgent.bean.RobotPointPositions;
@@ -16,6 +17,7 @@ import com.retron.robotAgent.bean.TaskBean;
 import com.retron.robotAgent.content.Content;
 import com.retron.robotAgent.service.SocketServices;
 import com.retron.robotAgent.sqlite.SqLiteOpenHelperUtils;
+import com.retron.robotAgent.task.TaskManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,7 +34,8 @@ public class GsonUtils {
 
     private String callback = null;
     private String tvTime = null;
-    private String mapName = "";
+    private String mapNameUuid = "";
+    private String current_mapname = "";
     private String taskName = "";
     private double x;
     private double y;
@@ -56,6 +59,20 @@ public class GsonUtils {
     private String robotVersion;
     private String address = "";
     private String robotName = "";
+    private RobotCmdVel robotCmdVel = null;
+    private String total_time;
+
+    public void setTotal_time(String total_time) {
+        this.total_time = total_time;
+    }
+
+    public void setRobotCmdVel(RobotCmdVel robotCmdVel) {
+        this.robotCmdVel = robotCmdVel;
+    }
+
+    public void setCurrent_mapname(String current_mapname) {
+        this.current_mapname = current_mapname;
+    }
 
     public void setRobotName(String robotName) {
         this.robotName = robotName;
@@ -149,12 +166,12 @@ public class GsonUtils {
         this.taskName = taskName;
     }
 
-    public String getMapName() {
-        return mapName;
+    public String getMapNameUuid() {
+        return mapNameUuid;
     }
 
-    public void setMapName(String mapName) {
-        this.mapName = mapName;
+    public void setMapNameUuid(String mapNameUuid) {
+        this.mapNameUuid = mapNameUuid;
     }
 
     public void setTvTime(String tvTime) {
@@ -176,7 +193,8 @@ public class GsonUtils {
                 }
                 jsonArray.put(i, jsArray);
             }
-            jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
             jsonObject.put(Content.SEND_VIRTUAL, jsonArray);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -202,7 +220,7 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.ROBOT_HEALTHY, healthyMsg);
+            jsonObject.put(Content.ROBOT_HEALTHY, healthyMsg.replace("\"", ""));
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -215,14 +233,17 @@ public class GsonUtils {
         try {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.TASK_NAME, taskName);
-            jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
             JSONArray jsonArray = new JSONArray();
-            for (int i = 0; i < taskState.getList().size(); i++) {
-                JSONObject js = new JSONObject();
-                js.put(Content.POINT_NAME, taskState.getList().get(i).getPointName());
-                js.put(Content.POINT_STATE, taskState.getList().get(i).getPointState());
-                js.put(Content.POINT_TIME, taskState.getList().get(i).getTimeCount());
-                jsonArray.put(i, js);
+            if (taskState != null) {
+                for (int i = 0; i < taskState.getList().size(); i++) {
+                    JSONObject js = new JSONObject();
+                    js.put(Content.POINT_NAME, taskState.getList().get(i).getPointName());
+                    js.put(Content.POINT_STATE, taskState.getList().get(i).getPointState());
+                    js.put(Content.POINT_TIME, taskState.getList().get(i).getTimeCount());
+                    jsonArray.put(i, js);
+                }
             }
             jsonObject.put(Content.ROBOT_TASK_STATE, jsonArray);
         } catch (JSONException e) {
@@ -232,7 +253,7 @@ public class GsonUtils {
         return jsonObject.toString();
     }
 
-    public String putSocketTaskHistory(String type, Context context, String date) {
+    public String putSocketTaskHistory(String type, Context context, String data) {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -241,9 +262,11 @@ public class GsonUtils {
             Cursor cursor = sqLiteOpenHelperUtils.searchTaskHistory();
             Log.d(TAG, "HISTORY :cursor ---- " + cursor.getCount());
             while (cursor.moveToNext()) {
-                if (cursor.getString(cursor.getColumnIndex(Content.dbData)).startsWith(date)){
+                if (TextUtils.isEmpty(data) || cursor.getString(cursor.getColumnIndex(Content.dbData)).startsWith(data)){
                     JSONObject js = new JSONObject();
-                    js.put(Content.dbTaskMapName, cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)));
+                    js.put(Content.dbMapNameUuid, cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)));
+                    js.put(Content.dbTaskMapName, cursor.getString(cursor.getColumnIndex(Content.dbMapName)));
+                    js.put(Content.MAP_NAME_UUID, cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName)));
                     js.put(Content.dbTaskName, cursor.getString(cursor.getColumnIndex(Content.dbTaskName)));
                     js.put(Content.dbTime, cursor.getString(cursor.getColumnIndex(Content.dbTime)));
                     js.put(Content.dbDate, cursor.getString(cursor.getColumnIndex(Content.dbData)));
@@ -290,7 +313,11 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.MAP_NAME, SocketServices.use_mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
+            if (type.equals(Content.CONN_OK)) {
+                jsonObject.put(Content.SCANNING_MAP, TaskManager.scanningFlag);
+            }
             jsonObject.put(Content.TASK_NAME, taskName);
             jsonObject.put(Content.Address, address);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
@@ -343,6 +370,7 @@ public class GsonUtils {
         try {
             jsonObject.put(TYPE, type);
             jsonObject.put(Content.TV_TIME, tvTime);
+            jsonObject.put(Content.TOTAL_TIME, total_time);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -354,7 +382,13 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
+            String local = "fail";
+            if (Content.hasLocalization) {
+                local = "success";
+            }
+            jsonObject.put(Content.CURRENT_INITIALIZE_STATUS, local);
             jsonObject.put(Content.ROBOT_X, x);
             jsonObject.put(Content.ROBOT_Y, y);
             jsonObject.put(Content.GRID_HEIGHT, gridHeight);
@@ -363,6 +397,10 @@ public class GsonUtils {
             jsonObject.put(Content.ORIGIN_Y, originY);
             jsonObject.put(Content.RESOLUTION, resolution);
             jsonObject.put(Content.ANGLE, angle);
+            if (robotCmdVel != null) {
+                jsonObject.put(Content.ANGULAR_SPEED, robotCmdVel.getData().getAngular().getY());
+                jsonObject.put(Content.LINEAR_SPEED, robotCmdVel.getData().getAngular().getX());
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -378,7 +416,8 @@ public class GsonUtils {
             jsonObject.put(Content.EMERGENCY_STOP, Content.EMERGENCY);
             jsonObject.put(Content.BATTERY_DATA, battery);
             jsonObject.put(Content.TASK_NAME, TextUtils.isEmpty(Content.taskName) ? "" : Content.taskName);
-            jsonObject.put(Content.MAP_NAME, SocketServices.use_mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_CODE);
         } catch (JSONException e) {
             e.printStackTrace();
@@ -404,6 +443,7 @@ public class GsonUtils {
                 }
                 obj.put(Content.POINT, jsonArray);
                 obj.put(Content.TASK_NAME, runningTaskBeanArrayList.get(i).getTaskName());
+                obj.put(Content.MAP_NAME_UUID, runningTaskBeanArrayList.get(i).getMapNameUuid());
                 obj.put(Content.MAP_NAME, runningTaskBeanArrayList.get(i).getMapName());
                 obj.put(Content.dbAlarmTime, runningTaskBeanArrayList.get(i).getTaskAlarm());
                 obj.put(Content.dbAlarmCycle, runningTaskBeanArrayList.get(i).getAlarmCycle());
@@ -463,12 +503,25 @@ public class GsonUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d("sendRobotMsg111 ", jsonObject.toString());
+        return jsonObject.toString();
+    }
+
+    public String sendRobotMsg(String type, String msg, long fileLength) {
+        jsonObject = new JSONObject();
+        try {
+            jsonObject.put(TYPE, type);
+            jsonObject.put(type, msg);
+            jsonObject.put("fileLength", fileLength);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
         Log.d("sendRobotMsg ", jsonObject.toString());
         return jsonObject.toString();
     }
 
     public String sendRobotMsg(String type, ArrayList<ArrayList<RobotPointPositions>> robotPointPositions, RobotMap robotMap) {
-        Log.d(TAG, "ZDZD : SIZE ----- " + robotPointPositions.size());
+        Log.d(TAG, "ZDZD : SIZE ----- " + robotPointPositions.size() + ", robotMap : " + robotMap.getData().size());
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
@@ -476,17 +529,20 @@ public class GsonUtils {
             if (robotMap != null) {
                 for (int i = 0; i < robotMap.getData().size(); i++) {
                     JSONObject object = new JSONObject();
-                    object.put(Content.MAP_NAME, robotMap.getData().get(i).getName());
+                    object.put(Content.MAP_NAME_UUID, robotMap.getData().get(i).getName());
+                    object.put(Content.MAP_NAME, robotMap.getData().get(i).getMapName());
                     object.put(Content.GRID_HEIGHT, robotMap.getData().get(i).getMapInfo().getGridHeight());
                     object.put(Content.GRID_WIDTH, robotMap.getData().get(i).getMapInfo().getGridWidth());
                     object.put(Content.ORIGIN_X, robotMap.getData().get(i).getMapInfo().getOriginX());
                     object.put(Content.ORIGIN_Y, robotMap.getData().get(i).getMapInfo().getOriginY());
                     object.put(Content.RESOLUTION, robotMap.getData().get(i).getMapInfo().getResolution());
-
+                    object.put(Content.DUMP_MD5, robotMap.getData().get(i).getDump_md5());
                     JSONArray mRobotPositionsArray = new JSONArray();
+                    Log.d(TAG, "ZDZD1111 robotPointPositions : " + robotMap.getData().get(i).getName());
                     if (robotPointPositions.size() != 0) {
                         for (int j = 0; j < robotPointPositions.size(); j++) {
                             for (int k = 0; k < robotPointPositions.get(j).size(); k++) {
+                                Log.d(TAG, "ZDZD1111 getMapName : " + robotPointPositions.get(j).get(k).getMapName());
                                 if (robotMap.getData().get(i).getName().equals(robotPointPositions.get(j).get(k).getMapName())) {
                                     JSONObject pointObject = new JSONObject();
                                     pointObject.put(Content.POINT_NAME, robotPointPositions.get(j).get(k).getName());
@@ -508,7 +564,7 @@ public class GsonUtils {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        Log.d("sendRobotMsg ", jsonObject.toString());
+        Log.d("sendRobotMsg22222 ", jsonObject.toString());
         return jsonObject.toString();
     }
 
@@ -517,7 +573,8 @@ public class GsonUtils {
         jsonObject = new JSONObject();
         try {
             jsonObject.put(TYPE, type);
-            jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
             JSONArray mRobotPositionsArray = new JSONArray();
             if (robotPointPositions.size() != 0) {
                 for (int j = 0; j < robotPointPositions.size(); j++) {
@@ -581,7 +638,8 @@ public class GsonUtils {
             jsonObject.put(Content.GET_VOICE_LEVEL, voice);
             jsonObject.put(Content.GET_WORKING_MODE, workingMode);
             jsonObject.put(Content.GET_CHARGING_MODE, Content.have_charging_mode);
-            jsonObject.put(Content.MAP_NAME, mapName);
+            jsonObject.put(Content.MAP_NAME_UUID, mapNameUuid);
+            jsonObject.put(Content.MAP_NAME, current_mapname);
             jsonObject.put(Content.VERSIONCODE, BuildConfig.VERSION_NAME);
             jsonObject.put(Content.ROBOTVERSIONCODE, robotVersion);
         } catch (JSONException e) {

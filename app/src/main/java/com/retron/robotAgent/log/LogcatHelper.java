@@ -2,6 +2,7 @@ package com.retron.robotAgent.log;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 
@@ -171,11 +173,8 @@ public class LogcatHelper {
                     }
                     random = null;
                 }
-
             }
-
         }
-
     }
 
     public String getFileName() {
@@ -184,14 +183,16 @@ public class LogcatHelper {
         return date;// 2012年10月03日 23:41:31
     }
 
-    public void alarmDeleteFile(Context mContext) {
+    public void createAlarmFile(Context mContext) {
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(Content.DeleteFileAlarmAction);
-        intent.setClass(mContext, AlarmReceiver.class);
-        PendingIntent mPendingIntent = PendingIntent.getBroadcast(
-                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-        //闹铃间隔， 这里设为1分钟闹一次，在第2步我们将每隔1分钟收到一次广播
-
-        mAlarmManager.setRepeating(AlarmManager.RTC, System.currentTimeMillis(), 24 * 60 * 60 * 1000, mPendingIntent);
+        Calendar instance = Calendar.getInstance();
+        instance.set(Calendar.HOUR_OF_DAY, 0);
+        instance.set(Calendar.MINUTE, 0);
+        instance.set(Calendar.SECOND, 0);
+        Intent alarmIntent = new Intent(Content.DeleteFileAlarmAction);
+        ComponentName componentName = new ComponentName(mContext, "com.retron.robotAgent.receiver.AlarmReceiver");
+        alarmIntent.setComponent(componentName);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0, alarmIntent, 0);
+        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, instance.getTimeInMillis(), 24 * 60 * 60 * 1000, pendingIntent);
     }
 }

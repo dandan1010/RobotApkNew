@@ -81,11 +81,48 @@ public class RobotMap {
         private String lethalPngName;
         private MapInfoBean mapInfo;
         private String name;
+        private String mapName;
         private String obstacleFileName;
         private String pgmFileName;
         private String pngFileName;
         private String slopeFileName;
         private String yamlFileName;
+        private String map_link;
+        private String map_md5;
+        private String dump_link;
+        private String dump_md5;
+
+        public String getMap_link() {
+            return map_link;
+        }
+
+        public void setMap_link(String map_link) {
+            this.map_link = map_link;
+        }
+
+        public String getMap_md5() {
+            return map_md5;
+        }
+
+        public void setMap_md5(String map_md5) {
+            this.map_md5 = map_md5;
+        }
+
+        public String getDump_link() {
+            return dump_link;
+        }
+
+        public void setDump_link(String dump_link) {
+            this.dump_link = dump_link;
+        }
+
+        public String getDump_md5() {
+            return dump_md5;
+        }
+
+        public void setDump_md5(String dump_md5) {
+            this.dump_md5 = dump_md5;
+        }
 
         public String getDIYPngName() {
             return DIYPngName;
@@ -149,6 +186,14 @@ public class RobotMap {
 
         public void setMapInfo(MapInfoBean mapInfo) {
             this.mapInfo = mapInfo;
+        }
+
+        public String getMapName() {
+            return mapName;
+        }
+
+        public void setMapName(String mapName) {
+            this.mapName = mapName;
         }
 
         public String getName() {

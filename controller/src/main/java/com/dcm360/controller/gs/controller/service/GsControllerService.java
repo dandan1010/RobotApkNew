@@ -10,6 +10,7 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotNonMapData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotMapGPS;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotSyncGpsData;
@@ -478,6 +479,14 @@ public interface GsControllerService {
      */
     @GET("/gs-robot/real_time_data/navigation_path")
     Call<RobotNavigationPath> navigationPath();
+
+    /**
+     * 机器人当前状态
+     *
+     * @return the call
+     */
+    @GET("/gs-robot/real_time_data/work_status")
+    Call<RobotWorkStatus> work_status();
 
     /**
      * 任意两点得到导航路线

@@ -15,9 +15,9 @@ public class VirtualBeanUtils {
         this.mContext = mContext;
     }
 
-    public void updateVirtual(int type, String mapName, String obstacle_name, List<List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity>> polylinesEntities) {
+    public void updateVirtual(int type, String mapNameUuid,String mapName, String obstacle_name, List<List<UpdataVirtualObstacleBean.ObstaclesEntity.PolylinesEntity>> polylinesEntities) {
         UpdataVirtualObstacleBean updataVirtualObstacleBean = new UpdataVirtualObstacleBean();
-        updataVirtualObstacleBean.setMapName(mapName);
+        updataVirtualObstacleBean.setMapName(mapNameUuid);
         updataVirtualObstacleBean.setType(type);
         List<?> arrayList = new ArrayList<>();
 
@@ -67,6 +67,6 @@ public class VirtualBeanUtils {
         updataVirtualObstacleBean.setDecelerations(decelerationsEntity);
         updataVirtualObstacleBean.setDisplays(displaysEntity);
         updataVirtualObstacleBean.setSlopes(slopesEntity);
-        TaskManager.getInstances(mContext).update_virtual_obstacles(updataVirtualObstacleBean, mapName, obstacle_name);
+        TaskManager.getInstances(mContext).update_virtual_obstacles(updataVirtualObstacleBean, mapNameUuid, mapName, obstacle_name);
     }
 }

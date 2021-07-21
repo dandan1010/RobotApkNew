@@ -3,6 +3,8 @@ package com.retron.robotAgent.content;
 import com.retron.robotAgent.service.MqttWebSocketServer;
 import com.retron.robotAgent.service.SimpleServer;
 
+import retrofit2.http.PUT;
+
 public final class Content {
     public static final String AlarmAction = "android.alarm.task.action";
     public static final String DeleteFileAlarmAction = "android.alarm.deleteFile.action";
@@ -12,7 +14,10 @@ public final class Content {
     public static final String START_PTP_SERVER = "start_ptp_server";
 
     public static final String limiting_path = "/dev/ttyS2";
+
     public static boolean isNewSerialPort;
+    public static boolean isDownloadCancel = false;
+
     public static String getBatterySerialPortPath(){
         if (isNewSerialPort) {
             return "/dev/ttyS1";
@@ -36,7 +41,7 @@ public final class Content {
     public static boolean is_leave_charging = false;
 
     public static final String Robot_Error = "Robot_Error";//机器人异常
-
+    public static boolean hasLocalization = false;
     /**
      * //测试版本不亮灯 ：0
      * demo : 1
@@ -44,9 +49,7 @@ public final class Content {
      */
     public static int Working_mode = 2;
     public static boolean have_charging_mode = true;
-    public static final String WORKING_MODE = "working_mode";//工作模式
     public static final String GET_WORKING_MODE = "get_working_mode";//工作模式
-    public static final String SET_CHARGING_MODE = "set_charging_mode";//有无充电桩模式
     public static final String GET_CHARGING_MODE = "get_charging_mode";//有无充电桩模式
     public static final String ROBOT_NAME = "robot_name";//机器人的名字
 
@@ -72,6 +75,7 @@ public final class Content {
     public static final String SYSTEM_DATE = "system_date";//系统时间
     public static final String VERSIONCODE = "versionCode";//系统版本
     public static final String ROBOTVERSIONCODE = "robotVersionCode";//下位机版本
+    public static final String SCANNING_MAP = "scanning_map";//机器人状态
     public static boolean isLastTask = false;
     public static long startTime = System.currentTimeMillis();
     public static int Sum_Time = 0;
@@ -112,14 +116,13 @@ public final class Content {
 
     public static final String PING = "ping";
 
-    public static final String MAP_NAME = "map_Name";//地图名字
+    public static final String MAP_NAME_UUID = "map_name_uuid";//地图名字
+    public static final String MAP_NAME = "map_name";//地图名字
     public static final String TASK_NAME = "task_Name";//任务名字
     //type id
     public static final String STARTLIGHT = "startLight";//开灯
     public static final String STOPLIGHT = "stopLight";//关灯
     public static final String STARTMOVE = "startMove";//机器人移动
-    public static final String LINEAR_SPEED = "linear_speed";//机器人线速度
-    public static final String ANGULAR_SPEED = "angular_speed";//机器人角速度
 
     public static final String GETMAPLIST = "getMapList";//请求地图列表
     public static final String SENDMAPNAME = "sendMapName";//返回地图列表名称
@@ -140,6 +143,7 @@ public final class Content {
     public static final String NEW_POINT_NAME = "new_point_name";//新点
 
     public static final String TV_TIME = "tv_time";//返回时间
+    public static final String TOTAL_TIME = "total_time";//返回时间
     public static final String SAVETASKQUEUE = "saveTaskQueue";//存储任务
     public static final String DELETETASKQUEUE = "deleteTaskQueue";//删除任务队列
     public static final String STARTTASKQUEUE = "startTaskQueue";//开始任务队列
@@ -160,17 +164,16 @@ public final class Content {
     public static final String DELETE_MAP_FAIL = "delete_map_fail";
     public static final String USE_MAP = "use_map";//选定地图
     public static final String RENAME_MAP = "rename_map";//重命名地图
-    public static final String OLD_MAP_NAME = "old_map_name";//原始地图名
+    public static final String MQTT_RENAME_MAP = "mqtt_rename_map";//重命名地图
     public static final String NEW_MAP_NAME = "new_map_name";//新地图名
 
     public static final String BATTERY_DATA = "battery_data";//电池电量
     public static final String GET_LOW_BATTERY = "get_low_battery";//获取低电量回充
-    public static final String SET_LOW_BATTERY = "set_low_battery";//设置低电量回充
     public static final String ADD_POWER_POINT = "add_power_point";//添加充电点
     public static int battery = 30;//低电量回充
     public static int maxBattery = 70;//最高电量
     public static int fullBattery = 99;//充满电
-    public static boolean isCharging = false;//充电窗台
+    public static boolean isCharging = false;//充电状态
     public static int isLimiting_flag = 0;//已经限流
     public static int charging_limiting_flag = 0;//已经限流
     public static int limitint_init_flag = 0;//初始化限流
@@ -229,7 +232,15 @@ public final class Content {
     public static final String ORIGIN_X = "origin_x";//原点x
     public static final String ORIGIN_Y = "origin_y";//原点Y
     public static final String RESOLUTION = "resolution";//比例
+    public static final String MAP_LINK = "map_link";
+    public static final String MAP_MD5 = "map_md5";
+    public static final String DUMP_LINK = "dump_link";
+    public static final String DUMP_MD5 = "dump_md5";
     public static final String ANGLE = "angle";//角度
+    public static final String CURRENT_INITIALIZE_STATUS = "current_initialize_status";//是否有位置信息
+    public static final String LINEAR_SPEED = "linear_speed";//机器人线速度
+    public static final String ANGULAR_SPEED = "angular_speed";//机器人角速度
+
 
     public static final String ROBOT_HEALTHY = "robot_healthy";//机器人健康
     public static final String ROBOT_TASK_STATE = "robot_task_state";//机器人任务状态
@@ -238,6 +249,7 @@ public final class Content {
 
     public static final String GET_VIRTUAL = "get_virtual";//获取虚拟墙数据
     public static final String UPDATA_VIRTUAL = "updata_virtual";//更新虚拟墙
+    public static final String MQTT_UPDATA_VIRTUAL = "mqtt_updata_virtual";//更新虚拟墙
     public static final String SEND_VIRTUAL = "send_virtual";//返回虚拟墙数据
     public static final String SEND_MQTT_VIRTUAL = "send_mqtt_virtual";//返回虚拟墙数据
     public static final String VIRTUAL_X = "virtual_x";//虚拟墙数据
@@ -248,7 +260,7 @@ public final class Content {
 
     //db Name
     public static final String dbName = "RobotDatabase";//数据库名字
-    public static final String tableName = "taskHistory";//历史数据
+    public static final String dbTaskHistory = "dbTaskHistory";//历史数据
     public static final String dbTaskName = "taskName";
     public static final String dbTaskMapName = "dbTaskMapName";
     public static final String dbTime = "time";
@@ -278,7 +290,7 @@ public final class Content {
     public static final String dbPointMap = "dbPointMap";
 
     public static final String dbTaskState = "dbTaskState";//点任务状态
-    public static final String dbTaskStateMapName = "dbMapName";
+    public static final String dbTaskStateMapName = "dbTaskStateMapName";
     public static final String dbTaskStateTaskName = "dbTaskStateTaskName";
     public static final String dbTaskStatePointState = "dbTaskStatePointState";
 
@@ -292,6 +304,14 @@ public final class Content {
     public static final String dbTimeCurrentCount = "dbTimeCurrentCount";//当月任务总时间
     public static final String dbAreaCurrentCount = "dbAreaCurrentCount";//当月任务总面积
     public static final String dbCurrentDate = "dbCurrentDate";//当月
+
+    public static final String dbMapNameDeatabase = "dbMapNameDeatabase";
+    public static final String dbMapNameUuid = "dbMapNameUuid";
+    public static final String dbMapName = "dbMapName";
+    public static final String db_map_md5 = "map_md5";
+    public static final String db_map_link = "map_link";
+    public static final String db_dump_link = "dump_link";
+    public static final String db_dump_md5 = "dump_md5";
 
     //test
     public static final String TEST_UVCSTART_1 = "test_uvcstart_1";
@@ -311,6 +331,7 @@ public final class Content {
     public static final String TEST_LIGHTSTOP = "test_lightstop";
 
     public static final String START_UVC_MODE = "start_uvc_mode";//手动模式开启uvc
+    public static final String STOP_UVC_MODE = "stop_uvc_mode";//手动模式开启uvc
     public static final String UVC_KILL_TIME = "uvc_kill_time";//手动模式消毒时间
 
     public static final String GET_ULTRASONIC = "get_ultrasonic";//声呐设备
@@ -323,6 +344,10 @@ public final class Content {
     public static boolean isHightTemp = false;//温度高，暂停任务
 
     public static final String DOWNLOAD_LOG = "download_log";//下载log
+    public static final String MQTT_DOWNLOAD_LOG = "mqtt_download_log";//下载log
+    public static final String CANCEL_DOWNLOAD_LOG = "cancel_download_log";//下载log
+    public static final String FILE_NAME = "file_name";//下载log
+    public static final String GET_LOG_LIST = "get_log_list";//log列表
     public static final String UPDATE_FILE_LENGTH = "update_file_length";//升级文件的大小
     public static final String UPDATE_FILE_NAME = "update_file_name";//升级文件的名字
     public static long update_file_length = 0;//升级文件的大小
@@ -342,4 +367,8 @@ public final class Content {
     public static final String MAP_IMG_ZIP = "map_img_zip";//下载地图
     public static final String UPLOAD_MAP = "upload_map";//下载地图
     public static final String UPLOAD_MAP_PATH = "upload_map_path";//下载地图
+    public static final String UPLOADMAPSYN = "uploadmapsyn";//上传地图成功
+    public static final String MQTT_ADD_POINT = "mqtt_add_point";//添加点
+    public static final String COMPRESSED = "compressed";
+//
 }

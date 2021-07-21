@@ -31,7 +31,7 @@ public class AlarmUtils {
         mPendingIntent = PendingIntent.getBroadcast(
                 mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         //闹铃间隔， 这里设为1分钟闹一次，在第2步我们将每隔1分钟收到一次广播
-        mAlarmManager.setRepeating(AlarmManager.RTC, time, interval, mPendingIntent);
+        mAlarmManager.setRepeating(AlarmManager.RTC_WAKEUP, time, interval, mPendingIntent);
 //        am.set(AlarmManager.RTC, triggerAtMillis, sender);
     }
 
@@ -79,6 +79,11 @@ public class AlarmUtils {
      */
     public String getTimeMillis(long time) {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm");
+        return dateFormat.format(new Date(time));
+    }
+
+    public String getTimeDay(long time) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.format(new Date(time));
     }
 

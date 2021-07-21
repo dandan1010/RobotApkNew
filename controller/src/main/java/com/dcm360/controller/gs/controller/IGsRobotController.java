@@ -11,6 +11,7 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotFootprint;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotMobileData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotNonMapData;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotMapGPS;
 import com.dcm360.controller.gs.controller.bean.gps_bean.RobotSyncGpsData;
@@ -222,4 +223,6 @@ public interface IGsRobotController {
     void getBag(String bagName, RobotStatus<ResponseBody> status);
 
     void deleteBag(String bagName, RobotStatus<Status> status);
+
+    void work_status(RobotStatus<RobotWorkStatus> status);
 }

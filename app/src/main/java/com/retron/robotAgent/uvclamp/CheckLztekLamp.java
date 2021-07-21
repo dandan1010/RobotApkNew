@@ -492,7 +492,7 @@ public class CheckLztekLamp {
                     Log.d("zdzd555:", "taskName : " + Content.taskName
                             + ", battery : " + SocketServices.battery
                             + ",leave : " + Content.is_leave_charging
-                            + " , mapName : " + SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME));
+                            + " , mapName : " + SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME_UUID));
                     getChargingGpio();
                     /*if (Content.taskName == null) {
                         //充电桩充电 && 不在执行任务
@@ -514,7 +514,7 @@ public class CheckLztekLamp {
                                 && SocketServices.battery < 90) {
                             lowbatteryCount++;
                             if (lowbatteryCount >= 5) {
-                                String mapName = SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME);
+                                String mapName = SharedPrefUtil.getInstance(mContext).getSharedPrefMapName(Content.MAP_NAME_UUID);
                                 Log.d("zdzd555 : ", "导航到充点电 ： " + mapName);
                                 NavigationService.initialize(mapName, Content.CHARGING_POINT);
                                 Message message = handler.obtainMessage();
@@ -552,7 +552,7 @@ public class CheckLztekLamp {
                         Content.isCharging = true;
                         Content.chargingState = 2;
                         EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, msg));
-                    } else if (Content.taskName != null || Content.noChargingCount >= 20) {
+                    } else if (Content.taskName != null || Content.noChargingCount >= 5) {
                         Content.noChargingCount = 0;
                         msg = "放电";
                         if (Content.robotState == 4) {

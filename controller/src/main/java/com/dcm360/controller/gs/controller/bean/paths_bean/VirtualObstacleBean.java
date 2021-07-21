@@ -14,7 +14,15 @@ public class VirtualObstacleBean implements Cloneable {
     private DataEntity data;
     private boolean successed;
     private String errorCode;
+    private String mapNameUuid;
     private String mapName;
+    public String getMapNameUuid() {
+        return mapNameUuid;
+    }
+
+    public void setMapNameUuid(String mapNameUuid) {
+        this.mapNameUuid = mapNameUuid;
+    }
 
     public String getMapName() {
         return mapName;

@@ -1,6 +1,7 @@
 package com.retron.robotAgent.utils;
 
 import android.content.Context;
+import android.nfc.Tag;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.util.Log;
@@ -22,7 +23,10 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public class AssestFile {
 
@@ -34,35 +38,56 @@ public class AssestFile {
     private String updatePackageName = "";
     private String updateFilePath = "";
     private File updateFile;
-    public static final String ROBOT_HEALTHY_PATH = "/sdcard/robotLog/robotHealthy";
-    public static final String ROBOT_BAG_PATH = "/sdcard/robotLog/robotBag";
-    public static final String ROBOT_LOG = "/sdcard/robotLog";
-    public static final String ROBOT_INTERPRENTER = "/sdcard/robotLog/interprenter";
-    public static final String ROBOT_DATABASES = "/data/data/com.example.robot/databases/RobotDatabase";
-    public static final String ROBOTLOG_DATABASES = "/sdcard/robotLog/databases";
+    private DateFormat dateFormat1;
+    private String data = "";
+    public static String ROBOT_HEALTHY_PATH;
+    public static String ROBOT_BAG_PATH;
+    public static String ROBOT_LOG;
+    public static String ROBOT_INTERPRENTER;
+    public static String ROBOT_DATABASES;
+    public static String ROBOTLOG_DATABASES;
 
-    public static final String ROBOTZIP_BAG = "/sdcard/robotLog/robotLogZip/robotBag";
-    public static final String ROBOTZIP_INTERPRENTER = "/sdcard/robotLog/robotLogZip/interprenter";
-    public static final String ROBOTZIP_DATABASES = "/sdcard/robotLog/robotLogZip/databases";
+    public static String ROBOTZIP_PATH;
+    public static String ROBOTZIP_BAG;
+    public static String ROBOTZIP_INTERPRENTER;
+    public static String ROBOTZIP_DATABASES;
+
+    public static String ROBOT_MAP;
 
     public AssestFile(Context mContext) {
         this.mContext = mContext;
         stringBuffer = new StringBuffer();
+        data = new AlarmUtils(mContext).getTimeDay(System.currentTimeMillis());
+        ROBOT_HEALTHY_PATH = "/sdcard/robotLog/" + data + "/robotHealthy";
+        ROBOT_BAG_PATH = "/sdcard/robotLog/" + data + "/robotBag";
+        ROBOT_LOG = "/sdcard/robotLog";
+        ROBOT_INTERPRENTER = "/sdcard/robotLog/" + data + "/interprenter";
+        ROBOT_DATABASES = "/data/data/" + BuildConfig.APPLICATION_ID + "/databases/RobotDatabase";
+        ROBOTLOG_DATABASES = "/sdcard/robotLog/" + data + "/databases";
+
+        ROBOTZIP_PATH = "/sdcard/robotLogZip";
+        ROBOTZIP_BAG = "/sdcard/robotLogZip/" + data + "/robotBag";
+        ROBOTZIP_INTERPRENTER = "/sdcard/robotLogZip/" + data + "/interprenter";
+        ROBOTZIP_DATABASES = "/sdcard/robotLogZip/" + data + "/databases";
+
+        ROBOT_MAP = "/sdcard/robotMap";
+
+        dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     }
 
     public void writeBytesToFile(ByteBuffer byteBuffer) {
         try {
             updatePackageName = "/update" + Content.update_file_name + ".apk";
             updateFilePath = getUpdateFilePath(mContext);
-            randomAccessFile = new RandomAccessFile(updateFilePath  + updatePackageName, "rw");
-            updateFile = new File(updateFilePath  + updatePackageName);
+            randomAccessFile = new RandomAccessFile(updateFilePath + updatePackageName, "rw");
+            updateFile = new File(updateFilePath + updatePackageName);
             randomAccessFile.seek(updateFile.length());
             randomAccessFile.write(byteBuffer.array());
             Log.d(TAG, "file length： " + byteBuffer.array().length + ",    randomAccessFile : " + randomAccessFile.length());
             if (randomAccessFile.length() == Content.update_file_length) {
                 Log.d(TAG, "broadcast install apk");
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.UPDATE_FILE_LENGTH, (int) (randomAccessFile.length() / 1024 / 1024 + 1)));
-                FixFileName(updateFilePath  + updatePackageName, updateFilePath + "/update.apk");
+                FixFileName(updateFilePath + updatePackageName, updateFilePath + "/update.apk");
                 if (randomAccessFile != null) {
                     randomAccessFile.close();
                     randomAccessFile = null;
@@ -191,6 +216,7 @@ public class AssestFile {
         //删除当前空目录
         return dirFile.delete();
     }
+
     /**
      * 根据路径删除指定的目录或文件，无论存在与否
      *
@@ -236,7 +262,6 @@ public class AssestFile {
                 }
                 raf = new RandomAccessFile(file, "rw");
                 raf.seek(file.length());
-                DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 raf.write((dateFormat1.format(new Date(System.currentTimeMillis())) + " : " + stringBuffer.toString()).getBytes());
                 raf.write("\n".getBytes());
                 Log.d(TAG, "write log file success");
@@ -282,7 +307,6 @@ public class AssestFile {
             if (!file.exists()) {
                 file.mkdirs();
             }
-            DateFormat dateFormat1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             String path = ROBOT_BAG_PATH + "/" + dateFormat1.format(new Date(System.currentTimeMillis())).replace(" ", "_").replace(":", "-") + ".bag";
             if (!file.exists()) {
                 try {
@@ -305,28 +329,31 @@ public class AssestFile {
     }
 
     public void mCopyFile(String fromPath, String toPath) {
+
         File fromFile = new File(fromPath);
+        Log.d(TAG, "mCopyFile : " + fromPath + ",   " + toPath + ",   " + fromFile.exists());
         if (!fromFile.exists()) {
             return;
         }
-        File toFile = new File(ROBOT_LOG);
-        if (!fromFile.exists()) {
+        File toFile = new File(toPath);
+        if (!toFile.exists()) {
             toFile.mkdirs();
         }
-        toFile = new File(toPath + "/RobotDatabase");
+        File newFile = new File(toPath + "/RobotDatabase");
         try {
             FileInputStream fosfrom = new FileInputStream(fromFile);
-            FileOutputStream fosto = new FileOutputStream(toFile);
+            FileOutputStream fosto = new FileOutputStream(newFile);
             byte bt[] = new byte[1024 * 1024];
             int c;
             int length = 0;
             while ((c = fosfrom.read(bt)) > 0) {
                 fosto.write(bt, 0, c);
                 length = length + c;
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.COPY_FILE, length / fosfrom.available() * 100));
+                //EventBus.getDefault().post(new EventBusMessage(BaseEvent.COPY_FILE, length / fosfrom.available() * 100));
             }
             fosfrom.close();
             fosto.close();
+            Log.d(TAG, "copy RobotDatabase success");
         } catch (FileNotFoundException e) {
             Log.d(TAG, "copy RobotDatabase fail : " + e.toString());
         } catch (IOException e) {
@@ -334,18 +361,105 @@ public class AssestFile {
         }
     }
 
-    public static void zipFolder(String srcFilePath, String zipFilePath) {
-        //创建Zip包
-        java.util.zip.ZipOutputStream outZip = null;
+    public static void zip(String src, String dest) {
+        //定义压缩输出流
+        ZipOutputStream out = null;
         try {
-            outZip = new java.util.zip.ZipOutputStream(new FileOutputStream(zipFilePath));
-            //打开要输出的文件
-            java.io.File file = new java.io.File(srcFilePath);
-            //压缩
-            zipFiles(file.getParent() + java.io.File.separator, file.getName(), outZip);
-            //完成,关闭
-            outZip.finish();
-            outZip.close();
+            //传入源文件
+            File outFile = new File(ROBOTZIP_PATH);
+            if (!outFile.exists()) {
+                outFile.mkdirs();
+            }
+            File fileOrDirectory = new File(src);
+            //传入压缩输出流
+            out = new ZipOutputStream(new FileOutputStream(new File(dest)));
+            //判断是否是一个文件或目录
+            //如果是文件则压缩
+            if (fileOrDirectory.isFile()) {
+                zipFileOrDirectory(out, fileOrDirectory, "");
+            } else {
+                //否则列出目录中的所有文件递归进行压缩
+                File[] entries = fileOrDirectory.listFiles();
+                for (int i = 0; i < entries.length; i++) {
+                    Log.d(TAG, "zipFile : " + entries[i].getName());
+                    zipFileOrDirectory(out, entries[i], "");
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (out != null) {
+                try {
+                    out.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private static void zipFileOrDirectory(ZipOutputStream out, File fileOrDirectory, String curPath) throws IOException {
+        FileInputStream in = null;
+        try {
+            //判断目录是否为null
+            Log.d(TAG, "zipFileOrDirectory : " + fileOrDirectory.isDirectory());
+            if (!fileOrDirectory.isDirectory()) {
+                byte[] buffer = new byte[4096];
+                int bytes_read;
+                in = new FileInputStream(fileOrDirectory);
+                //归档压缩目录
+                ZipEntry entry = new ZipEntry(curPath + fileOrDirectory.getName());
+                //将压缩目录写到输出流中
+                out.putNextEntry(entry);
+                while ((bytes_read = in.read(buffer)) != -1) {
+                    out.write(buffer, 0, bytes_read);
+                }
+                out.closeEntry();
+            } else {
+                //列出目录中的所有文件
+                File[] entries = fileOrDirectory.listFiles();
+                for (int i = 0; i < entries.length; i++) {
+                    //递归压缩
+                    zipFileOrDirectory(out, entries[i], curPath + fileOrDirectory.getName() + "/");
+                }
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } finally {
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public ArrayList<String> getLogList() {
+        ArrayList<String> arrayList = new ArrayList<>();
+        File file = new File(ROBOT_LOG);
+        Log.d(TAG, "getLogList111 : " + file.listFiles().length);
+        if (file.exists()) {
+            for (int i = 0; i < file.listFiles().length; i++) {
+                Log.d("getLogList ", "getLogList Name : " + file.listFiles()[i].getName());
+                arrayList.add(file.listFiles()[i].getName());
+            }
+            return arrayList;
+        }
+        return arrayList;
+    }
+
+    public void downloadMapPic(String mapName, byte[] bytes) {
+        File robotMap = new File(ROBOT_MAP);
+        if (!robotMap.exists()) {
+            robotMap.mkdirs();
+        }
+        File file = new File(ROBOT_MAP + "/" + mapName + ".tar.gz");
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(bytes);
+            fileOutputStream.close();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
@@ -353,50 +467,21 @@ public class AssestFile {
         }
     }
 
-    private static void zipFiles(String folderPath, String filePath,
-                                 java.util.zip.ZipOutputStream zipOut) {
-        if (zipOut == null) {
-            return;
+    public void saveMapPic(String mapName, byte[] bytes) {
+        File robotMap = new File("/sdcard/robotMapPic");
+        if (!robotMap.exists()) {
+            robotMap.mkdirs();
         }
-        java.io.File file = new java.io.File(folderPath + filePath);
-        //判断是不是文件
-        if (file.isFile()) {
-            java.util.zip.ZipEntry zipEntry = new java.util.zip.ZipEntry(filePath);
-            FileInputStream inputStream = null;
-            try {
-                inputStream = new FileInputStream(file);
-                zipOut.putNextEntry(zipEntry);
-                int len;
-                byte[] buffer = new byte[4096];
-
-                while ((len = inputStream.read(buffer)) != -1) {
-                    zipOut.write(buffer, 0, len);
-                }
-                zipOut.closeEntry();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else {
-            //文件夹的方式,获取文件夹下的子文件
-            String fileList[] = file.list();
-            //如果没有子文件, 则添加进去即可
-            if (fileList.length <= 0) {
-                java.util.zip.ZipEntry zipEntry =
-                        new java.util.zip.ZipEntry(filePath + java.io.File.separator);
-                try {
-                    zipOut.putNextEntry(zipEntry);
-                    zipOut.closeEntry();
-                    //如果有子文件, 遍历子文件
-                    for (int i = 0; i < fileList.length; i++) {
-                        zipFiles(folderPath, filePath + java.io.File.separator + fileList[i], zipOut);
-                    }//end of for
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }//end of if
-        }//end of func
+        File file = new File("/sdcard/robotMapPic/" + mapName + ".png");
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);
+            fileOutputStream.write(bytes);
+            fileOutputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
 

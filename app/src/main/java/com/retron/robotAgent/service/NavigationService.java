@@ -80,7 +80,7 @@ public class NavigationService extends Service {
     }
 
     public static void initialize_directly(String mapName) {//不转圈初始化
-        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.CHARGING_POINT, new RobotStatus<Status>() {
+        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.InitializePositionName, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "initialize_directly" + status.getMsg());
@@ -118,13 +118,13 @@ public class NavigationService extends Service {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "is_initialize_finished：" + status.toString());
-                EventBus.getDefault().post(new EventBusMessage(10034, status));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.IS_INITIALIZE_FINISHED, status));
             }
 
             @Override
             public void error(Throwable error) {
                 Log.d(TAG, "is_initialize_finished：" + error.getMessage());
-                EventBus.getDefault().post(new EventBusMessage(10035, error.getMessage()));
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_FAIL, error.getMessage()));
             }
         });
     }
@@ -193,6 +193,8 @@ public class NavigationService extends Service {
             EventBus.getDefault().post(new EventBusMessage(88888, ""));
             TaskManager.getInstances(mContext).modifyRobotParam(0.75);
             TaskManager.getInstances(mContext).deviceRobotVersion();
+            TaskManager.getInstances(mContext).work_status();
+            TaskManager.getInstances(mContext).loadMapList();
         }
         if (!connect) {
             Log.d(TAG, "重置底盘连接状态：" + connect);
