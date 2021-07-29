@@ -331,6 +331,7 @@ public class TaskManager implements Handler.Callback {
                     message.obj = map_name;
                     message.what = 1;
                     childHandler.sendMessage(message);
+                    gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.SCANNING_MAP, TaskManager.scanningFlag));
                 }
 
                 @Override
@@ -360,6 +361,8 @@ public class TaskManager implements Handler.Callback {
                     message.obj = map_name;
                     message.what = 1;
                     childHandler.sendMessage(message);
+                    gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.SCANNING_MAP, TaskManager.scanningFlag));
+
                 }
             }
 
@@ -401,6 +404,7 @@ public class TaskManager implements Handler.Callback {
             public void success(Status status) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_scanSaveMap) + status.getMsg()));
                 scanningFlag = false;
+                gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.SCANNING_MAP, TaskManager.scanningFlag));
                 childHandler.removeMessages(1);
                 Log.d(TAG, "stopScanMap success :  " + currentMapName);
                 sqLiteOpenHelperUtils.saveMapName(currentMapName, Content.TempMapName,
@@ -436,6 +440,7 @@ public class TaskManager implements Handler.Callback {
             public void success(Status status) {
                 Log.d(TAG, "cancleScanMap ：" + status.getMsg());
                 scanningFlag = false;
+                gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.SCANNING_MAP, TaskManager.scanningFlag));
                 childHandler.removeMessages(1);
                 use_map(SocketServices.use_mapName);
                 getMapPic(SocketServices.use_mapName);
@@ -1262,6 +1267,7 @@ public class TaskManager implements Handler.Callback {
         Content.is_initialize_finished = 0;
         Log.d(TAG, "TaskManager-use_map： " + map_name);
         Content.noChargingCount = 5;
+        NavigationService.stopInitialize();
         RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {

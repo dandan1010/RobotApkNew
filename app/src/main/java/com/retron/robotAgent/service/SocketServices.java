@@ -1814,7 +1814,6 @@ public class SocketServices extends BaseService {
                 gsonUtils.setMapNameUuid(use_mapName);
                 gsonUtils.setCurrent_mapname(current_mapname);
                 gsonUtils.serverSendMsg(gsonUtils.putConnMsg(Content.CONN_OK));
-                gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.SCANNING_MAP, TaskManager.scanningFlag));
                 Content.CONNECT_ADDRESS = address;
                 myHandler.sendEmptyMessageDelayed(DISCONNECT, 2000);
                 Log.d(TAG, "open connect：" + Content.CONNECT_ADDRESS);
@@ -1871,12 +1870,13 @@ public class SocketServices extends BaseService {
                                 Log.d(TAG, "swapStream.FileInputStream() : " + is.available());
                                 ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
                                 byte[] buff = new byte[1024 * 500];
+                                int available = is.available();
                                 int rc = 0;
                                 while ((rc = is.read(buff)) > 0) {
                                     if (Content.isDownloadCancel) {
                                         swapStream.write(buff, 0, rc);
                                         Log.d(TAG, "swapStream.toByteArray() : " + swapStream.toByteArray());
-                                        gsonUtils.serverSendMsg(gsonUtils.sendRobotMsg(Content.DOWNLOAD_LOG, zipName, is.available()));
+                                        gsonUtils.serverSendMsg(gsonUtils.sendRobotMsg(Content.DOWNLOAD_LOG, zipName, available));
                                         Content.server.broadcast(buff);
                                         Thread.sleep(200);
                                     } else {
@@ -1884,6 +1884,7 @@ public class SocketServices extends BaseService {
                                     }
                                 }
                                 is.close();
+                                swapStream.close();
                                 flag = false;
                                 TaskManager.getInstances(mContext).getMapPic(use_mapName);
                             }

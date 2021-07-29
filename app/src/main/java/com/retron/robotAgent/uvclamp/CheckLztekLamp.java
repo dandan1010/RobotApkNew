@@ -600,6 +600,7 @@ public class CheckLztekLamp {
         @Override
         public void run() {
             OutputStream outputStream = null;
+            java.io.InputStream input = null;
             byte[] speed = hexBytes(mContext.getString(R.string.temp_request).replace(" ", ""));
             try {
                 if (null != speed) {
@@ -607,7 +608,7 @@ public class CheckLztekLamp {
                     outputStream.write(speed);
                     outputStream.flush();
                 }
-                java.io.InputStream input = speedSerialPort.getInputStream();
+                input = speedSerialPort.getInputStream();
                 try {
                     byte[] buffer = new byte[1024];
                     int len = input.read(buffer);
@@ -630,6 +631,13 @@ public class CheckLztekLamp {
                 if (outputStream != null) {
                     try {
                         outputStream.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                if (input != null) {
+                    try {
+                        input.close();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -764,6 +772,7 @@ public class CheckLztekLamp {
         public void run() {
             for (int i = 0; i < setArrayList.size(); i++) {
                 OutputStream outputStream = null;
+                java.io.InputStream input = null;
                 byte[] speed = hexBytes(setArrayList.get(i));
                 try {
                     if (null != speed) {
@@ -771,7 +780,7 @@ public class CheckLztekLamp {
                         outputStream.write(speed);
                         outputStream.flush();
                     }
-                    java.io.InputStream input = speedSerialPort.getInputStream();
+                    input = speedSerialPort.getInputStream();
                     try {
                         byte[] buffer = new byte[1024];
                         int len = input.read(buffer);
@@ -790,6 +799,21 @@ public class CheckLztekLamp {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                } finally {
+                    if (outputStream != null) {
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (input != null) {
+                        try {
+                            input.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
         }
