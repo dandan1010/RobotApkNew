@@ -12,13 +12,6 @@ import retrofit2.Response;
 public interface UsLamController {
 
     void setTargetPoint(TargetListBean targetPoint, RobotStatus<Status> status);//设置目标点
-    /*
-        * "simple": "bool, true"
-          "speed": "string, low|normal|high",
-          "direction": "string, left|right|forward|backward|stop|"*/
-    void relocalization(float x, float y, float theta, RobotStatus<Status> status);//重定位
-
-    void disRlocalization();//取消重定位
 
     void getRlocalization();//查询重定位
 
@@ -35,12 +28,6 @@ public interface UsLamController {
   "map_name": "string, map name.",
   "umap": "umap json object."*/
     void import_map(boolean import_map_force, String map_name, JSONObject umap, RobotStatus<Status> status);//导入地图
-    /*
-    * "map_name": "string, map name.",
-  "umap": "umap json object."*/
-    void updateMap(String mapName, JSONObject umap, RobotStatus<Status> status);//更新地图
-
-    void editPosition(RobotStatus<Status> status);
 
     void auto_scanMap(boolean suto_status, boolean points_list, RobotStatus<Status> status);//获取自主构图状态
 

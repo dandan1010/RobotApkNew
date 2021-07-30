@@ -9,13 +9,14 @@ import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.retron.factorybean.MapPngBean;
 import com.retron.factorybean.MoveBean;
 
+import org.json.JSONObject;
+
 import okhttp3.ResponseBody;
 import retrofit2.Response;
 
 public interface RobotEventController {
 
     void setnavigationSpeedLevel(String level, RobotStatus<Status> status);//导航速度
-
 
     void move(MoveBean moveBean, RobotStatus<Status> status);
 
@@ -32,6 +33,11 @@ public interface RobotEventController {
     void deleteMap(String mapName, RobotStatus<Status> status);//删除地图
 
     void loadMapList();//获取地图列表
+
+    /*
+    * "map_name": "string, map name.",
+  "umap": "umap json object."*/
+    void updateMap(String originMapName, String newMapName, JSONObject umap, RobotStatus<Status> status);//更新地图
 
     Response<ResponseBody> downloadMap(String mapName);//下载地图压缩包
 
@@ -64,11 +70,22 @@ public interface RobotEventController {
 
     void deletePosition(String mapName, String point_name, PositionListBean positionListBean, RobotStatus<Status> status);//删除点
 
+    void editPosition(String mapName, String originName, String newName, RobotStatus<Status> status);//编辑点
+
     void getPositions(String mapName, RobotStatus<RobotPosition> status);//获取初始化点列表
 
     void cancelNavigate(RobotStatus<Status> status);//取消导航
 
+    /*
+        * "simple": "bool, true"
+          "speed": "string, low|normal|high",
+          "direction": "string, left|right|forward|backward|stop|"
+          * i:区分调用gx的哪一种初始化*/
+    void initialize(String map_name, String init_point_name, float x, float y, float theta, int i, RobotStatus<Status> status);//转圈初始化
+
     void is_initialize_finished(RobotStatus<Status> status);//初始化是否完成
+
+    void stop_initialize(com.dcm360.controller.robot_interface.status.RobotStatus<Status> status);//停止初始化
 
     void work_status(RobotStatus<RobotWorkStatus> status);//构建地图状态
 

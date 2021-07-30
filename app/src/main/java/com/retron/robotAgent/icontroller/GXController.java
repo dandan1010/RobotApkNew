@@ -47,10 +47,6 @@ public interface GXController {
 
     void initialize_directly(String map_name, String init_point_name, RobotStatus<Status> status);//不转圈初始化
 
-    void initialize(String map_name, String init_point_name, RobotStatus<Status> status);//转圈初始化
-
-    void stop_initialize(com.dcm360.controller.robot_interface.status.RobotStatus<Status> status);//停止初始化
-
     void initDirectly(String mapName, String initPointName, RobotStatus<Status> status);//不转圈初始化
 
     void initRobot(String mapName, String initPointName, RobotStatus<Status> status);//转圈初始化
@@ -117,15 +113,11 @@ public interface GXController {
 
     Status deleteMapSyn(String mapName);//同步删除地图
 
-    void renameMap(String originMapName, String newMapName, RobotStatus<Status> status);//修改地图名称
-
     Status uploadMapSyn(String mapName, String mapPath);//上传地图
 
     void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status);//编辑地图
 
     void loadMap(String mapName, RobotStatus<Status> status);//加载地图
-
-    void renamePosition(String mapName, String originName, String newName, RobotStatus<Status> status);//重命名点
 
     void cancelScanMap(RobotStatus<Status> status);//取消扫描不保存地图
 
