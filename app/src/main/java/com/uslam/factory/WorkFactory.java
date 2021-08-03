@@ -1,4 +1,4 @@
-package com.retron.robotAgent.factory;
+package com.uslam.factory;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
@@ -38,12 +38,12 @@ import com.dcm360.controller.gs.controller.listener.StatusMessageListener;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.NavigationStatus;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
-import com.retron.factorybean.MapPngBean;
-import com.retron.factorybean.MoveBean;
-import com.retron.robotAgent.controllerbean.TargetListBean;
-import com.retron.robotAgent.icontroller.GXController;
-import com.retron.robotAgent.icontroller.RobotEventController;
-import com.retron.robotAgent.icontroller.UsLamController;
+import com.uslam.bean.MapPngBean;
+import com.uslam.bean.MoveBean;
+import com.uslam.bean.TargetPointBean;
+import com.uslam.icontroller.GXController;
+import com.uslam.icontroller.RobotEventController;
+import com.uslam.icontroller.UsLamController;
 
 import org.json.JSONObject;
 
@@ -551,7 +551,7 @@ public class WorkFactory implements RobotEventController, GXController, UsLamCon
     }
 
     @Override
-    public void setTargetPoint(TargetListBean targetPoint, RobotStatus<Status> status) {
+    public void setTargetPoint(TargetPointBean targetPoint, RobotStatus<Status> status) {
 
     }
 

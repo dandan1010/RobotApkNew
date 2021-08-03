@@ -8,7 +8,7 @@ android {
         applicationId "com.retron.robotAgent"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 2
+        versionCode 1
         versionName "V1.000.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

@@ -1,4 +1,4 @@
-package com.retron.robotAgent.icontroller;
+package com.uslam.icontroller;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
@@ -6,8 +6,8 @@ import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.NavigationStatus;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
-import com.retron.factorybean.MapPngBean;
-import com.retron.factorybean.MoveBean;
+import com.uslam.bean.MapPngBean;
+import com.uslam.bean.MoveBean;
 
 import org.json.JSONObject;
 

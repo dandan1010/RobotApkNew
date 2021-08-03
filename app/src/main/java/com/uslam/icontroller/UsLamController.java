@@ -1,17 +1,14 @@
-package com.retron.robotAgent.icontroller;
+package com.uslam.icontroller;
 
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
-import com.retron.robotAgent.controllerbean.TargetListBean;
+import com.uslam.bean.TargetPointBean;
 
 import org.json.JSONObject;
 
-import okhttp3.ResponseBody;
-import retrofit2.Response;
-
 public interface UsLamController {
 
-    void setTargetPoint(TargetListBean targetPoint, RobotStatus<Status> status);//设置目标点
+    void setTargetPoint(TargetPointBean targetPoint, RobotStatus<Status> status);//设置目标点
 
     void getRlocalization();//查询重定位
 

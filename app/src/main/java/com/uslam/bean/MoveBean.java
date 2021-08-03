@@ -1,4 +1,4 @@
-package com.retron.factorybean;
+package com.uslam.bean;
 
 public class MoveBean {
 

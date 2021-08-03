@@ -1,6 +1,6 @@
-package com.retron.robotAgent.controllerbean;
+package com.uslam.bean;
 
-public class TargetListBean {
+public class TargetPointBean {
     /*
     * {
   "target_list": [
