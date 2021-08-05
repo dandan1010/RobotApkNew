@@ -6,6 +6,8 @@ import com.retron.robotAgent.service.SimpleServer;
 import retrofit2.http.PUT;
 
 public final class Content {
+    public static String ipAddress = "A";
+
     public static final String AlarmAction = "android.alarm.task.action";
     public static final String DeleteFileAlarmAction = "android.alarm.deleteFile.action";
 

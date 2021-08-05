@@ -38,7 +38,7 @@ public interface UsLamControllerService {
      * 重定位[POST] http://{{base_Url}}/robot/relocalization/
      */
     @POST("/robot/relocalization")
-    Call<Status> relocalization(@Body String s);
+    Call<Status> relocalization(@Query("x")float x, @Query("y")float y, @Query("theta")float theta);
 
     /**
      * 获得机器人状态 [GET] http://{{base_url}}/robot/status/?relocalization=true

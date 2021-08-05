@@ -52,6 +52,8 @@ import com.retron.robotAgent.utils.EventBusMessage;
 import com.retron.robotAgent.controller.RobotManagerController;
 import com.retron.robotAgent.utils.GsonUtils;
 import com.retron.robotAgent.utils.Md5Utils;
+import com.uslam.bean.MapPngBean;
+import com.uslam.factory.Factory;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -142,7 +144,6 @@ public class TaskManager implements Handler.Callback {
                     mTaskManager = new TaskManager(mContext);
             }
         }
-
         return mTaskManager;
     }
 
@@ -154,7 +155,6 @@ public class TaskManager implements Handler.Callback {
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_TASK_STATE, ""));
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_ALL_TASK_STATE, ""));
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_SETTING_MODE, ""));
-            //EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_HISTORY, ""));
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, TaskManager.pointStateBean));
         }
     }
@@ -176,7 +176,9 @@ public class TaskManager implements Handler.Callback {
             Log.d(TAG, "getMapPic getRobotController is null ");
             return;
         }
-        RobotManagerController.getInstance().getRobotController().getMapPicture(mapName, new RobotStatus<byte[]>() {
+        MapPngBean mapPngBean = new MapPngBean();
+        mapPngBean.setMapName(mapName);
+        Factory.getInstance(mContext, Content.ipAddress).getMapPng(mapPngBean, new RobotStatus<byte[]>() {
             @Override
             public void success(byte[] bytes) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapIcon) + "successed"));
@@ -199,7 +201,7 @@ public class TaskManager implements Handler.Callback {
      */
     public void getPositions(String mapName) {
         Log.d(TAG, "getPositions mapName : " + mapName);
-        GsController.INSTANCE.getPositions(mapName, new RobotStatus<RobotPosition>() {
+        Factory.getInstance(mContext, Content.ipAddress).getPositions(mapName, new RobotStatus<RobotPosition>() {
             @Override
             public void success(RobotPosition robotPosition) {
                 mRobotPosition = robotPosition;
@@ -218,7 +220,7 @@ public class TaskManager implements Handler.Callback {
      * */
 
     public void cmdVel() {
-        GsController.INSTANCE.cmdVel(new RobotStatus<RobotCmdVel>() {
+        Factory.getInstance(mContext, Content.ipAddress).cmdVel(new RobotStatus<RobotCmdVel>() {
             @Override
             public void success(RobotCmdVel robotCmdVel) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.CMDVEL, robotCmdVel));
@@ -238,44 +240,52 @@ public class TaskManager implements Handler.Callback {
     @SuppressLint("CheckResult")
     public void loadMapList() {
         Log.d(TAG, "ZDZD ---- loadMapList : ");
-        GsController.INSTANCE.getGsControllerService().getMapList()
-                .filter(robotMap -> robotMap != null && robotMap.getData() != null)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<RobotMap>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
+        RobotMap[] robotMaps = Factory.getInstance(mContext, Content.ipAddress).loadMapList();
+        if (robotMaps != null && robotMaps.length > 0) {
+            mRobotMap = robotMaps[0];
+            Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + mRobotMap.getData().size());
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
 
-                    }
-
-                    @Override
-                    public void onNext(RobotMap robotMap) {
-                        mRobotMap = robotMap;
-                        Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + robotMap.getData().size());
-                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
-
-                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, robotMap));
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.d(TAG, "get map list is error ： " + e.getMessage());
-                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + e.getMessage()));
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
+            EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, mRobotMap));
+        }
+//        GsController.INSTANCE.getGsControllerService().getMapList()
+//                .filter(robotMap -> robotMap != null && robotMap.getData() != null)
+//                .subscribeOn(Schedulers.io())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<RobotMap>() {
+//                    @Override
+//                    public void onSubscribe(Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(RobotMap robotMap) {
+//                        mRobotMap = robotMap;
+//                        Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + robotMap.getData().size());
+//                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
+//
+//                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, robotMap));
+//
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        Log.d(TAG, "get map list is error ： " + e.getMessage());
+//                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + e.getMessage()));
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
     }
 
     /**
      * 移动到导航点
      */
     public void navigate_Position(String mapName, String positionName) {
-        RobotManagerController.getInstance().getRobotController().navigate_Position(mapName, positionName, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).navigate_Position(mapName, positionName, new RobotStatus<Status>() {
 
             @Override
             public void success(Status status) {
@@ -296,7 +306,7 @@ public class TaskManager implements Handler.Callback {
      * 获取工作状态
      * */
     public void work_status() {
-        GsController.INSTANCE.work_status(new RobotStatus<RobotWorkStatus>() {
+        Factory.getInstance(mContext, Content.ipAddress).work_status(new RobotStatus<RobotWorkStatus>() {
             @Override
             public void success(RobotWorkStatus robotWorkStatus) {
                 currentMapName = robotWorkStatus.getData().getWork_status().getCurrent_map_name();
@@ -323,7 +333,7 @@ public class TaskManager implements Handler.Callback {
         Log.d(TAG, "开始扫描 ： " + map_name + "scanningFlag : " + scanningFlag);
         if (!scanningFlag) {
             currentMapName = map_name;
-            GsController.INSTANCE.startScanMap(map_name, 0, new RobotStatus<Status>() {
+            Factory.getInstance(mContext, Content.ipAddress).startScanMap(map_name, 0, new RobotStatus<Status>() {
                 @Override
                 public void success(Status status) {
                     scanningFlag = true;
@@ -348,7 +358,7 @@ public class TaskManager implements Handler.Callback {
      * 扩展扫描地图
      */
     public void start_develop_map(String map_name) {
-        GsController.INSTANCE.startScanMap(map_name, 1, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).startScanMap(map_name, 1, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 currentMapName = map_name;
@@ -378,7 +388,7 @@ public class TaskManager implements Handler.Callback {
      * 获取实时扫地图图片png
      */
     public void scanMapPng() {
-        RobotManagerController.getInstance().getRobotController().scanMapPng(new RobotStatus<byte[]>() {
+        Factory.getInstance(mContext, Content.ipAddress).scanMapPng(new RobotStatus<byte[]>() {
             @Override
             public void success(byte[] bytes) {
                 Log.d(TAG, "scanMapPng :  " + bytes.length);
@@ -399,7 +409,7 @@ public class TaskManager implements Handler.Callback {
     public void stopScanMap() {
         Content.InitializePositionName = "End";
         isAddInitialize = false;
-        GsController.INSTANCE.stopScanMap(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).stopScanMap(currentMapName, false, false, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_scanSaveMap) + status.getMsg()));
@@ -435,7 +445,7 @@ public class TaskManager implements Handler.Callback {
      */
 
     public void cancleScanMap() {
-        GsController.INSTANCE.cancelScanMap(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).cancelScanMap(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "cancleScanMap ：" + status.getMsg());
@@ -461,7 +471,7 @@ public class TaskManager implements Handler.Callback {
      */
     public void deleteMap(String mapNameUuid, int mapCount) {
         Log.d(TAG, "deleteMap mapName  :  " + mapNameUuid);
-        GsController.INSTANCE.deleteMap(mapNameUuid, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).deleteMap(mapNameUuid, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "deleteMap :  " + status.getMsg() + ", mapname :" + mapNameUuid);
@@ -803,7 +813,7 @@ public class TaskManager implements Handler.Callback {
     };
 
     public void reboot() {
-        RobotManagerController.getInstance().getRobotController().reboot(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).reboot(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "REBOOT ----" + status.getMsg());
@@ -862,45 +872,6 @@ public class TaskManager implements Handler.Callback {
         EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, pointStateBean));
         return mTaskArrayList;
     }
-
-    /**
-     * 暂停任务
-     */
-/*    public void pauseTaskQueue() {
-        GsController.INSTANCE.pauseTaskQueue(new RobotStatus<Status>() {
-            @Override
-            public void success(Status status) {
-                Log.d(TAG, "pauseTaskQueue " + status.getMsg());
-                Content.taskState = 2;
-                //myHandler.removeCallbacks(runnable);
-            }
-
-            @Override
-            public void error(Throwable error) {
-                Log.d(TAG, "pauseTaskQueue failed " + error.getMessage());
-            }
-        });
-    }
-
-    *//**
-     * 恢复任务
-     *//*
-    public void resumeTaskQueue() {
-        GsController.INSTANCE.resumeTaskQueue(new RobotStatus<Status>() {
-            @Override
-            public void success(Status status) {
-                Log.d(TAG, "resumeTaskQueue" + status.getMsg());
-                Content.taskState = 1;
-                Content.robotState = 3;
-                Content.time = 300;
-            }
-
-            @Override
-            public void error(Throwable error) {
-                Log.d(TAG, "resumeTaskQueue failed " + error.getMessage());
-            }
-        });
-    }*/
 
     /**
      * 结束任务
@@ -1027,10 +998,6 @@ public class TaskManager implements Handler.Callback {
      * 删除任务队列
      */
     public void deleteTaskQueue(String mapNameUuid, String mapName, String task_name, boolean needAddTask, String message) {
-//        GsController.INSTANCE.deleteTaskQueue(mapName, task_name, new RobotStatus<Status>() {
-//            @Override
-//            public void success(Status status) {
-//                Log.d(TAG, "deleteTaskQueue : " + status.getMsg());
         sqLiteOpenHelperUtils.deleteAlarmTask(mapNameUuid + Content.dbSplit + task_name);
         sqLiteOpenHelperUtils.deletePointTask(Content.dbPointTaskName, mapNameUuid + Content.dbSplit + task_name);
 
@@ -1081,41 +1048,12 @@ public class TaskManager implements Handler.Callback {
         EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_TASK_STATE, ""));
         EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_ALL_TASK_STATE, ""));
     }
-//
-//            @Override
-//            public void error(Throwable error) {
-//                Log.d(TAG, "deleteTaskQueue failed : " + error.getMessage());
-//                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.delete_task) + error.getMessage()));
-//            }
-//        });
-//    }
-
-    /**
-     * 获取任务队列
-     */
-  /*  public void getTaskQueues(String map_name) {
-        GsController.INSTANCE.taskQueues(map_name, new RobotStatus<RobotTaskQueueList>() {
-            @Override
-            public void success(RobotTaskQueueList robotTaskQueueList) {
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_taskList) + " successed"));
-                Log.d(TAG, "getTaskQueues success" + robotTaskQueueList.getData().size());
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.STOPLIGHT, robotTaskQueueList));
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDTASKQUEUE, robotTaskQueueList));
-            }
-
-            @Override
-            public void error(Throwable error) {
-                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_taskList) + error.getMessage()));
-            }
-        });
-
-    }*/
 
     /**
      * 添加点
      */
     public void add_Position(PositionListBean positionListBean, int add_point_time) {
-        GsController.INSTANCE.add_Position(positionListBean, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).add_Position(positionListBean, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "addPosition success : " + status.getMsg());
@@ -1150,7 +1088,7 @@ public class TaskManager implements Handler.Callback {
      */
     public void deletePosition(String mapName, String positionName, PositionListBean positionBean, int add_point_time, String type) {
         Log.d(TAG, "deletePosition : " + mapName + ",  positionName : " + positionName);
-        GsController.INSTANCE.deletePosition(mapName, positionName, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).deletePosition(mapName, positionName, positionBean, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "deletePosition success");
@@ -1186,7 +1124,7 @@ public class TaskManager implements Handler.Callback {
      * 重命名点
      */
     public void renamePosition(String mapName, String originName, String newName) {
-        GsController.INSTANCE.renamePosition(mapName, originName, newName, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).editPosition(mapName, originName, newName, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 if ("successed".equals(status.getMsg())) {
@@ -1211,7 +1149,7 @@ public class TaskManager implements Handler.Callback {
      * 地图点数据，导航点列表
      */
     public void getPosition(String mapName, String type) {
-        GsController.INSTANCE.getMapPositions(mapName, new RobotStatus<RobotPositions>() {
+        Factory.getInstance(mContext, Content.ipAddress).getMapPositions(mapName, new RobotStatus<RobotPositions>() {
             @Override
             public void success(RobotPositions robotPositions) {
                 Log.d(TAG, "getPosition success : " + robotPositions.getData().size() + ", map: " + mapName + ", point : " + type);
@@ -1245,7 +1183,7 @@ public class TaskManager implements Handler.Callback {
      * 取消导航
      */
     public void cancel_navigate() {
-        GsController.INSTANCE.cancelNavigate(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).cancelNavigate(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "cancel_navigate " + status.getMsg());
@@ -1268,7 +1206,7 @@ public class TaskManager implements Handler.Callback {
         Log.d(TAG, "TaskManager-use_map： " + map_name);
         Content.noChargingCount = 5;
         NavigationService.stopInitialize();
-        RobotManagerController.getInstance().getRobotController().use_map(map_name, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "use_map success : " + ",   " + map_name + ",   " + Content.taskIndex);
@@ -1281,11 +1219,6 @@ public class TaskManager implements Handler.Callback {
                         NavigationService.initGlobal(map_name);
                     }
                 }
-//                handler.removeMessages(GETPOINTPOSITION);
-//                Message message = handler.obtainMessage();
-//                message.obj = map_name;
-//                message.what = GETPOINTPOSITION;
-//                handler.sendMessageDelayed(message, 1000);
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.use_map) + "success"));
             }
 
@@ -1299,11 +1232,11 @@ public class TaskManager implements Handler.Callback {
 
     //获取虚拟墙
     public void getVirtual_obstacles(String mapNameUuid, String mapName, String type) {
-        RobotManagerController.getInstance().getRobotController().getRecordStatus(new RobotStatus<RecordStatusBean>() {
+        Factory.getInstance(mContext, Content.ipAddress).getRecordStatus(new RobotStatus<RecordStatusBean>() {
             @Override
             public void success(RecordStatusBean status) {
                 Log.d(TAG, "lines : getRecordStatus " + status.getMsg());
-                RobotManagerController.getInstance().getRobotController().getVirtualObstacleData(mapNameUuid, new RobotStatus<VirtualObstacleBean>() {
+                Factory.getInstance(mContext, Content.ipAddress).getVirtualObstacleData(mapNameUuid, new RobotStatus<VirtualObstacleBean>() {
                     @Override
                     public void success(VirtualObstacleBean virtualObstacleBean) {
                         if ("successed".equals(virtualObstacleBean.getMsg())) {
@@ -1338,7 +1271,7 @@ public class TaskManager implements Handler.Callback {
     //添加虚拟墙
     public void update_virtual_obstacles(UpdataVirtualObstacleBean updataVirtualObstacleBean, String mapNameUuid, String mapName, String obstacle_name) {
         Log.d(TAG, "update_virtual111 " + updataVirtualObstacleBean.toString());
-        RobotManagerController.getInstance().getRobotController().updateVirtualObstacleData(updataVirtualObstacleBean, mapNameUuid, obstacle_name, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).updateVirtualObstacleData(updataVirtualObstacleBean, mapNameUuid, obstacle_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "update_virtual " + status.getMsg());
@@ -1358,7 +1291,7 @@ public class TaskManager implements Handler.Callback {
 
     //跑路径速度
     public void setSpeedLevel(int level) {
-        RobotManagerController.getInstance().getRobotController().setSpeedLevel(String.valueOf(level), new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).setSpeedLevel(String.valueOf(level), new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "setSpeedLevel " + status.getMsg());
@@ -1376,7 +1309,7 @@ public class TaskManager implements Handler.Callback {
 
     //导航速度
     public void setnavigationSpeedLevel(int level) {
-        RobotManagerController.getInstance().getRobotController().setnavigationSpeedLevel(String.valueOf(level), new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).setnavigationSpeedLevel(String.valueOf(level), new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "setnavigationSpeedLevel " + status.getMsg());
@@ -1397,7 +1330,7 @@ public class TaskManager implements Handler.Callback {
      * 获取设备信息
      */
     public void deviceStatus() {
-        GsController.INSTANCE.deviceStatus(new RobotStatus<RobotDeviceStatus>() {
+        Factory.getInstance(mContext, Content.ipAddress).deviceStatus(new RobotStatus<RobotDeviceStatus>() {
             @Override
             public void success(RobotDeviceStatus robotDeviceStatus) {
                 Log.d(TAG, "deviceStatus： ： " + robotDeviceStatus.getData());
@@ -1416,7 +1349,7 @@ public class TaskManager implements Handler.Callback {
      * 获取版本信息
      */
     public void deviceRobotVersion() {
-        GsController.INSTANCE.deviceRobotVersion(new RobotStatus<VersionBean>() {
+        Factory.getInstance(mContext, Content.ipAddress).deviceRobotVersion(new RobotStatus<VersionBean>() {
             @Override
             public void success(VersionBean versionBean) {
                 Log.d(TAG, "VersionBean： ： " + versionBean.getData().getVersion());
@@ -1644,7 +1577,7 @@ public class TaskManager implements Handler.Callback {
             arrayList.add("/root/GAUSSIAN_RUNTIME_DIR/bag/" + mAlarmUtils.getTime(recordingTime).replace(" ", "_") + ".bag");
         }
         recordingBean.setArgs(arrayList);
-        GsController.INSTANCE.recording(recordingBean, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).recording(recordingBean, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "recording-- op_name : " + op_name + ",  status : " + status.getMsg());
@@ -1659,7 +1592,7 @@ public class TaskManager implements Handler.Callback {
 
     public void getBag(String bagName) {
         Log.d(TAG, "getBag ： " + bagName);
-        RobotManagerController.getInstance().getRobotController().getBag(bagName, new RobotStatus<byte[]>() {
+        Factory.getInstance(mContext, Content.ipAddress).getBag(bagName, new RobotStatus<byte[]>() {
             @Override
             public void success(byte[] bytes) {
                 Log.d(TAG, "下载bag文件 ： " + bagName + ",   " + bytes.length);
@@ -1675,7 +1608,7 @@ public class TaskManager implements Handler.Callback {
     }
 
     public void deleteBag(String bagName) {
-        GsController.INSTANCE.deleteBag("bag/" + bagName, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).deleteBag("bag/" + bagName, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "删除bag文件 : " + bagName + ",   " + status.getMsg());
@@ -1689,7 +1622,7 @@ public class TaskManager implements Handler.Callback {
     }
 
     public void robot_reset() {
-        GsController.INSTANCE.reset_robot(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).reset_robot(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "reset_robot : " + status.getMsg());
@@ -1706,12 +1639,11 @@ public class TaskManager implements Handler.Callback {
     }
 
     public void getUltrasonicPhit() {
-        GsController.INSTANCE.getUltrasonicPhit(new RobotStatus<UltrasonicPhitBean>() {
+        Factory.getInstance(mContext, Content.ipAddress).getUltrasonicPhit(new RobotStatus<UltrasonicPhitBean>() {
             @Override
             public void success(UltrasonicPhitBean ultrasonicPhitBean) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.SEND_ULTRASONIC, ultrasonicPhitBean));
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_ultrasonic_phit) + "成功"));
-
             }
 
             @Override
@@ -1728,7 +1660,7 @@ public class TaskManager implements Handler.Callback {
         robotParam.setValue(value + "");
         ModifyRobotParam.RobotParam[] params = new ModifyRobotParam.RobotParam[]{robotParam};
 
-        GsController.INSTANCE.modifyRobotParam(params, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).modifyRobotParam(params, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "设置回充电桩的距离 ： " + status + ",  value : " + value);
@@ -1769,8 +1701,7 @@ public class TaskManager implements Handler.Callback {
                 break;
             case 2:
                 try {
-                    Response<ResponseBody> responseBodyResponse = RobotManagerController.getInstance().getRobotController()
-                            .download_map((String) msg.obj);
+                    Response<ResponseBody> responseBodyResponse = Factory.getInstance(mContext, Content.ipAddress).downloadMap((String) msg.obj);
                     byte[] downloadMap = responseBodyResponse.body().bytes();
                     Log.d(TAG, "download_map SIZE : " + downloadMap.length);
                     if (downloadMap != null && downloadMap.length != 0) {
@@ -1785,9 +1716,9 @@ public class TaskManager implements Handler.Callback {
                 }
                 break;
             case 3:
-                Log.d("upload_map_syn : ","文件路径： " + "/sdcard/robotMap/" + (String) msg.obj);
+                Log.d("upload_map_syn : ", "文件路径： " + "/sdcard/robotMap/" + (String) msg.obj);
                 String mapName = (String) ((String) msg.obj).replace(".tar.gz", "");
-                GsController.INSTANCE.uploadMap(mapName, "/sdcard/robotMap/" + (String) msg.obj, new RobotStatus<Status>() {
+                Factory.getInstance(mContext, Content.ipAddress).uploadMap(mapName, "/sdcard/robotMap/" + (String) msg.obj, new RobotStatus<Status>() {
                     @Override
                     public void success(Status status) {
                         JSONObject jsonObject = new JSONObject();

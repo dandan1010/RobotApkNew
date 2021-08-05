@@ -17,6 +17,8 @@ import com.retron.robotAgent.task.TaskManager;
 import com.retron.robotAgent.content.Content;
 import com.retron.robotAgent.utils.EventBusMessage;
 import com.retron.robotAgent.uvclamp.CheckLztekLamp;
+import com.uslam.bean.MoveBean;
+import com.uslam.factory.Factory;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -36,9 +38,6 @@ public class NavigationService extends Service {
 
     private static Context mContext;
     public static boolean isStartNavigationService = false;
-    public static String positions = "";
-    private boolean serverIsRun = false;
-    private boolean threadIsRun = false;
     private CheckLztekLamp checkLztekLamp;
 
     @Override
@@ -63,8 +62,8 @@ public class NavigationService extends Service {
             disposables.dispose();
     }
 
-    public static void initGlobal(String mapName){
-        GsController.INSTANCE.initGlobal(mapName, new RobotStatus<Status>() {
+    public static void initGlobal(String mapName) {
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, "", 0, 0, 0, 3, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "initGlobal" + status.getMsg());
@@ -80,7 +79,7 @@ public class NavigationService extends Service {
     }
 
     public static void initialize_directly(String mapName) {//不转圈初始化
-        RobotManagerController.getInstance().getRobotController().initialize_directly(mapName, Content.InitializePositionName, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, Content.InitializePositionName, 0, 0, 0, 1, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "initialize_directly" + status.getMsg());
@@ -98,7 +97,7 @@ public class NavigationService extends Service {
 
     public static void initialize(String mapName, String initializePositionName) {//转圈初始化
 
-        RobotManagerController.getInstance().getRobotController().initialize(mapName, initializePositionName, new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, initializePositionName, 0, 0, 0, 2, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
@@ -114,7 +113,7 @@ public class NavigationService extends Service {
     }
 
     public static void is_initialize_finished() {
-        RobotManagerController.getInstance().getRobotController().is_initialize_finished(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).is_initialize_finished(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "is_initialize_finished：" + status.toString());
@@ -130,7 +129,7 @@ public class NavigationService extends Service {
     }
 
     public static void stopInitialize() {//停止初始化
-        RobotManagerController.getInstance().getRobotController().stop_initialize(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).stop_initialize(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "停止初始化");
@@ -145,8 +144,12 @@ public class NavigationService extends Service {
         });
     }
 
+    static MoveBean moveBean = new MoveBean();
+
     public static void move(float linearSpeed, float angularSpeed) {
-        RobotManagerController.getInstance().getRobotController().move(linearSpeed, angularSpeed, new RobotStatus<Status>() {
+        moveBean.setLinearSpeed(linearSpeed);
+        moveBean.setAngularSpeed(angularSpeed);
+        Factory.getInstance(mContext, Content.ipAddress).move(moveBean, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "robot move：" + linearSpeed + ",   " + angularSpeed);
@@ -161,14 +164,14 @@ public class NavigationService extends Service {
 
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
-        RobotManagerController.getInstance().getRobotController().connect_robot(Content.ROBOROT_INF);
+        Factory.getInstance(mContext, Content.ipAddress).connect_robot(Content.ROBOROT_INF);
         TaskManager.getInstances(mContext).getRobotHealthy();
         //TaskManager.getInstances(mContext).robotStatus();
         ping();
     }
 
     private void ping() {
-        disposables.add(Observable.interval(2, TimeUnit.SECONDS).subscribe(aLong -> RobotManagerController.getInstance().getRobotController().ping(new RobotStatus<Status>() {
+        disposables.add(Observable.interval(2, TimeUnit.SECONDS).subscribe(aLong -> Factory.getInstance(mContext, Content.ipAddress).ping(new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "gxRobotStatus = " + status.toString());
@@ -200,14 +203,6 @@ public class NavigationService extends Service {
             Log.d(TAG, "重置底盘连接状态：" + connect);
             checkLztekLamp.openEth();
             checkLztekLamp.setEthAddress();
-//            try {
-//                Content.server.stop();
-//                Content.server = null;
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
         }
     }
 

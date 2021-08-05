@@ -48,6 +48,7 @@ import com.retron.robotAgent.utils.ZipUtils;
 import com.retron.robotAgent.uvclamp.CheckLztekLamp;
 import com.retron.robotAgent.uvclamp.UvcWarning;
 import com.retron.robotAgent.R;
+import com.uslam.factory.Factory;
 
 import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
@@ -86,8 +87,6 @@ public class SocketServices extends BaseService {
     private static final int DELETE_MAP = 16;//应用上一张地图，删除临时地图
     private static final int ROBOT_MOVE = 17;//移动
     private static final int CHECK_WIRELESS_APK = 18;//保活wireless
-    private NavigationService navigationService;
-    private Intent intentService;
     private Context mContext;
     private UvcWarning uvcWarning;
     public static CheckLztekLamp checkLztekLamp;
@@ -157,9 +156,7 @@ public class SocketServices extends BaseService {
             if (msg.what == 1) {
                 Log.d(TAG, "getEthEnable " + checkLztekLamp.getEthEnable());
                 if (checkLztekLamp.getEthEnable()) {
-                    navigationService = new NavigationService();
-                    intentService = new Intent(getApplicationContext(), NavigationService.class);
-                    startService(intentService);
+                    Factory.getInstance(mContext,Content.ipAddress);
                     myHandler.sendEmptyMessage(ROBOT_DEVICE);
                     myHandler.sendEmptyMessage(ROBOT_STATUS);
 
@@ -296,7 +293,7 @@ public class SocketServices extends BaseService {
     public void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "server onDestroy");
-        stopService(intentService);
+        Factory.stopServer();
     }
 
     public void onCheckedChanged(int index) {

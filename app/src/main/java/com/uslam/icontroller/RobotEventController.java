@@ -2,6 +2,7 @@ package com.uslam.icontroller;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
+import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.NavigationStatus;
@@ -28,11 +29,11 @@ public interface RobotEventController {
   "map_name": "string, map name.",*/
     void stopScanMap(String mapName, boolean saveMap, boolean save_map_force, RobotStatus<Status> status);//结束扫描并保存地图(同步)
 
-    void getMapPng(MapPngBean mapPngBean, RobotStatus<ResponseBody> status);//获取地图图片png
+    void getMapPng(MapPngBean mapPngBean, RobotStatus<byte[]> status);//获取地图图片png
 
     void deleteMap(String mapName, RobotStatus<Status> status);//删除地图
 
-    void loadMapList();//获取地图列表
+    RobotMap[] loadMapList();//获取地图列表
 
     /*
     * "map_name": "string, map name.",
@@ -72,7 +73,7 @@ public interface RobotEventController {
 
     void editPosition(String mapName, String originName, String newName, RobotStatus<Status> status);//编辑点
 
-    void getPositions(String mapName, RobotStatus<RobotPosition> status);//获取初始化点列表
+    void getPositions(String mapName, RobotStatus<RobotPosition> status);//获取实时位置
 
     void cancelNavigate(RobotStatus<Status> status);//取消导航
 
