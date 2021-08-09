@@ -20,6 +20,7 @@ import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserRaw;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotEditMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotInitCustom;
+import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationPath;
@@ -351,6 +352,12 @@ public enum GsController implements IGsRobotController {
     public void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status) {
         if (gsControllerService != null)
             gsControllerService.editMap(mapName, operationType, editMap).enqueue(new ResponseCallback<Status>().call(status));
+    }
+
+    @Override
+    public void getMapList(RobotStatus<RobotMap> status) {
+        if (gsControllerService != null)
+            gsControllerService.getMapList().enqueue(new ResponseCallback<RobotMap>().call(status));
     }
 
     @Override

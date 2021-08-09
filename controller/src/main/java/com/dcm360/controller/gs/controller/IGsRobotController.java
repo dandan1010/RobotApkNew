@@ -19,6 +19,7 @@ import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserPhit;
 import com.dcm360.controller.gs.controller.bean.laser_bean.RobotLaserRaw;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotEditMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotInitCustom;
+import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigatePosition;
 import com.dcm360.controller.gs.controller.bean.navigate_bean.RobotNavigationPath;
@@ -225,4 +226,6 @@ public interface IGsRobotController {
     void deleteBag(String bagName, RobotStatus<Status> status);
 
     void work_status(RobotStatus<RobotWorkStatus> status);
+
+    void getMapList(RobotStatus<RobotMap> status);
 }

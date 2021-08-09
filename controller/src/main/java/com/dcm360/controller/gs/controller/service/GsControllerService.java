@@ -280,8 +280,8 @@ public interface GsControllerService {
      * @return the maps
      */
     @GET("/gs-robot/data/maps")
-    Observable<RobotMap> getMapList();
-
+    //Observable<RobotMap> getMapList();
+    Call<RobotMap> getMapList();
     /**
      * 删除地图
      *
