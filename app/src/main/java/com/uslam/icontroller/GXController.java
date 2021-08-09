@@ -34,6 +34,7 @@ import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.gs.controller.listener.StatusMessageListener;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
+import com.uslam.bean.TargetPointBean;
 
 import java.util.List;
 
@@ -43,10 +44,10 @@ import retrofit2.Call;
 public interface GXController {
 
     //初始化
-    void connect_robot(String url);
+    void connect_robot(String url, RobotStatus<Status> status);
 
     //导航
-    void navigate_Position(String map_name, String position_name, RobotStatus<Status> status);//导航到点  传入之前标记的导航点的名字和地图名字
+    void navigate_Position(String map_name, String position_name, TargetPointBean targetPointBean, RobotStatus<Status> status);//导航到点  传入之前标记的导航点的名字和地图名字
 
     void charge_Position(String map_name, RobotStatus<String> pos);//获取充电点
 
@@ -63,8 +64,6 @@ public interface GXController {
     Status uploadMapSyn(String mapName, String mapPath);//上传地图
 
     void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status);//编辑地图
-
-    void cancelScanMap(RobotStatus<Status> status);//取消扫描不保存地图
 
     void ping(RobotStatus<Status> status);//心跳
 

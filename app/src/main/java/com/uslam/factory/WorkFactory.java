@@ -57,12 +57,12 @@ import retrofit2.Response;
 public class WorkFactory implements RobotEventController, GXController, UsLamController {
 
     @Override
-    public void connect_robot(String url) {
+    public void connect_robot(String url, RobotStatus<Status> status) {
 
     }
 
     @Override
-    public void navigate_Position(String map_name, String position_name, RobotStatus<Status> status) {
+    public void navigate_Position(String map_name, String position_name, TargetPointBean targetPointBean, RobotStatus<Status> status) {
 
     }
 
@@ -103,11 +103,6 @@ public class WorkFactory implements RobotEventController, GXController, UsLamCon
 
     @Override
     public void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void cancelScanMap(RobotStatus<Status> status) {
 
     }
 
@@ -207,6 +202,11 @@ public class WorkFactory implements RobotEventController, GXController, UsLamCon
     }
 
     @Override
+    public void cancelScanMap(String mapName, boolean saveMap, boolean save_map_force, RobotStatus<Status> status) {
+
+    }
+
+    @Override
     public void getMapPng(MapPngBean mapPngBean, RobotStatus<byte[]> status) {
 
     }
@@ -216,9 +216,15 @@ public class WorkFactory implements RobotEventController, GXController, UsLamCon
 
     }
 
+//    @Override
+//    public RobotMap[] loadMapList() {
+//        return loadMapList();
+//    }
+
+
     @Override
-    public RobotMap[] loadMapList() {
-        return null;
+    public void loadMapList(RobotStatus<RobotMap> status) {
+
     }
 
     @Override

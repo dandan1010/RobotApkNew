@@ -2,6 +2,7 @@ package com.uslam.factory;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.dcm360.controller.gs.GSRobotController;
 import com.retron.robotAgent.controller.RobotManagerController;
@@ -29,12 +30,14 @@ public class Factory {
     private static WorkFactory createFactory(Context context, String ipAddress){
         switch (ipAddress) {
             case "A":
+                Log.d("WorkFactory", "ipAddress" + "A");
                 factory = new GxFactory();
                 navigationService = new NavigationService();
                 intentService = new Intent(context, NavigationService.class);
                 context.startService(intentService);
                 break;
             case "B":
+                Log.d("WorkFactory", "ipAddress" + "B");
                 factory = new UsLamFactory("url");
                 break;
             default:

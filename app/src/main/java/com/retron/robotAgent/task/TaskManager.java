@@ -239,54 +239,28 @@ public class TaskManager implements Handler.Callback {
      */
     @SuppressLint("CheckResult")
     public void loadMapList() {
-        Log.d(TAG, "ZDZD ---- loadMapList : ");
-        RobotMap[] robotMaps = Factory.getInstance(mContext, Content.ipAddress).loadMapList();
-        if (robotMaps != null && robotMaps.length > 0) {
-            mRobotMap = robotMaps[0];
-            Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + mRobotMap.getData().size());
-            EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
+        Factory.getInstance(mContext, Content.ipAddress).loadMapList(new RobotStatus<RobotMap>() {
+            @Override
+            public void success(RobotMap robotMap) {
+                mRobotMap = robotMap;
+                Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + robotMap.getData().size());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
 
-            EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, mRobotMap));
-        }
-//        GsController.INSTANCE.getGsControllerService().getMapList()
-//                .filter(robotMap -> robotMap != null && robotMap.getData() != null)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<RobotMap>() {
-//                    @Override
-//                    public void onSubscribe(Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(RobotMap robotMap) {
-//                        mRobotMap = robotMap;
-//                        Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + robotMap.getData().size());
-//                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
-//
-//                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, robotMap));
-//
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        Log.d(TAG, "get map list is error ： " + e.getMessage());
-//                        EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + e.getMessage()));
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.SENDMAPNAME, robotMap));
+            }
+
+            @Override
+            public void error(Throwable error) {
+
+            }
+        });
     }
 
     /**
      * 移动到导航点
      */
     public void navigate_Position(String mapName, String positionName) {
-        Factory.getInstance(mContext, Content.ipAddress).navigate_Position(mapName, positionName, new RobotStatus<Status>() {
-
+        Factory.getInstance(mContext, Content.ipAddress).navigate_Position(mapName, positionName, null, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "navigate " + mapName + " to " + positionName + ",     " + status.getMsg());
@@ -445,7 +419,7 @@ public class TaskManager implements Handler.Callback {
      */
 
     public void cancleScanMap() {
-        Factory.getInstance(mContext, Content.ipAddress).cancelScanMap(new RobotStatus<Status>() {
+        Factory.getInstance(mContext, Content.ipAddress).cancelScanMap(currentMapName, false, false, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "cancleScanMap ：" + status.getMsg());

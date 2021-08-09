@@ -71,7 +71,7 @@ public class LogcatHelper {
 
     public void getFileLength() {
         stop();
-        File file = new File(AssestFile.ROBOT_INTERPRENTER);
+        File file = new File(AssestFile.ROBOT_LOG);
         if (file.listFiles().length > 10) {
             sortFileList(file.listFiles());
         }
@@ -85,8 +85,29 @@ public class LogcatHelper {
         }
         Collections.sort(fileInfoArrayList);
         for (int i = 0; i < (files.length - 10); i++) {
-            fileInfoArrayList.get(i).delete();
+            boolean delete = deleteSDFile(fileInfoArrayList.get(i));
+            Log.d("删除Log文件", "" + fileInfoArrayList.get(i).getPath() + ",   " + delete);
         }
+    }
+
+    //删除整个文件夹方法
+    public boolean deleteSDFile(File file) {
+
+        //file目标文件夹绝对路径
+
+        if (file.exists()) { //指定文件是否存在
+            if (file.isFile()) { //该路径名表示的文件是否是一个标准文件
+                file.delete(); //删除该文件
+            } else if (file.isDirectory()) { //该路径名表示的文件是否是一个目录（文件夹）
+                File[] files = file.listFiles(); //列出当前文件夹下的所有文件
+                for (File f : files) {
+                    deleteSDFile(f); //递归删除
+                    //Log.d("fileName", f.getName()); //打印文件名
+                }
+            }
+            file.delete(); //删除文件夹（song,art,lyric）
+        }
+        return true;
     }
 
 

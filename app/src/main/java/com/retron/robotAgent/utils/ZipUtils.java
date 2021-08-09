@@ -46,6 +46,10 @@ public final class ZipUtils {
     public static boolean zipFiles(final Collection<String> srcFiles,
                                    final String zipFilePath)
             throws IOException {
+        File file = new File(AssestFile.ROBOTZIP_PATH);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         return zipFiles(srcFiles, zipFilePath, null);
     }
 

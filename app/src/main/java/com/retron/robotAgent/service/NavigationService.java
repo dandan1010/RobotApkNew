@@ -164,7 +164,7 @@ public class NavigationService extends Service {
 
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
-        Factory.getInstance(mContext, Content.ipAddress).connect_robot(Content.ROBOROT_INF);
+        Factory.getInstance(mContext, Content.ipAddress).connect_robot(Content.ROBOROT_INF, null);
         TaskManager.getInstances(mContext).getRobotHealthy();
         //TaskManager.getInstances(mContext).robotStatus();
         ping();

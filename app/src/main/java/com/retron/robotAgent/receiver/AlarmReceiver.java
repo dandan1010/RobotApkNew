@@ -21,9 +21,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.ALARM_CODE, week));
         } else if (Content.DeleteFileAlarmAction.equals(intent.getAction())) {
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.DELETE_FILE_ALARM_CODE, ""));
-        } else if (false) {
-            //收到消息
-            EventBus.getDefault().post(new EventBusMessage(BaseEvent.GO_TO_LOG_URL, ""));
         }
         Log.d("AlarmReceiver ", "结束alarm ：" + System.currentTimeMillis());
     }

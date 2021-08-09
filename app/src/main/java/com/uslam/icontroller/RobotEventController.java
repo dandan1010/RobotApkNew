@@ -29,11 +29,13 @@ public interface RobotEventController {
   "map_name": "string, map name.",*/
     void stopScanMap(String mapName, boolean saveMap, boolean save_map_force, RobotStatus<Status> status);//结束扫描并保存地图(同步)
 
+    void cancelScanMap(String mapName, boolean saveMap, boolean save_map_force, RobotStatus<Status> status);//取消扫描不保存地图
+
     void getMapPng(MapPngBean mapPngBean, RobotStatus<byte[]> status);//获取地图图片png
 
     void deleteMap(String mapName, RobotStatus<Status> status);//删除地图
 
-    RobotMap[] loadMapList();//获取地图列表
+    void loadMapList(RobotStatus<RobotMap> status);//获取地图列表
 
     /*
     * "map_name": "string, map name.",

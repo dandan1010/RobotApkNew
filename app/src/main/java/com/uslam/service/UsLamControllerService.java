@@ -1,6 +1,9 @@
 package com.uslam.service;
 
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
+import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
+import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.uslam.bean.MapListBean;
 import com.uslam.bean.MoveBean;
@@ -12,6 +15,9 @@ import com.uslam.bean.TargetPointBean;
 
 import org.json.JSONObject;
 
+import io.reactivex.Observable;
+import okhttp3.RequestBody;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -20,6 +26,20 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface UsLamControllerService {
+
+
+
+    /**
+     *  连接机器人[GET] http://{{base_url}}/robot/connect/
+     */
+    @GET("/robot/connect")
+    Call<RobotStatus> robot_connect();
+
+    /**
+     * 和机器人断开连接 [DELETE] http://{{base_url}}/robot/connect/
+     */
+    @DELETE("/robot/connect")
+    Call<RobotStatus> dis_connect();
 
     /**
      * 获得机器人状态 [GET] http://{{base_url}}/robot/status/
@@ -92,7 +112,7 @@ public interface UsLamControllerService {
      * 获得地图列表[GET] http://{{base_Url}}/robot/map_list
      */
     @GET("/robot/map_list")
-    Call<MapListBean> map_list();
+    Observable<MapListBean> getMapList();
 
     /**
      * 检查地图名称重复性[POST] http://{{base_Url}}/robot/map_list
@@ -104,9 +124,9 @@ public interface UsLamControllerService {
      * 获得地图[GET] http://{{base_Url}}/robot/map/?map_name="map_name"&png_map="boolean"&umap="boolean"
      */
     @GET("/robot/map")
-    Call<Status> get_map(@Query("map_name") String map_name,
-                         @Query("png_map") boolean png_map,
-                         @Query("umap") boolean umap);
+    Call<ResponseBody> get_map(@Query("map_name") String map_name,
+                               @Query("png_map") boolean png_map,
+                               @Query("umap") boolean umap);
 
     /**
      * 导出地图[GET] http://{{base_Url}}/robot/map/?map_name="map_name"&archive=true
@@ -119,7 +139,7 @@ public interface UsLamControllerService {
      * 更新地图[UPDATE] http://{{base_Url}}/robot/map/?map_name="map_name"
      */
 //    @UPDATE("/robot/map")
-    Call<Status> update_map(@Query("map_name") String map_name);
+    Call<Status> update_map(@Query("map_name") String map_name, @Query("umap") JSONObject umap);
 
     /**
      * 删除地图[DELETE] http://{{base_Url}}/robot/map/?map_name="map_name"
@@ -153,7 +173,7 @@ public interface UsLamControllerService {
      * 获取构图状态[GET] http://{{base_Url}}/robot/mapping/
      */
     @GET("/robot/mapping")
-    Call<Status> get_scan_map();
+    Call<RobotWorkStatus> get_scan_map();
 
     /**
      * 增量式构图/扩展构图[UPDATE] http://{{base_Url}}/robot/mapping/
@@ -165,14 +185,13 @@ public interface UsLamControllerService {
      * 导出地图压缩文件[GET] http://{{base_Url}}/robot/download?map_name="map_name"
      */
     @GET("/robot/download")
-    Call<Status> export_mapZip(@Query("map_name") String map_name);
+    Call<ResponseBody> export_mapZip(@Query("map_name") String map_name);
 
     /**
      * 导入地图压缩文件[POST] http://{{base_Url}}/robot/download?cover_force=true
      */
     @POST("/robot/download")
-    Call<Status> import_mapZip(@Query("cover_force") boolean cover_force);
-
+    Call<Status> import_mapZip(@Query("cover_force") boolean cover_force, @Body RequestBody file);
 
     /**
      * 本地地图.tar.gz压缩文件导入[POST] http://{{base_Url}}/robot/download?cover_force=true&@@PATH=/home/cruiser/ftpDownload/map/mapname.tar.gz
@@ -203,7 +222,7 @@ public interface UsLamControllerService {
      * 获取所有目标点[GET] http://{{base_Url}}/robot/point?
      */
     @GET("/robot/point")
-    Call<PointBean> get_all_points();
+    Call<RobotPositions> get_all_points();
 
     /**
      * 获取自主建图状态[GET] http://{{base_Url}}/robot/auto_mapping?status="boolean"

@@ -156,7 +156,7 @@ public class SocketServices extends BaseService {
             if (msg.what == 1) {
                 Log.d(TAG, "getEthEnable " + checkLztekLamp.getEthEnable());
                 if (checkLztekLamp.getEthEnable()) {
-                    Factory.getInstance(mContext,Content.ipAddress);
+                    Factory.getInstance(mContext, Content.ipAddress);
                     myHandler.sendEmptyMessage(ROBOT_DEVICE);
                     myHandler.sendEmptyMessage(ROBOT_STATUS);
 
@@ -1883,6 +1883,7 @@ public class SocketServices extends BaseService {
                                 is.close();
                                 swapStream.close();
                                 flag = false;
+                                file.delete();
                                 TaskManager.getInstances(mContext).getMapPic(use_mapName);
                             }
                         } catch (FileNotFoundException e) {
