@@ -266,43 +266,26 @@ public class UsLamFactory extends WorkFactory {
         super.deleteMap(mapName, status);
         if (usLamControllerService != null)
             usLamControllerService.delete_map(mapName).enqueue(new ResponseCallback<Status>().call(status));
-
     }
 
-//    @Override
-//    public RobotMap[] loadMapList() {
-//        final MapListBean[] robotMapList = {null};
-//        usLamControllerService.getMapList()
-//                .filter(robotMap -> robotMap != null)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<MapListBean>() {
-//                    @Override
-//                    public void onSubscribe(Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(MapListBean mapListBean) {
-//                        robotMapList[0] = mapListBean;
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//        return null;
-//    }
-
-
     @Override
-    public void loadMapList(RobotStatus<RobotMap> status) {
-        super.loadMapList(status);
+    public void loadMapList(final RobotStatus<RobotMap> mapList) {
+        super.loadMapList(mapList);
+        if (usLamControllerService != null)
+            usLamControllerService.getMapList().enqueue(new ResponseCallback<MapListBean>().call(new RobotStatus<MapListBean>() {
+                @Override
+                public void success(MapListBean status) {
+                    RobotMap robotMap = new RobotMap();
+                    //塞数据
+                    mapList.success(robotMap);
+                }
+
+                @Override
+                public void error(Throwable error) {
+                    mapList.error(error);
+                }
+            }));
+
     }
 
     @Override
@@ -354,7 +337,7 @@ public class UsLamFactory extends WorkFactory {
     @Override
     public void getPositions(String mapName, RobotStatus<RobotPosition> status) {
         super.getPositions(mapName, status);
-
+        
     }
 
     @Override

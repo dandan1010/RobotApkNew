@@ -243,6 +243,7 @@ public class TaskManager implements Handler.Callback {
             @Override
             public void success(RobotMap robotMap) {
                 mRobotMap = robotMap;
+                Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + robotMap.getData().get(0).getMapName());
                 Log.d(TAG, "ZDZD ---- loadMapList SUCCESS : " + robotMap.getData().size());
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.get_mapList) + "successed"));
 

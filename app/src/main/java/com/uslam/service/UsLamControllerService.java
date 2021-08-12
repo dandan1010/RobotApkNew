@@ -112,7 +112,7 @@ public interface UsLamControllerService {
      * 获得地图列表[GET] http://{{base_Url}}/robot/map_list
      */
     @GET("/robot/map_list")
-    Observable<MapListBean> getMapList();
+    Call<MapListBean> getMapList();
 
     /**
      * 检查地图名称重复性[POST] http://{{base_Url}}/robot/map_list

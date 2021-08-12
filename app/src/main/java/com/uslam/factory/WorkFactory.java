@@ -54,7 +54,7 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 
-public class WorkFactory implements RobotEventController, GXController, UsLamController {
+public class WorkFactory implements RobotEventController, GXController {
 
     @Override
     public void connect_robot(String url, RobotStatus<Status> status) {
@@ -289,51 +289,6 @@ public class WorkFactory implements RobotEventController, GXController, UsLamCon
 
     @Override
     public void RobotStatus(NavigationStatus navigationStatus, String... args) {
-
-    }
-
-    @Override
-    public void setTargetPoint(TargetPointBean targetPoint, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void getRlocalization() {
-
-    }
-
-    @Override
-    public void searchNavigation() {
-
-    }
-
-    @Override
-    public void setFlowPattern(boolean fluent_mode, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void checkRepeatMap(String mapName, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void import_map(boolean import_map_force, String map_name, JSONObject umap, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void auto_scanMap(boolean suto_status, boolean points_list, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void controll_auto_scanmap(double distance, double area, boolean fov, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void stop_auto_scanmap(boolean saveMap, boolean save_map_force, String map_name, RobotStatus<Status> status) {
 
     }
 }

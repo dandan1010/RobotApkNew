@@ -23,6 +23,7 @@ import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
 import com.retron.robotAgent.content.Content;
 import com.retron.robotAgent.controller.RobotManagerController;
+import com.uslam.bean.MapListBean;
 import com.uslam.bean.MapPngBean;
 import com.uslam.bean.MoveBean;
 import com.uslam.bean.TargetPointBean;
@@ -63,11 +64,6 @@ public class GxFactory extends WorkFactory {
     }
 
     @Override
-    public void charge_Position(String map_name, RobotStatus<String> status) {
-        super.charge_Position(map_name, status);
-    }
-
-    @Override
     public void cmdVel(RobotStatus<RobotCmdVel> status) {
         super.cmdVel(status);
         GsController.INSTANCE.cmdVel(status);
@@ -83,11 +79,6 @@ public class GxFactory extends WorkFactory {
     public void scanMapPng(RobotStatus<byte[]> status) {
         super.scanMapPng(status);
         RobotManagerController.getInstance().getRobotController().scanMapPng(status);
-    }
-
-    @Override
-    public void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status) {
-        super.editMap(mapName, operationType, editMap, status);
     }
 
     @Override
@@ -224,49 +215,10 @@ public class GxFactory extends WorkFactory {
         GsController.INSTANCE.deleteMap(mapName, status);
     }
 
-//    @Override
-//    public RobotMap[] loadMapList() {
-//        Log.d("地图","返回地图列表11");
-//        final RobotMap[] robotMapList = {null};
-//        GsController.INSTANCE.getGsControllerService().getMapList()
-//                .filter(robotMap -> robotMap != null && robotMap.getData() != null)
-//                .subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<RobotMap>() {
-//                    @Override
-//                    public void onSubscribe(Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(RobotMap robotMap) {
-//                        Log.d("地图","返回地图列表" + robotMap.getData().size());
-//                        robotMapList[0] = robotMap;
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
-//        Log.d("地图","返回地图列表----" + robotMapList.length);
-//        return robotMapList;
-//    }
-
-
     @Override
     public void loadMapList(RobotStatus<RobotMap> status) {
         super.loadMapList(status);
         GsController.INSTANCE.getMapList(status);
-    }
-
-    @Override
-    public void updateMap(String originMapName, String newMapName, JSONObject umap, RobotStatus<Status> status) {
-        super.updateMap(originMapName, newMapName, umap, status);
     }
 
     @Override
