@@ -439,7 +439,7 @@ public class CheckLztekLamp {
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
             if (msg.what == 1001) {
-                NavigationService.move(0.2f, 0.0f);
+                TaskManager.getInstances(mContext).move(0.2f, 0.0f);
                 handler.sendEmptyMessageDelayed(1001, 10);
             } else if (msg.what == 1002) {
                 handler.removeMessages(1001);
@@ -453,7 +453,7 @@ public class CheckLztekLamp {
                     message.what = 1003;
                     handler.sendMessageDelayed(message, 1 * 1000);
                 } else if (Content.is_initialize_finished == 2) {
-                    NavigationService.initialize((String) msg.obj, Content.CHARGING_POINT);
+                    TaskManager.getInstances(mContext).initialize((String) msg.obj, Content.CHARGING_POINT);
                     Message message = handler.obtainMessage();
                     message.obj = msg.obj;
                     message.what = 1003;

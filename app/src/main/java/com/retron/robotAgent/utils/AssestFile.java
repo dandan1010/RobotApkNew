@@ -13,11 +13,14 @@ import com.retron.robotAgent.content.Content;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
@@ -482,6 +485,35 @@ public class AssestFile {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public String readFile(String path) {
+        if (TextUtils.isEmpty(path)) {
+            //默认高仙导航
+            return "A";
+        }
+        File file = new File(path);
+        if (file.exists()) {
+            String navType = "";
+            try {
+                InputStream inputStream = new FileInputStream(file);
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bfReader= new BufferedReader(inputStreamReader);
+                navType = bfReader.readLine();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (navType.equals("A")) {
+                //高仙导航
+                return "A";
+            } else {
+                return "B";
+            }
+
+        }
+        return "A";
     }
 }
 

@@ -12,7 +12,6 @@ import com.dcm360.controller.gs.controller.bean.data_bean.RobotDeviceStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotPositions;
 import com.dcm360.controller.gs.controller.bean.data_bean.RobotWorkStatus;
 import com.dcm360.controller.gs.controller.bean.data_bean.VersionBean;
-import com.dcm360.controller.gs.controller.bean.map_bean.RobotEditMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotMap;
 import com.dcm360.controller.gs.controller.bean.map_bean.RobotPosition;
 import com.dcm360.controller.gs.controller.bean.paths_bean.UpdataVirtualObstacleBean;
@@ -52,8 +51,8 @@ public class GxFactory extends WorkFactory {
     }
 
     @Override
-    public void connect_robot(String url, RobotStatus<Status> status) {
-        super.connect_robot(url, status);
+    public void connect_robot(String url, String uuid) {
+        super.connect_robot(url, uuid);
         RobotManagerController.getInstance().getRobotController().connect_robot(url);
     }
 

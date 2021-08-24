@@ -1,6 +1,5 @@
 package com.uslam.factory;
 
-import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.gs.controller.ResponseCallback;
 import com.dcm360.controller.gs.controller.bean.PositionListBean;
 import com.dcm360.controller.gs.controller.bean.RecordStatusBean;
@@ -18,11 +17,8 @@ import com.dcm360.controller.gs.controller.bean.paths_bean.VirtualObstacleBean;
 import com.dcm360.controller.gs.controller.bean.system_bean.UltrasonicPhitBean;
 import com.dcm360.controller.gs.controller.bean.vel_bean.RobotCmdVel;
 import com.dcm360.controller.gs.controller.interceptor.GsMoreBaseUrlInterceptor;
-import com.dcm360.controller.gs.controller.service.GsControllerService;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
-import com.retron.robotAgent.content.Content;
-import com.retron.robotAgent.controller.RobotManagerController;
 import com.uslam.bean.MapListBean;
 import com.uslam.bean.MapPngBean;
 import com.uslam.bean.MoveBean;
@@ -34,11 +30,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
-
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
@@ -52,8 +43,8 @@ public class UsLamFactory extends WorkFactory {
 
     private UsLamControllerService usLamControllerService = null;
 
-    public UsLamFactory(String url) {
-        initialize(url);
+    public UsLamFactory(String baseUrl) {
+        initialize(baseUrl);
     }
 
     public void initialize(String baseUrl) {
@@ -82,11 +73,18 @@ public class UsLamFactory extends WorkFactory {
         }
     }
 
+
+
     @Override
-    public void connect_robot(String url, RobotStatus<Status> status) {
-        super.connect_robot(url, status);
-        if (usLamControllerService != null)
-            usLamControllerService.robot_connect().enqueue(new ResponseCallback<Status>().call(status));
+    public void connect_robot(String url, String uuid) {
+        super.connect_robot(url, uuid);
+        if (usLamControllerService != null) {
+            try {
+                usLamControllerService.robot_connect(uuid).execute();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override
@@ -94,12 +92,6 @@ public class UsLamFactory extends WorkFactory {
         super.navigate_Position(map_name, position_name, targetPointBean, status);
         if (usLamControllerService != null)
             usLamControllerService.navigation(targetPointBean).enqueue(new ResponseCallback<Status>().call(status));
-    }
-
-    @Override
-    public void charge_Position(String map_name, RobotStatus<String> status) {
-        super.charge_Position(map_name, status);
-        //usLamControllerService.(targetPointBean).enqueue(new ResponseCallback<Status>().call(status));
     }
 
     @Override
@@ -118,11 +110,6 @@ public class UsLamFactory extends WorkFactory {
     public void scanMapPng(RobotStatus<byte[]> status) {
         super.scanMapPng(status);
 
-    }
-
-    @Override
-    public void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status) {
-        super.editMap(mapName, operationType, editMap, status);
     }
 
     @Override

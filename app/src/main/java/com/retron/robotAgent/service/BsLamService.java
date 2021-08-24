@@ -3,26 +3,19 @@ package com.retron.robotAgent.service;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import com.dcm360.controller.gs.controller.GsController;
 import com.dcm360.controller.robot_interface.bean.Status;
 import com.dcm360.controller.robot_interface.status.RobotStatus;
-import com.retron.robotAgent.R;
-import com.retron.robotAgent.content.BaseEvent;
-import com.retron.robotAgent.controller.RobotManagerController;
-import com.retron.robotAgent.task.TaskManager;
 import com.retron.robotAgent.content.Content;
+import com.retron.robotAgent.task.TaskManager;
 import com.retron.robotAgent.utils.EventBusMessage;
 import com.retron.robotAgent.uvclamp.CheckLztekLamp;
-import com.uslam.bean.MoveBean;
 import com.uslam.factory.Factory;
 
 import org.greenrobot.eventbus.EventBus;
 
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -31,8 +24,8 @@ import io.reactivex.disposables.CompositeDisposable;
 /**
  * @author liyan
  */
-public class NavigationService extends Service {
-    private static final String TAG = "NavigationService";
+public class BsLamService extends Service {
+    private static final String TAG = "BsLamService";
 
     public static CompositeDisposable disposables;
 
@@ -44,8 +37,6 @@ public class NavigationService extends Service {
     public void onCreate() {
         super.onCreate();
         mContext = this;
-        disposables = new CompositeDisposable();
-        startGaoXianSdk();
         checkLztekLamp = new CheckLztekLamp(this);
     }
 
@@ -64,7 +55,7 @@ public class NavigationService extends Service {
 
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
-        Factory.getInstance(mContext, Content.ipAddress).connect_robot(Content.ROBOROT_INF, null);
+        Factory.getInstance(mContext, Content.ipAddress).connect_robot(Content.ROBOROT_INF, "uuid");
         TaskManager.getInstances(mContext).getRobotHealthy();
         //TaskManager.getInstances(mContext).robotStatus();
         ping();

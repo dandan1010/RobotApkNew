@@ -57,17 +57,12 @@ import retrofit2.Response;
 public class WorkFactory implements RobotEventController, GXController {
 
     @Override
-    public void connect_robot(String url, RobotStatus<Status> status) {
+    public void connect_robot(String url, String uuid) {
 
     }
 
     @Override
     public void navigate_Position(String map_name, String position_name, TargetPointBean targetPointBean, RobotStatus<Status> status) {
-
-    }
-
-    @Override
-    public void charge_Position(String map_name, RobotStatus<String> pos) {
 
     }
 
@@ -99,11 +94,6 @@ public class WorkFactory implements RobotEventController, GXController {
     @Override
     public Status uploadMapSyn(String mapName, String mapPath) {
         return null;
-    }
-
-    @Override
-    public void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status) {
-
     }
 
     @Override

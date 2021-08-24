@@ -53,6 +53,7 @@ import com.retron.robotAgent.controller.RobotManagerController;
 import com.retron.robotAgent.utils.GsonUtils;
 import com.retron.robotAgent.utils.Md5Utils;
 import com.uslam.bean.MapPngBean;
+import com.uslam.bean.MoveBean;
 import com.uslam.factory.Factory;
 
 import org.greenrobot.eventbus.EventBus;
@@ -157,6 +158,106 @@ public class TaskManager implements Handler.Callback {
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.GET_SETTING_MODE, ""));
             EventBus.getDefault().post(new EventBusMessage(BaseEvent.ROBOT_TASK_STATE, TaskManager.pointStateBean));
         }
+    }
+
+    public void initGlobal(String mapName) {
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, "", 0, 0, 0, 3, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "initGlobal" + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initGlobal" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, error.getMessage()));
+            }
+        });
+    }
+
+    public void initialize_directly(String mapName) {//不转圈初始化
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, Content.InitializePositionName, 0, 0, 0, 1, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "initialize_directly" + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initialize_directly" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, error.getMessage()));
+            }
+        });
+
+    }
+
+    public void initialize(String mapName, String initializePositionName) {//转圈初始化
+
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, initializePositionName, 0, 0, 0, 2, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
+                Log.d(TAG, "initialize" + status.getMsg());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initialize：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, error.getMessage()));
+            }
+        });
+    }
+
+    public void is_initialize_finished() {
+        Factory.getInstance(mContext, Content.ipAddress).is_initialize_finished(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "is_initialize_finished：" + status.toString());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.IS_INITIALIZE_FINISHED, status));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "is_initialize_finished：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_FAIL, error.getMessage()));
+            }
+        });
+    }
+
+    public void stopInitialize() {//停止初始化
+        Factory.getInstance(mContext, Content.ipAddress).stop_initialize(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "停止初始化");
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_initialize) + status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "停止初始化失败：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_initialize) + error.getMessage()));
+            }
+        });
+    }
+
+    static MoveBean moveBean = new MoveBean();
+
+    public void move(float linearSpeed, float angularSpeed) {
+        moveBean.setLinearSpeed(linearSpeed);
+        moveBean.setAngularSpeed(angularSpeed);
+        Factory.getInstance(mContext, Content.ipAddress).move(moveBean, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "robot move：" + linearSpeed + ",   " + angularSpeed);
+            }
+
+            @Override
+            public void error(Throwable error) {
+
+            }
+        });
     }
 
     /**
@@ -722,7 +823,7 @@ public class TaskManager implements Handler.Callback {
                     } else {
                         isSendType = true;
                         Content.is_initialize_finished = 0;
-                        NavigationService.initGlobal(SocketServices.use_mapName);
+                        initGlobal(SocketServices.use_mapName);
                         handler.removeMessages(REINITIALIZE_RESULT);
                         handler.sendEmptyMessageDelayed(REINITIALIZE_RESULT, 1000);
                     }
@@ -748,7 +849,7 @@ public class TaskManager implements Handler.Callback {
                     handler.removeMessages(REINITIALIZE_RESULT);
                 }
             } else if (msg.what == MOVE_TO_INITIALIZE) {
-                NavigationService.move(0.2f, 0.0f);
+                move(0.2f, 0.0f);
                 handler.sendEmptyMessageDelayed(MOVE_TO_INITIALIZE, 10);
             } else if (msg.what == ADD_INITIALIZE_POINT) {
                 handler.removeMessages(MOVE_TO_INITIALIZE);
@@ -1180,18 +1281,18 @@ public class TaskManager implements Handler.Callback {
         Content.is_initialize_finished = 0;
         Log.d(TAG, "TaskManager-use_map： " + map_name);
         Content.noChargingCount = 5;
-        NavigationService.stopInitialize();
+        stopInitialize();
         Factory.getInstance(mContext, Content.ipAddress).use_map(map_name, new RobotStatus<Status>() {
             @Override
             public void success(Status status) {
                 Log.d(TAG, "use_map success : " + ",   " + map_name + ",   " + Content.taskIndex);
                 if (Content.is_initialize_finished == 0) {
                     if (Content.isCharging) {
-                        NavigationService.initialize_directly(map_name);
+                        initialize_directly(map_name);
                     } else if (Content.taskIndex == -1 || Content.taskIndex == 0) {
-                        NavigationService.initialize(map_name, Content.InitializePositionName);
+                        initialize(map_name, Content.InitializePositionName);
                     } else {
-                        NavigationService.initGlobal(map_name);
+                        initGlobal(map_name);
                     }
                 }
                 EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.use_map) + "success"));
@@ -1681,10 +1782,10 @@ public class TaskManager implements Handler.Callback {
                     Log.d(TAG, "download_map SIZE : " + downloadMap.length);
                     if (downloadMap != null && downloadMap.length != 0) {
                         mAssestFile.downloadMapPic((String) msg.obj, downloadMap);
-                        File file = new File("/sdcard/robotMap/" + (String) msg.obj + ".tar.gz");
-                        String md5ByFile = Md5Utils.getMd5ByFile(file);
-                        sqLiteOpenHelperUtils.updateDumpMd5(Content.dbMapNameUuid, (String) msg.obj, md5ByFile);
-                        sqLiteOpenHelperUtils.close();
+//                        File file = new File("/sdcard/robotMap/" + (String) msg.obj + ".tar.gz");
+//                        String md5ByFile = Md5Utils.getMd5ByFile(file);
+//                        sqLiteOpenHelperUtils.updateDumpMd5(Content.dbMapNameUuid, (String) msg.obj, md5ByFile);
+//                        sqLiteOpenHelperUtils.close();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
