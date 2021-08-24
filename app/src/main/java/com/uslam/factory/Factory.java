@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.dcm360.controller.gs.GSRobotController;
 import com.retron.robotAgent.controller.RobotManagerController;
-import com.retron.robotAgent.service.BsLamService;
 import com.retron.robotAgent.service.NavigationService;
 import com.retron.robotAgent.utils.SharedPrefUtil;
 
@@ -14,7 +13,6 @@ public class Factory {
 
     public static WorkFactory factory;
     public static NavigationService navigationService;
-    public static BsLamService bsLamService;
     private static Context mContext;
     private static Intent intentService;
 
@@ -40,10 +38,7 @@ public class Factory {
                 break;
             case "B":
                 Log.d("WorkFactory", "ipAddress" + "B");
-                factory = new UsLamFactory("baseUrl");
-                bsLamService = new BsLamService();
-                intentService = new Intent(context, BsLamService.class);
-                context.startService(intentService);
+                factory = new UsLamFactory("url");
                 break;
             default:
                 break;

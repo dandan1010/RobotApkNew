@@ -22,7 +22,6 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
-import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
@@ -34,7 +33,7 @@ public interface UsLamControllerService {
      *  连接机器人[GET] http://{{base_url}}/robot/connect/
      */
     @GET("/robot/connect")
-    Call<RobotStatus> robot_connect(@Header("access-token") String token);
+    Call<RobotStatus> robot_connect();
 
     /**
      * 和机器人断开连接 [DELETE] http://{{base_url}}/robot/connect/

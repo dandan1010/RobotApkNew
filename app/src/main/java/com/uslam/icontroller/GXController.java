@@ -44,10 +44,12 @@ import retrofit2.Call;
 public interface GXController {
 
     //初始化
-    void connect_robot(String url, String uuid);
+    void connect_robot(String url, RobotStatus<Status> status);
 
     //导航
     void navigate_Position(String map_name, String position_name, TargetPointBean targetPointBean, RobotStatus<Status> status);//导航到点  传入之前标记的导航点的名字和地图名字
+
+    void charge_Position(String map_name, RobotStatus<String> pos);//获取充电点
 
     void cmdVel(RobotStatus<RobotCmdVel> status); //实时角速度和线速度数据
 
@@ -60,6 +62,8 @@ public interface GXController {
     Status deleteMapSyn(String mapName);//同步删除地图
 
     Status uploadMapSyn(String mapName, String mapPath);//上传地图
+
+    void editMap(String mapName, String operationType, RobotEditMap editMap, RobotStatus<Status> status);//编辑地图
 
     void ping(RobotStatus<Status> status);//心跳
 

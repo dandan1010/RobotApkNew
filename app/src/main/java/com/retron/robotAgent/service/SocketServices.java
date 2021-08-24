@@ -156,10 +156,10 @@ public class SocketServices extends BaseService {
             if (msg.what == 1) {
                 Log.d(TAG, "getEthEnable " + checkLztekLamp.getEthEnable());
                 if (checkLztekLamp.getEthEnable()) {
-                    //读取导航类型
-                    Factory.getInstance(mContext, assestFile.readFile(""));
+                    Factory.getInstance(mContext, Content.ipAddress);
                     myHandler.sendEmptyMessage(ROBOT_DEVICE);
                     myHandler.sendEmptyMessage(ROBOT_STATUS);
+
                     Cursor cursor = mSqLiteOpenHelperUtils.searchTaskIndex();
                     while (cursor.moveToNext()) {
                         String mapName = cursor.getString(cursor.getColumnIndex(Content.dbTaskMapName));
@@ -355,7 +355,7 @@ public class SocketServices extends BaseService {
 
                         Log.d("zdzd prop111 : ", "" + PropertyUtils.getProperty(Content.isRobotAngularSpeed, "false"));
                         if ("true".equals(PropertyUtils.getProperty(Content.isRobotAngularSpeed, "false"))) {
-                            TaskManager.getInstances(mContext).move(0, 0.2f);
+                            NavigationService.move(0, 0.2f);
                         }
                     } else {
                         Content.taskIsFinish = false;
@@ -463,7 +463,7 @@ public class SocketServices extends BaseService {
                     getTaskQueue(msg.arg1);
                     break;
                 case MOVE_UP:
-                    TaskManager.getInstances(mContext).move(0.2f, 0.0f);
+                    NavigationService.move(0.2f, 0.0f);
                     myHandler.sendEmptyMessageDelayed(MOVE_UP, 20);
                     break;
                 case START_ALARM_TASK:
@@ -517,7 +517,7 @@ public class SocketServices extends BaseService {
                     Content.is_initialize_finished = 2;
                     handlerInitialize.removeCallbacks(runnableInitialize);
                     myHandler.removeMessages(INITIALIZE_FAIL);
-                    TaskManager.getInstances(mContext).stopInitialize();
+                    NavigationService.stopInitialize();
                     EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, Content.initialize_fail));
                     break;
                 case DELETE_MAP:
@@ -526,7 +526,7 @@ public class SocketServices extends BaseService {
                 case ROBOT_MOVE:
                     Log.d(TAG, "ZDZD startMove : ");
                     String obj = (String) msg.obj;
-                    TaskManager.getInstances(mContext).move(Float.parseFloat(obj.split(",")[0]),
+                    NavigationService.move(Float.parseFloat(obj.split(",")[0]),
                             Float.parseFloat(obj.split(",")[1]));
                     Message message = myHandler.obtainMessage();
                     message.what = ROBOT_MOVE;
@@ -844,7 +844,7 @@ public class SocketServices extends BaseService {
                             robotMap.getData().get(i).setMapName(robotMap.getData().get(i).getName());
                             mSqLiteOpenHelperUtils.saveMapName(robotMap.getData().get(i).getName(),
                                     robotMap.getData().get(i).getName(),
-                                    "",
+                                    Md5Utils.md5(robotMap.getData().get(i).getName()),
                                     "",
                                     "",
                                     "");
@@ -852,14 +852,7 @@ public class SocketServices extends BaseService {
                         } else {
                             while (cursor.moveToNext()) {
                                 robotMap.getData().get(i).setMapName(cursor.getString(cursor.getColumnIndex(Content.dbMapName)));
-                                File file = new File("/sdcard/robotMap/" + robotMap.getData().get(i).getName() + ".tar.gz");
-                                String md5ByFile = "";
-                                try {
-                                    md5ByFile = Md5Utils.getMd5ByFile(file);
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                }
-                                robotMap.getData().get(i).setDump_md5(md5ByFile);
+                                robotMap.getData().get(i).setDump_md5(Md5Utils.md5(robotMap.getData().get(i).getName()));
                                 if (Content.TempMapName.equals(cursor.getString(cursor.getColumnIndex(Content.dbMapName)))) {
                                     use_mapName = robotMap.getData().get(i).getName();
                                     current_mapname = Content.TempMapName;
@@ -1917,7 +1910,7 @@ public class SocketServices extends BaseService {
                         //arrayList.add(AssestFile.ROBOT_LOG + "/" + jsonObject.getJSONArray(Content.FILE_NAME).get(i));
                         assestFile.zip(
                                 AssestFile.ROBOT_LOG + "/" + jsonObject.getJSONArray(Content.FILE_NAME).get(i),
-                                AssestFile.ROBOTZIP_PATH + "/" + jsonObject.getJSONArray(Content.FILE_NAME).get(i) + ".zip");
+                                AssestFile.ROBOTZIP_PATH+ "/" + jsonObject.getJSONArray(Content.FILE_NAME).get(i) + ".zip");
                     }
 //                    String zipName = "" + System.currentTimeMillis();
 //                    try {
@@ -1926,7 +1919,7 @@ public class SocketServices extends BaseService {
 //                        e.printStackTrace();
 //                    }
                     Log.d(TAG, "zipFileOrDirectory 压缩完成");
-                    gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.COMPRESSED, "success"));
+                    gsonUtils.mqttSendMsg(gsonUtils.sendRobotMsg(Content.COMPRESSED,"success"));
                     flag = false;
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -1982,7 +1975,7 @@ public class SocketServices extends BaseService {
     Runnable runnableInitialize = new Runnable() {
         @Override
         public synchronized void run() {
-            TaskManager.getInstances(mContext).is_initialize_finished();
+            NavigationService.is_initialize_finished();
         }
     };
 

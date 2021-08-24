@@ -62,6 +62,106 @@ public class NavigationService extends Service {
             disposables.dispose();
     }
 
+    public static void initGlobal(String mapName) {
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, "", 0, 0, 0, 3, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "initGlobal" + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initGlobal" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, error.getMessage()));
+            }
+        });
+    }
+
+    public static void initialize_directly(String mapName) {//不转圈初始化
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, Content.InitializePositionName, 0, 0, 0, 1, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "initialize_directly" + status.getMsg());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initialize_directly" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, error.getMessage()));
+            }
+        });
+
+    }
+
+    public static void initialize(String mapName, String initializePositionName) {//转圈初始化
+
+        Factory.getInstance(mContext, Content.ipAddress).initialize(mapName, initializePositionName, 0, 0, 0, 2, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, status.getMsg()));
+                Log.d(TAG, "initialize" + status.getMsg());
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "initialize：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_RESULE, error.getMessage()));
+            }
+        });
+    }
+
+    public static void is_initialize_finished() {
+        Factory.getInstance(mContext, Content.ipAddress).is_initialize_finished(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "is_initialize_finished：" + status.toString());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.IS_INITIALIZE_FINISHED, status));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "is_initialize_finished：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.INITIALIZE_FAIL, error.getMessage()));
+            }
+        });
+    }
+
+    public static void stopInitialize() {//停止初始化
+        Factory.getInstance(mContext, Content.ipAddress).stop_initialize(new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "停止初始化");
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_initialize) + status.getMsg()));
+            }
+
+            @Override
+            public void error(Throwable error) {
+                Log.d(TAG, "停止初始化失败：" + error.getMessage());
+                EventBus.getDefault().post(new EventBusMessage(BaseEvent.REQUEST_MSG, mContext.getResources().getString(R.string.stop_initialize) + error.getMessage()));
+            }
+        });
+    }
+
+    static MoveBean moveBean = new MoveBean();
+
+    public static void move(float linearSpeed, float angularSpeed) {
+        moveBean.setLinearSpeed(linearSpeed);
+        moveBean.setAngularSpeed(angularSpeed);
+        Factory.getInstance(mContext, Content.ipAddress).move(moveBean, new RobotStatus<Status>() {
+            @Override
+            public void success(Status status) {
+                Log.d(TAG, "robot move：" + linearSpeed + ",   " + angularSpeed);
+            }
+
+            @Override
+            public void error(Throwable error) {
+
+            }
+        });
+    }
+
     public void startGaoXianSdk() {
         Log.d(TAG, "   导航服务启动");
         Factory.getInstance(mContext, Content.ipAddress).connect_robot(Content.ROBOROT_INF, null);
